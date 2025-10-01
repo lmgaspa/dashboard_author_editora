@@ -1,0 +1,77 @@
+<section class="rounded-xl border border-slate-200 bg-white shadow-sm">
+  <header class="flex items-center justify-between px-4 py-3 border-b border-slate-200/70">
+    <h3 class="text-sm font-medium text-slate-700">Status da Entrega</h3>
+    <button (click)="toggleEdit()" class="text-xs px-2.5 py-1 rounded-md border border-slate-300 hover:bg-slate-50">
+      {{ editing() ? 'Fechar' : 'Editar' }}
+    </button>
+  </header>
+
+  <div class="p-4 space-y-3">
+    <div class="flex items-center gap-3">
+      <div class="w-32 text-xs text-slate-600">Já Enviado</div>
+      <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+        <div class="h-full bg-emerald-500/80" [style.width]="maxBarWidth(current().jaEnviado)"></div>
+      </div>
+      <div class="w-12 text-right text-xs text-slate-700">{{ current().jaEnviado }}</div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="w-32 text-xs text-slate-600">Em Trânsito</div>
+      <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+        <div class="h-full bg-sky-500/80" [style.width]="maxBarWidth(current().emTransito)"></div>
+      </div>
+      <div class="w-12 text-right text-xs text-slate-700">{{ current().emTransito }}</div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="w-32 text-xs text-slate-600">Entregue</div>
+      <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+        <div class="h-full bg-indigo-500/80" [style.width]="maxBarWidth(current().entregue)"></div>
+      </div>
+      <div class="w-12 text-right text-xs text-slate-700">{{ current().entregue }}</div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="w-32 text-xs text-slate-600">Retornando</div>
+      <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+        <div class="h-full bg-rose-500/80" [style.width]="maxBarWidth(current().retornando)"></div>
+      </div>
+      <div class="w-12 text-right text-xs text-slate-700">{{ current().retornando }}</div>
+    </div>
+
+    <!-- Editor inline -->
+    <div *ngIf="editing()" class="mt-4 rounded-lg border border-slate-200 p-3 bg-slate-50/50">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <label class="text-xs text-slate-600 flex flex-col gap-1">
+          Já Enviado
+          <input type="number" class="input"
+                 [ngModel]="form().jaEnviado"
+                 (ngModelChange)="updateField('jaEnviado', $event)">
+        </label>
+        <label class="text-xs text-slate-600 flex flex-col gap-1">
+          Em Trânsito
+          <input type="number" class="input"
+                 [ngModel]="form().emTransito"
+                 (ngModelChange)="updateField('emTransito', $event)">
+        </label>
+        <label class="text-xs text-slate-600 flex flex-col gap-1">
+          Entregue
+          <input type="number" class="input"
+                 [ngModel]="form().entregue"
+                 (ngModelChange)="updateField('entregue', $event)">
+        </label>
+        <label class="text-xs text-slate-600 flex flex-col gap-1">
+          Retornando
+          <input type="number" class="input"
+                 [ngModel]="form().retornando"
+                 (ngModelChange)="updateField('retornando', $event)">
+        </label>
+      </div>
+
+      <div class="mt-3 flex gap-2">
+        <button (click)="save()" class="btn-primary">Salvar</button>
+        <button (click)="cancel()" class="btn-ghost">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</section>

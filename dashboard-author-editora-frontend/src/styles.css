@@ -2,12 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-/* tokens suaves, sem preto */
+/* ===== Tokens (Light/Dark) ===== */
 :root{
-  --card-bg: theme(colors.white);
-  --page-bg: theme(colors.brand.50);
-  --ink-1: theme(colors.slate.700);
-  --ink-2: theme(colors.slate.500);
-  --border-1: theme(colors.slate.200);
-  --accent: theme(colors.brand.500);
+  /* superfícies */
+  --bg:#f5f9ff;
+  --surface:#ffffff;
+  --surface-muted:#f3f6fb;
+
+  /* bordas */
+  --border-1:#e6edf5;
+  --border-2:#d7e3f0;
+
+  /* tintas */
+  --ink-1:#0f172a;  /* títulos */
+  --ink-2:#2b3a55;  /* corpo */
+  --ink-3:#6b7a91;  /* fraco */
+
+  /* marca/estados */
+  --brand:#2997f0;
+  --brand-contrast:#0b5aa7;
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+
+  /* cores p/ gráficos */
+  --chart-1:#60a5fa;
+  --chart-2:#84cc16;
+  --chart-3:#475569;
+  --chart-4:#f59e0b;
 }
+.dark{
+  --bg:#0b1220;
+  --surface:#0f172a;
+  --surface-muted:#0b1424;
+
+  --border-1:#1f2a3b;
+  --border-2:#243248;
+
+  --ink-1:#e6edf7;
+  --ink-2:#cfe0f1;
+  --ink-3:#9bb0c9;
+
+  --brand:#60b3f6;
+  --brand-contrast:#93cdfa;
+  --success:#34d399;
+  --warning:#fbbf24;
+  --danger:#f87171;
+
+  --chart-1:#60a5fa;
+  --chart-2:#84cc16;
+  --chart-3:#94a3b8;
+  --chart-4:#f59e0b;
+}
+
+/* ===== Base ===== */
+@layer base{
+  html{@apply antialiased}
+  body{
+    background:var(--bg);
+    color:var(--ink-2);
+    font-family:theme('fontFamily.sans');
+    font-size:theme('fontSize.base.0');      /* ↑ base maior */
+    line-height:theme('fontSize.base.1.lineHeight');
+  }
+  h1{@apply text-3xl font-bold text-[color:var(--ink-1)];}
+  h2{@apply text-2xl font-semibold text-[color:var(--ink-1)];}
+  h3{@apply text-xl font-semibold text-[color:var(--ink-1)];}
+  .tabular{font-variant-numeric:tabular-nums;}
+}
+
+/* ===== Utilidades seguras p/ angular-css ===== */
+.app-card{ @apply rounded-card shadow-card border bg-[color:var(--surface)] border-[color:var(--border-1)]; }
+
+.kpi-title{ color:var(--ink-3); }
+.kpi-value{ color:var(--ink-1); font-size:1.9rem; line-height:2.2rem; } /* maior */
+
+.badge{ display:inline-flex; align-items:center; padding:2px 8px; border-radius:9999px; font-size:12px; font-weight:600; }
+.badge-success{ background-color:rgba(16,185,129,.15); color:var(--success); }
+.badge-danger{  background-color:rgba(239,68,68,.15);  color:var(--danger);  }
+.badge-warning{ background-color:rgba(245,158,11,.18); color:var(--warning); }
+
+.table-border{ border-color:var(--border-1); }
+
+/* ===== Ajudas visuais específicas ===== */
+/* Mapa mais estreito quando quiser: use max-w-map-narrow na wrapper */
+.map-wrap { @apply w-full mx-auto max-w-map-narrow; }  /* opcional */

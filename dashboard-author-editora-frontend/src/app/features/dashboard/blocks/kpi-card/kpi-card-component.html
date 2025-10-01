@@ -1,0 +1,27 @@
+<div class="h-full rounded-xl border border-slate-200 bg-white shadow-sm p-4 flex flex-col">
+  <div class="text-sm text-slate-600">{{ title() }}</div>
+
+  <div class="mt-2 text-2xl font-semibold text-slate-800">
+    <ng-container [ngSwitch]="kpiKey()">
+      <span *ngSwitchCase="'revenue'">R$ {{ value() | number:'1.0-0' }}</span>
+      <span *ngSwitchDefault>{{ value() | number:'1.0-0' }}</span>
+    </ng-container>
+  </div>
+
+  <div class="mt-2 flex items-center gap-2 text-sm"
+       [class.text-emerald-600]="isUp" [class.text-rose-600]="!isUp">
+    <!-- seta verde ↗ -->
+    <svg *ngIf="isUp" width="16" height="16" viewBox="0 0 24 24" class="shrink-0">
+      <path d="M6 18 L18 6 M10 6h8v8" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <!-- seta vermelha ↙ -->
+    <svg *ngIf="!isUp" width="16" height="16" viewBox="0 0 24 24" class="shrink-0">
+      <path d="M18 6 L6 18 M14 18H6v-8" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <span>{{ isUp ? '+' : '' }}{{ pct() | number:'1.0-1' }}%</span>
+    <span class="text-slate-500">vs período anterior</span>
+  </div>
+</div>

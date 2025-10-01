@@ -1,0 +1,16 @@
+<app-block [title]="'Mapa do Brasil'">
+  <div block-actions class="text-xs text-[color:var(--ink-3)]">
+    Choropleth por UF (mock)
+  </div>
+
+  <!-- Se maxWidth vier definido, centraliza e limita a largura; se não, ocupa 100% -->
+  <div class="w-full mx-auto" [style.maxWidth.px]="maxWidth || null">
+    <div
+      #chart
+      class="w-full rounded-md"
+      [style.minHeight.px]="minHeight"
+      role="img"
+      aria-label="Mapa do Brasil - Vendas por UF"
+    ></div>
+  </div>
+</app-block>
