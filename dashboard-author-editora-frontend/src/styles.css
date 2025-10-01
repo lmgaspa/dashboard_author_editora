@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* tokens suaves, sem preto */
+:root{
+  --card-bg: theme(colors.white);
+  --page-bg: theme(colors.brand.50);
+  --ink-1: theme(colors.slate.700);
+  --ink-2: theme(colors.slate.500);
+  --border-1: theme(colors.slate.200);
+  --accent: theme(colors.brand.500);
+}
