@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "dashboard-author-editora": {
+    "dashboard-author-editora-frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",
