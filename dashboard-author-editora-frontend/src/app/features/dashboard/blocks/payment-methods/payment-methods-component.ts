@@ -182,6 +182,8 @@ export class PaymentMethodsComponent {
 
       // resolve tokens CSS para cores reais (canvas do ECharts não entende var(--x))
       const root = getComputedStyle(document.documentElement);
+      const bg = root.getPropertyValue('--surface').trim() || '#ffffff';
+
       const success = root.getPropertyValue('--success').trim() || '#10b981';
       const danger = root.getPropertyValue('--danger').trim() || '#ef4444';
       const neutral = root.getPropertyValue('--ink-2').trim() || '#334155';

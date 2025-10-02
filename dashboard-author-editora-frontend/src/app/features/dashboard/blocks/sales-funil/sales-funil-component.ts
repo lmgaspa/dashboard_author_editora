@@ -1,14 +1,8 @@
-import {
-  Component, ElementRef, ViewChild, effect, input, signal, DestroyRef,
-} from '@angular/core';
+import { Component, ElementRef, ViewChild, effect, input, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BlockComponent } from '@/app/shared/block.component';
 import * as echarts from 'echarts';
-import {
-  FunnelStep,
-  MOCK_FUNIL_ATUAL,
-  MOCK_FUNIL_MES_PASSADO,
-} from '../../data/mock-data-funil';
+import { FunnelStep, MOCK_FUNIL_ATUAL, MOCK_FUNIL_MES_PASSADO } from '../../data/mock-data-funil';
 
 type StepName = 'Visitas' | 'Carrinho' | 'Checkout' | 'Pagamento Aprovado';
 type ColorMode = 'fixed' | 'delta';
@@ -19,64 +13,72 @@ type ColorMode = 'fixed' | 'delta';
   imports: [CommonModule, BlockComponent],
   template: `
     <app-block title="Funil de Vendas">
-      <div class="grid gap-6 md:grid-cols-2 items-stretch"
-           [style.minHeight.px]="blockMinHeight()">
-
+      <div class="grid gap-6 md:grid-cols-2 items-stretch" [style.minHeight.px]="blockMinHeight()">
         <!-- Gráfico -->
         <div class="flex items-center justify-center h-full">
-          <div #chart class="w-full" [style.height.px]="chartMaxHeight()"
-               role="img" aria-label="Etapas do funil de vendas"></div>
+          <div
+            #chart
+            class="w-full"
+            [style.height.px]="chartMaxHeight()"
+            role="img"
+            aria-label="Etapas do funil de vendas"
+          ></div>
         </div>
 
         <!-- Legenda centralizada -->
         <div class="h-full flex items-center justify-center">
           <ol class="space-y-3" aria-label="Legenda do funil">
             @for (s of currentSteps(); let i = $index; track i) {
-              <li class="flex items-center gap-3">
-                <span class="inline-block rounded-full"
-                      [style.width.px]="dotPx()"
-                      [style.height.px]="dotPx()"
-                      [style.background-color]="legendDotColor(s.name, i)"></span>
-                <span class="text-foreground/80"
-                      [style.fontSize.px]="legendFontPx()"
-                      [style.lineHeight.px]="legendFontPx() + 4"
-                      style="font-weight:600">
-                  {{ s.name }}
-                </span>
-              </li>
+            <li class="flex items-center gap-3">
+              <span
+                class="inline-block rounded-full"
+                [style.width.px]="dotPx()"
+                [style.height.px]="dotPx()"
+                [style.background-color]="legendDotColor(s.name, i)"
+              ></span>
+              <span
+                class="font-semibold text-foreground-80"
+                [style.fontSize.px]="legendFontPx()"
+                [style.lineHeight.px]="legendFontPx() + 4"
+              >
+                {{ s.name }}
+              </span>
+            </li>
             }
           </ol>
         </div>
       </div>
 
       <!-- Resumo alinhado (controle pelo summaryTopGap) -->
-      <div class="leading-snug space-y-1.5"
-           [style.fontSize.px]="summaryFontPx()"
-           [style.marginTop.px]="summaryTopGap()">
+      <div
+        class="leading-snug space-y-1.5"
+        [style.fontSize.px]="summaryFontPx()"
+        [style.marginTop.px]="summaryTopGap()"
+      >
         <p>
-          Este mês tivemos <b>{{ fmt(val('Visitas')) }}</b> visitas
-          ( <b [style.color]="color('Visitas')">{{ keyword('Visitas') }}</b>{{ suffix('Visitas') }} ),
-          em relação ao mês passado.
+          Este mês tivemos <b>{{ fmt(val('Visitas')) }}</b> visitas (
+          <b [style.color]="color('Visitas')">{{ keyword('Visitas') }}</b
+          >{{ suffix('Visitas') }} ), em relação ao mês passado.
         </p>
 
         <p>
-          Este mês, o carrinho ficou em <b>{{ fmt(val('Carrinho')) }}</b>
-          ( <b [style.color]="color('Carrinho')">{{ keyword('Carrinho') }}</b>{{ suffix('Carrinho') }} ),
-          em relação ao mês passado.
+          Este mês, o carrinho ficou em <b>{{ fmt(val('Carrinho')) }}</b> (
+          <b [style.color]="color('Carrinho')">{{ keyword('Carrinho') }}</b
+          >{{ suffix('Carrinho') }} ), em relação ao mês passado.
         </p>
 
         <p>
-          Este mês, o checkout registrou <b>{{ fmt(val('Checkout')) }}</b>
-          ( <b [style.color]="color('Checkout')">{{ keyword('Checkout') }}</b>{{ suffix('Checkout') }} ),
-          em relação ao mês passado.
+          Este mês, o checkout registrou <b>{{ fmt(val('Checkout')) }}</b> (
+          <b [style.color]="color('Checkout')">{{ keyword('Checkout') }}</b
+          >{{ suffix('Checkout') }} ), em relação ao mês passado.
         </p>
 
         <p>
           Este mês, os pagamentos aprovados
-          <b [style.color]="color('Pagamento Aprovado')">somaram</b>
+          <b [style.color]="color('Pagamento Aprovado')">somaram </b>
           <b>{{ fmt(val('Pagamento Aprovado')) }}</b>
-          ( <b [style.color]="color('Pagamento Aprovado')">{{ keyword('Pagamento Aprovado') }}</b>{{ suffix('Pagamento Aprovado') }} ),
-          em relação ao mês passado.
+          ( <b [style.color]="color('Pagamento Aprovado')">{{ keyword('Pagamento Aprovado') }}</b
+          >{{ suffix('Pagamento Aprovado') }} ), em relação ao mês passado.
         </p>
       </div>
     </app-block>
@@ -87,12 +89,12 @@ export class SalesFunilComponent {
 
   /** Layout */
   blockMinHeight = input<number>(360);
-  chartMaxHeight  = input<number>(260);
+  chartMaxHeight = input<number>(260);
 
   /** Tamanhos */
-  legendFontPx  = input<number>(22);
+  legendFontPx = input<number>(22);
   summaryFontPx = input<number>(22);
-  dotPx         = input<number>(10);
+  dotPx = input<number>(10);
   /** Gap acima do resumo (px) para alinhar com o bloco do Mapa do Brasil */
   summaryTopGap = input<number>(0);
 
@@ -104,32 +106,32 @@ export class SalesFunilComponent {
 
   /** Cores quando colorMode='delta' */
   deltaColors = input<{ up: string; down: string; flat: string }>({
-    up:   '#166534', // verde
-    down: '#b91c1c', // vermelho
-    flat: '#0f172a', // preto
+    up: '#10b981', // verde
+    down: '#ef4444', // vermelho
+    flat: '#334155',
   });
 
   /** Dados (se não passar, usa mocks) */
-  stepsInput    = input<FunnelStep[] | null>(null);
+  stepsInput = input<FunnelStep[] | null>(null);
   previousInput = input<Partial<Record<StepName, number>> | null>(null);
 
   /** Dados efetivos */
   readonly stepsMock = signal<FunnelStep[]>([...MOCK_FUNIL_ATUAL]);
-  readonly prevMock  = { ...MOCK_FUNIL_MES_PASSADO };
+  readonly prevMock = { ...MOCK_FUNIL_MES_PASSADO };
   currentSteps = signal<FunnelStep[]>([]);
-  previous     = signal<Partial<Record<StepName, number>>>({});
+  previous = signal<Partial<Record<StepName, number>>>({});
 
   private chart?: echarts.ECharts;
   private ro?: ResizeObserver;
 
   // cores do texto (palavras-chave)
-  private readonly GREEN = '#166534';
-  private readonly RED   = '#b91c1c';
-  private readonly BLACK = '#0f172a';
+  private readonly GREEN = '#10b981';
+  private readonly RED = '#ef4444';
+  private readonly BLACK = '#334155';
 
   constructor(private destroyRef: DestroyRef) {
     effect(() => {
-      const cur  = this.stepsInput() ?? this.stepsMock();
+      const cur = this.stepsInput() ?? this.stepsMock();
       const prev = this.previousInput() ?? this.prevMock;
       this.currentSteps.set(cur);
       this.previous.set(prev);
@@ -152,15 +154,15 @@ export class SalesFunilComponent {
   }
 
   val(name: StepName): number {
-    return this.currentSteps().find(s => s.name === name)?.value ?? 0;
+    return this.currentSteps().find((s) => s.name === name)?.value ?? 0;
   }
 
   private change(name: StepName): number | undefined {
-    const cur  = this.val(name);
+    const cur = this.val(name);
     const prev = this.previous()[name];
     if (prev == null) return undefined;
     if (prev === 0) return cur ? 100 : 0;
-    return Math.round(((cur ?? 0) - prev) / prev * 100);
+    return Math.round((((cur ?? 0) - prev) / prev) * 100);
   }
 
   color(name: StepName): string {
@@ -215,15 +217,24 @@ export class SalesFunilComponent {
         formatter: (p: any) => this.fmt(p?.value ?? 0),
         textStyle: { fontSize: 14 },
       },
-      series: [{
-        type: 'funnel',
-        left: '4%', right: '4%', top: 12, bottom: 12, width: '92%',
-        min: 0, max: Math.max(...steps.map(s => s.value)),
-        sort: 'descending', gap: 6,
-        label: { show: false }, emphasis: { label: { show: false } },
-        itemStyle: { borderColor: 'var(--surface, #fff)', borderWidth: 2 },
-        data,
-      }],
+      series: [
+        {
+          type: 'funnel',
+          left: '4%',
+          right: '4%',
+          top: 12,
+          bottom: 12,
+          width: '92%',
+          min: 0,
+          max: Math.max(...steps.map((s) => s.value)),
+          sort: 'descending',
+          gap: 6,
+          label: { show: false },
+          emphasis: { label: { show: false } },
+          itemStyle: { borderColor: 'var(--surface, #fff)', borderWidth: 2 },
+          data,
+        },
+      ],
     };
 
     this.chart.setOption(option, true);

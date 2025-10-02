@@ -1,24 +1,23 @@
 <app-block>
   <div class="space-y-3">
-    <!-- Título + subtítulo na mesma linha (md+) -->
+    <!-- Título -->
     <div class="flex items-baseline justify-between gap-3">
       <h1
         class="text-xl md:text-xl lg:text-xl min-w-0 truncate text-[color:var(--ink-1)]"
-        id="mapa-brasil-heading"
-      >
+        id="mapa-brasil-heading">
         Vendas mensais por região do Brasil.
-    </h1>
+      </h1>
     </div>
 
-    <div class="w-full mx-auto" [style.maxWidth.px]="maxWidth || null" aria-labelledby="mapa-brasil-heading mapa-brasil-subtitle">
+    <div class="w-full mx-auto" [style.maxWidth.px]="maxWidth || null" aria-labelledby="mapa-brasil-heading">
       <!-- MAPA -->
       <div
         #chart
         class="w-full rounded-md"
         [style.minHeight.px]="minHeight"
         role="img"
-        aria-label="Mapa do Brasil — Vendas por UF (por região)"
-      ></div>
+        aria-label="Mapa do Brasil — Vendas por UF (por região)">
+      </div>
 
       <!-- Legenda -->
       <div class="legend mt-3">

@@ -165,7 +165,7 @@
 
 .table-border { border-color: var(--border-1); }
 
-/* foco/ring consistente para qualquer elemento com .ring-focus */
+/* foco/ring consistente */
 .ring-focus:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--focus), 0 0 0 6px color-mix(in oklab, var(--focus) 35%, transparent 65%);
@@ -180,9 +180,24 @@
 /* ===== Ajudas visuais específicas ===== */
 .map-wrap { @apply w-full mx-auto max-w-map-narrow; }
 
-/* Força o painel do overlay a ficar acima de tudo */
-/* classe auxiliar (caso queira aplicar também por classe) */
-.notif-portal {
-  /* redundância caso algum estilo tente sobrescrever */
-  z-index: 2147483647 !important;
+/* overlay acima de tudo */
+.notif-portal { z-index: 2147483647 !important; }
+
+/* opcional — tipografia “segura” em telas gigantes */
+@media (min-width: 1440px) {
+  html { font-size: clamp(14px, 1.05vw, 16px); }
 }
+
+/* garantir box-sizing consistente */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* === Helpers p/ compatibilidade com o que já usa nos templates === */
+.bg-muted { background: var(--surface-muted); }
+.text-foreground { color: var(--ink-1); }
+
+/* Versões com opacidade (não dá pra usar /80 em var arbitrária no Tailwind) */
+.text-foreground-80 { color: color-mix(in oklab, var(--ink-1) 80%, transparent 20%); }
+.text-ink2-85 { color: color-mix(in oklab, var(--ink-2) 85%, transparent 15%); }
+
+/* Garantir truncamento seguro dentro de grids/flex */
+.min-w-0 { min-width: 0; }

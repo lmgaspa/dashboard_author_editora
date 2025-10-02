@@ -43,7 +43,7 @@ module.exports = {
         pop:  "var(--shadow-pop)",
       },
 
-      /* sua escala MAIOR (com lineHeight) */
+      /* escala MAIOR (com lineHeight) */
       fontSize: {
         xs:  ["1.0625rem", { lineHeight: "1.45rem" }],
         sm:  ["1.1875rem", { lineHeight: "1.6rem"  }],

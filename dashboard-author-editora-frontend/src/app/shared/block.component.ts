@@ -4,12 +4,12 @@ import { Component, input } from '@angular/core';
   selector: 'app-block',
   standalone: true,
   template: `
-    <section class="rounded-card bg-[var(--card-bg)] shadow-sm border border-[var(--border-1)]">
-      <header class="flex items-center justify-between px-4 py-3 border-b border-[var(--border-1)]">
-        <h3 class="font-semibold text-[var(--ink-1)]">{{title()}}</h3>
+    <section class="app-card overflow-hidden rounded-card border border-[var(--border-1)] shadow-card">
+      <header class="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border-1)]">
+        <h3 class="font-bold text-2xl text-[color:var(--ink-1)] truncate min-w-0">{{ title() }}</h3>
         <ng-content select="[block-actions]"></ng-content>
       </header>
-      <div class="p-4">
+      <div class="p-4 min-w-0">
         <ng-content></ng-content>
       </div>
     </section>
