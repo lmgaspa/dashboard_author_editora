@@ -55,10 +55,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "dashboard-author-editora:build:production"
+              "buildTarget": "dashboard-author-editora-frontend:build:production"
             },
             "development": {
-              "buildTarget": "dashboard-author-editora:build:development"
+              "buildTarget": "dashboard-author-editora-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
