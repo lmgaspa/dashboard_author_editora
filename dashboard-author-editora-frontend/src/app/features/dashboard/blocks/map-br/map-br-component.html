@@ -1,38 +1,46 @@
-<app-block [title]="'Mapa do Brasil'">
-  <div block-actions class="text-xs text-[color:var(--ink-3)]">
-    Choropleth por UF (valores fixos por região)
-  </div>
-
-  <div class="w-full mx-auto" [style.maxWidth.px]="maxWidth || null">
-    <!-- MAPA -->
-    <div
-      #chart
-      class="w-full rounded-md"
-      [style.minHeight.px]="minHeight"
-      role="img"
-      aria-label="Mapa do Brasil - Vendas por UF (por região)">
+<app-block>
+  <div class="space-y-3">
+    <!-- Título + subtítulo na mesma linha (md+) -->
+    <div class="flex items-baseline justify-between gap-3">
+      <h1
+        class="text-xl md:text-xl lg:text-xl min-w-0 truncate text-[color:var(--ink-1)]"
+        id="mapa-brasil-heading"
+      >
+        Vendas mensais por região do Brasil.
+    </h1>
     </div>
 
-    <!-- LEGENDA CUSTOM (fora do mapa) -->
-    <div class="legend-wrap" aria-hidden="true">
-      <div class="legend-title">Vendas (0 → ≥ 100)</div>
-      <div class="legend-bar"></div>
-      <div class="legend-scale">
-        <span>0 (menos)</span>
-        <span>≥ 100 (mais vendas)</span>
+    <div class="w-full mx-auto" [style.maxWidth.px]="maxWidth || null" aria-labelledby="mapa-brasil-heading mapa-brasil-subtitle">
+      <!-- MAPA -->
+      <div
+        #chart
+        class="w-full rounded-md"
+        [style.minHeight.px]="minHeight"
+        role="img"
+        aria-label="Mapa do Brasil — Vendas por UF (por região)"
+      ></div>
+
+      <!-- Legenda -->
+      <div class="legend mt-3">
+        <div class="legend-title">Vendas (0 → ≥ 100)</div>
+        <div class="legend-bar"></div>
+        <div class="legend-scale">
+          <span>0 (menos)</span>
+          <span>≥ 100 (mais vendas)</span>
+        </div>
       </div>
-    </div>
 
-    <!-- RESUMO POR REGIÃO -->
-    <div class="mt-4 text-sm text-[color:var(--ink-2)]">
-      <h3 class="font-semibold mb-2">Vendas por Região (mock / fixo)</h3>
-      <ul class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-        <li><span class="dot dot--n"></span><span class="font-medium">N (Norte):</span> 250</li>
-        <li><span class="dot dot--ne"></span><span class="font-medium">NE (Nordeste):</span> 420</li>
-        <li><span class="dot dot--co"></span><span class="font-medium">CO (Centro-Oeste):</span> 180</li>
-        <li><span class="dot dot--se"></span><span class="font-medium">SE (Sudeste):</span> 1.320</li>
-        <li><span class="dot dot--s"></span><span class="font-medium">S (Sul):</span> 90</li>
-      </ul>
+      <!-- RESUMO POR REGIÃO -->
+      <div class="mt-4 text-sm text-[color:var(--ink-2)]">
+        <h3 class="font-semibold mb-2">Vendas por Região — Este mês</h3>
+        <ul class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <li><span class="dot dot--n"></span><span class="font-medium">N (Norte):</span> 250</li>
+          <li><span class="dot dot--ne"></span><span class="font-medium">NE (Nordeste):</span> 420</li>
+          <li><span class="dot dot--co"></span><span class="font-medium">CO (Centro-Oeste):</span> 180</li>
+          <li><span class="dot dot--se"></span><span class="font-medium">SE (Sudeste):</span> 1.320</li>
+          <li><span class="dot dot--s"></span><span class="font-medium">S (Sul):</span> 90</li>
+        </ul>
+      </div>
     </div>
   </div>
 </app-block>

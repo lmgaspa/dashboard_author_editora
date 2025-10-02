@@ -9,10 +9,10 @@
   color-scheme: light;
 
   /* superfícies */
-  --bg:              #f6f9ff;   /* fundo da app */
-  --surface:         #ffffff;   /* cards */
-  --surface-2:       #f1f5fb;   /* superfícies secundárias */
-  --surface-muted:   #ecf2fb;   /* caixas/headers leves */
+  --bg:              #fffafa;   /* fundo da app */
+  --surface:         #fffafa;   /* cards */
+  --surface-2:       #ffffff;   /* superfícies secundárias */
+  --surface-muted:   #ffffff;   /* caixas/headers leves */
 
   /* bordas */
   --border-1:        #e4ebf5;

@@ -7,10 +7,10 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="space-y-6">
+    <div class="space-y-6 mb-48">
       <!-- Linha de título + chips (mesma linha) -->
       <div class="flex items-start md:items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap">
-        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-slate-800 grow min-w-0">
+        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold grow min-w-0">
           Métricas de Vendas e Acesso ao Site
         </h1>
 
