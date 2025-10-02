@@ -2,88 +2,187 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Tokens (Light/Dark) ===== */
-:root{
+/* =========================
+   DESIGN TOKENS (LIGHT/DARK)
+   ========================= */
+:root {
+  color-scheme: light;
+
   /* superfícies */
-  --bg:#f5f9ff;
-  --surface:#ffffff;
-  --surface-muted:#f3f6fb;
+  --bg:              #f6f9ff;   /* fundo da app */
+  --surface:         #ffffff;   /* cards */
+  --surface-2:       #f1f5fb;   /* superfícies secundárias */
+  --surface-muted:   #ecf2fb;   /* caixas/headers leves */
 
   /* bordas */
-  --border-1:#e6edf5;
-  --border-2:#d7e3f0;
+  --border-1:        #e4ebf5;
+  --border-2:        #d7e3f0;
 
-  /* tintas */
-  --ink-1:#0f172a;  /* títulos */
-  --ink-2:#2b3a55;  /* corpo */
-  --ink-3:#6b7a91;  /* fraco */
+  /* tintas (texto) */
+  --ink-1:           #0f172a;   /* títulos */
+  --ink-2:           #2b3a55;   /* corpo */
+  --ink-3:           #6b7a91;   /* fraco */
 
-  /* marca/estados */
-  --brand:#2997f0;
-  --brand-contrast:#0b5aa7;
-  --success:#10b981;
-  --warning:#f59e0b;
-  --danger:#ef4444;
+  /* marca e estados */
+  --brand:           #2a95ff;
+  --brand-contrast:  #0b5aa7;
 
-  /* cores p/ gráficos */
-  --chart-1:#60a5fa;
-  --chart-2:#84cc16;
-  --chart-3:#475569;
-  --chart-4:#f59e0b;
-}
-.dark{
-  --bg:#0b1220;
-  --surface:#0f172a;
-  --surface-muted:#0b1424;
+  --success:         #12b886;
+  --warning:         #f59e0b;
+  --danger:          #ef4444;
 
-  --border-1:#1f2a3b;
-  --border-2:#243248;
+  /* UI feedback */
+  --ring:            color-mix(in oklab, var(--brand) 55%, white 45%);
+  --focus:           color-mix(in oklab, var(--brand) 75%, white 25%);
 
-  --ink-1:#e6edf7;
-  --ink-2:#cfe0f1;
-  --ink-3:#9bb0c9;
+  /* gráficos (sequência agradável) */
+  --chart-1:         #60a5fa;
+  --chart-2:         #34d399;
+  --chart-3:         #a78bfa;
+  --chart-4:         #f59e0b;
+  --chart-5:         #f472b6;
 
-  --brand:#60b3f6;
-  --brand-contrast:#93cdfa;
-  --success:#34d399;
-  --warning:#fbbf24;
-  --danger:#f87171;
+  /* sombras */
+  --shadow-card:     0 1px 2px rgba(16,24,40,.06), 0 1px 1px rgba(16,24,40,.04);
+  --shadow-pop:      0 10px 30px -12px rgba(2, 6, 23, 0.25);
 
-  --chart-1:#60a5fa;
-  --chart-2:#84cc16;
-  --chart-3:#94a3b8;
-  --chart-4:#f59e0b;
+  /* radius */
+  --radius-card:     12px;
+  --radius-pop:      14px;
+
+  /* opacidades para efeitos */
+  --alpha-muted:     .65;
 }
 
-/* ===== Base ===== */
-@layer base{
-  html{@apply antialiased}
-  body{
-    background:var(--bg);
-    color:var(--ink-2);
-    font-family:theme('fontFamily.sans');
-    font-size:theme('fontSize.base.0');      /* ↑ base maior */
-    line-height:theme('fontSize.base.1.lineHeight');
+.dark {
+  color-scheme: dark;
+
+  /* superfícies */
+  --bg:              #0b1220;
+  --surface:         #0f172a;
+  --surface-2:       #0b1424;
+  --surface-muted:   #0b1424;
+
+  /* bordas */
+  --border-1:        #1f2a3b;
+  --border-2:        #2a3550;
+
+  /* tintas (texto) */
+  --ink-1:           #e6edf7;
+  --ink-2:           #cfe0f1;
+  --ink-3:           #97a9c4;
+
+  /* marca e estados */
+  --brand:           #60b3f6;
+  --brand-contrast:  #93cdfa;
+
+  --success:         #34d399;
+  --warning:         #fbbf24;
+  --danger:          #f87171;
+
+  /* UI feedback */
+  --ring:            color-mix(in oklab, var(--brand) 55%, black 45%);
+  --focus:           color-mix(in oklab, var(--brand) 75%, black 25%);
+
+  /* gráficos */
+  --chart-1:         #60a5fa;
+  --chart-2:         #34d399;
+  --chart-3:         #94a3b8;
+  --chart-4:         #f59e0b;
+  --chart-5:         #f472b6;
+
+  --shadow-card:     0 1px 2px rgba(2,6,23,.55), 0 1px 1px rgba(2,6,23,.45);
+  --shadow-pop:      0 10px 30px -12px rgba(0,0,0,.55);
+}
+
+/* ============ BASE ============ */
+@layer base {
+  html { @apply antialiased; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink-2);
+    font-family: theme('fontFamily.sans');
+    font-size: theme('fontSize.base.0');             /* escala maior */
+    line-height: theme('fontSize.base.1.lineHeight');/* caminho correto */
+    transition: background-color .25s ease, color .25s ease, border-color .25s ease;
   }
-  h1{@apply text-3xl font-bold text-[color:var(--ink-1)];}
-  h2{@apply text-2xl font-semibold text-[color:var(--ink-1)];}
-  h3{@apply text-xl font-semibold text-[color:var(--ink-1)];}
-  .tabular{font-variant-numeric:tabular-nums;}
+
+  h1 {
+    @apply font-bold text-[color:var(--ink-1)];
+    font-size: theme('fontSize.3xl.0');
+    line-height: theme('fontSize.3xl.1.lineHeight');
+  }
+  h2 {
+    @apply font-semibold text-[color:var(--ink-1)];
+    font-size: theme('fontSize.2xl.0');
+    line-height: theme('fontSize.2xl.1.lineHeight');
+  }
+  h3 {
+    @apply font-semibold text-[color:var(--ink-1)];
+    font-size: theme('fontSize.xl.0');
+    line-height: theme('fontSize.xl.1.lineHeight');
+  }
+
+  ::selection { background: color-mix(in oklab, var(--brand) 25%, white 75%); color: var(--ink-1); }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* scrollbars suaves */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--ink-3) 35%, transparent 65%) transparent;
+  }
+  *::-webkit-scrollbar { height: 8px; width: 8px; }
+  *::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--ink-3) 35%, transparent 65%); border-radius: 9999px; }
 }
 
-/* ===== Utilidades seguras p/ angular-css ===== */
-.app-card{ @apply rounded-card shadow-card border bg-[color:var(--surface)] border-[color:var(--border-1)]; }
+/* ========= COMPONENT HELPERS ========= */
+.app-card {
+  background: var(--surface);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
 
-.kpi-title{ color:var(--ink-3); }
-.kpi-value{ color:var(--ink-1); font-size:1.9rem; line-height:2.2rem; } /* maior */
+.app-pop {
+  background: var(--surface);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-pop);
+  box-shadow: var(--shadow-pop);
+}
 
-.badge{ display:inline-flex; align-items:center; padding:2px 8px; border-radius:9999px; font-size:12px; font-weight:600; }
-.badge-success{ background-color:rgba(16,185,129,.15); color:var(--success); }
-.badge-danger{  background-color:rgba(239,68,68,.15);  color:var(--danger);  }
-.badge-warning{ background-color:rgba(245,158,11,.18); color:var(--warning); }
+.kpi-title { color: var(--ink-3); }
+.kpi-value { color: var(--ink-1); font-size: 2.1rem; line-height: 2.4rem; }
 
-.table-border{ border-color:var(--border-1); }
+/* badges */
+.badge {
+  display: inline-flex; align-items: center; padding: 4px 10px;
+  border-radius: 9999px; font-size: 14px; font-weight: 700;
+}
+.badge-success { background: color-mix(in oklab, var(--success) 18%, transparent 82%); color: var(--success); }
+.badge-warning { background: color-mix(in oklab, var(--warning) 18%, transparent 82%); color: var(--warning); }
+.badge-danger  { background: color-mix(in oklab, var(--danger)  18%, transparent 82%); color: var(--danger); }
+
+.table-border { border-color: var(--border-1); }
+
+/* foco/ring consistente para qualquer elemento com .ring-focus */
+.ring-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus), 0 0 0 6px color-mix(in oklab, var(--focus) 35%, transparent 65%);
+  transition: box-shadow .2s ease;
+}
+
+/* util para fundos brand suaves */
+.bg-brand-soft {
+  background: color-mix(in oklab, var(--brand) 8%, var(--surface) 92%);
+}
 
 /* ===== Ajudas visuais específicas ===== */
-/* Mapa mais estreito quando quiser: use max-w-map-narrow na wrapper */
-.map-wrap { @apply w-full mx-auto max-w-map-narrow; }  /* opcional */
+.map-wrap { @apply w-full mx-auto max-w-map-narrow; }
+
+/* Força o painel do overlay a ficar acima de tudo */
+/* classe auxiliar (caso queira aplicar também por classe) */
+.notif-portal {
+  /* redundância caso algum estilo tente sobrescrever */
+  z-index: 2147483647 !important;
+}

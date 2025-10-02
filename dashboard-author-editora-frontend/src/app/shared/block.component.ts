@@ -16,5 +16,5 @@ import { Component, input } from '@angular/core';
   `,
 })
 export class BlockComponent {
-  title = input<string>('Título');
+  title = input<string>('Produtos Vendidos');
 }

@@ -8,56 +8,85 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="space-y-6">
-      <!-- Linha de título + chips -->
-       <!-- Filtros (clicáveis; sem lógica funcional aqui) -->
-        <div class="hidden md:flex items-center gap-2">
+      <!-- Linha de título + chips (mesma linha) -->
+      <div class="flex items-start md:items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap">
+        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-slate-800 grow min-w-0">
+          Métricas de Vendas e Acesso ao Site
+        </h1>
+
+        <div class="inline-flex items-center gap-2 shrink-0">
           <button
             type="button"
             class="rounded-full bg-brand-100 hover:bg-brand-200 px-3 py-1 text-sm text-slate-700 transition"
-            aria-pressed="true">
-            Métricas
+          >
+            Vendas
           </button>
           <button
             type="button"
-            class="rounded-full bg-brand-100 hover:bg-brand-200 px-3 py-1 text-sm text-slate-700 transition">
-            Vendas
+            class="rounded-full bg-brand-100 hover:bg-brand-200 px-3 py-1 text-sm text-slate-700 transition"
+          >
+            Acesso ao site
           </button>
+
           <div class="relative">
             <button
               type="button"
-              class="rounded-md bg-white border border-slate-200 px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50">
+              class="rounded-md bg-white border border-slate-200 px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50"
+            >
               •••
             </button>
           </div>
         </div>
+      </div>
 
       <!-- Filtro de calendário -->
-      <form class="flex flex-wrap items-end gap-3" (submit)="$event.preventDefault(); applyFilter()"
-            aria-label="Filtro de calendário por intervalo de datas">
+      <form
+        class="flex flex-wrap items-end gap-3"
+        (submit)="$event.preventDefault(); applyFilter()"
+        aria-label="Filtro de calendário por intervalo de datas"
+      >
         <div class="flex flex-col">
           <label for="start" class="text-xs text-slate-500 mb-1">De</label>
-          <input id="start" type="date" [(ngModel)]="startDate" name="startDate"
-                 class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-300" />
+          <input
+            id="start"
+            type="date"
+            [(ngModel)]="startDate"
+            name="startDate"
+            class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
+          />
         </div>
         <div class="flex flex-col">
           <label for="end" class="text-xs text-slate-500 mb-1">Até</label>
-          <input id="end" type="date" [(ngModel)]="endDate" name="endDate"
-                 class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-300" />
+          <input
+            id="end"
+            type="date"
+            [(ngModel)]="endDate"
+            name="endDate"
+            class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
+          />
         </div>
-        <button type="submit"
-                class="rounded-md bg-brand-600 text-white text-sm px-4 py-2 hover:bg-brand-700 active:scale-[.99] transition">
+        <button
+          type="submit"
+          class="rounded-md bg-brand-600 text-white text-sm px-4 py-2 hover:bg-brand-700 active:scale-[.99] transition"
+        >
           Aplicar
         </button>
 
         <!-- Botão opcional para simular dados -->
-        <button type="button" (click)="randomizeData()"
-                class="rounded-md bg-white border border-slate-200 text-sm px-3 py-2 text-slate-700 hover:bg-slate-50">
+        <button
+          type="button"
+          (click)="randomizeData()"
+          class="rounded-md bg-white border border-slate-200 text-sm px-3 py-2 text-slate-700 hover:bg-slate-50"
+        >
           Simular
         </button>
       </form>
 
       <!-- Barras 00-23h -->
-      <section aria-labelledby="horas-title" class="bg-white rounded-xl border border-slate-100 p-4">
+      <section
+        aria-labelledby="horas-title"
+        class="bg-white rounded-xl border border-slate-100 p-4"
+      >
         <div class="flex items-center justify-between mb-3">
           <h2 id="horas-title" class="text-sm font-semibold text-slate-700">
             Atividade por hora (00–23)
@@ -78,15 +107,20 @@ import { FormsModule } from '@angular/forms';
           </div>
 
           <!-- barras (24 colunas) -->
-          <div class="h-40 md:h-48 grid gap-[6px]" style="grid-template-columns: repeat(24, minmax(0, 1fr));"
-               role="img"
-               aria-label="Histograma por hora">
+          <div
+            class="h-40 md:h-48 grid gap-[6px]"
+            style="grid-template-columns: repeat(24, minmax(0, 1fr));"
+            role="img"
+            aria-label="Histograma por hora"
+          >
             <ng-container *ngFor="let v of hourCounts; let h = index">
               <div class="flex items-end justify-center">
-                <div class="w-full rounded-t-md bg-brand-500/80 hover:bg-brand-600 transition"
-                     [style.height.%]="max ? (v / max) * 100 : 0"
-                     [attr.title]="label(h) + ': ' + v"
-                     aria-hidden="true"></div>
+                <div
+                  class="w-full rounded-t-md bg-brand-500/80 hover:bg-brand-600 transition"
+                  [style.height.%]="max ? (v / max) * 100 : 0"
+                  [attr.title]="label(h) + ': ' + v"
+                  aria-hidden="true"
+                ></div>
               </div>
             </ng-container>
           </div>
@@ -94,9 +128,11 @@ import { FormsModule } from '@angular/forms';
           <!-- Eixo X (00..23) a cada 3 horas -->
           <div class="mt-2 grid" style="grid-template-columns: repeat(24, minmax(0, 1fr));">
             <ng-container *ngFor="let _ of hourCounts; let h = index">
-              <div class="text-[10px] md:text-xs text-slate-500 text-center tabular-nums"
-                   [class.opacity-0]="h % 3 !== 0">
-                {{ h | number: '2.0-0' }}
+              <div
+                class="text-[10px] md:text-xs text-slate-500 text-center tabular-nums"
+                [class.opacity-0]="h % 3 !== 0"
+              >
+                {{ h | number : '2.0-0' }}
               </div>
             </ng-container>
           </div>
@@ -112,8 +148,7 @@ export class TopControlsComponent {
 
   // Série com 24 posições (00–23)
   hourCounts: number[] = [
-    4, 2, 1, 0, 0, 1, 3, 8, 12, 18, 24, 16,
-    14, 10, 12, 20, 22, 18, 15, 12, 9, 7, 5, 3
+    4, 2, 1, 0, 0, 1, 3, 8, 12, 18, 24, 16, 14, 10, 12, 20, 22, 18, 15, 12, 9, 7, 5, 3,
   ];
 
   get max(): number {

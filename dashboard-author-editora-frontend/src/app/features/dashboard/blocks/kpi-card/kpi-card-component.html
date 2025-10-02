@@ -1,27 +1,44 @@
-<div class="h-full rounded-xl border border-slate-200 bg-white shadow-sm p-4 flex flex-col">
-  <div class="text-sm text-slate-600">{{ title() }}</div>
-
-  <div class="mt-2 text-2xl font-semibold text-slate-800">
-    <ng-container [ngSwitch]="kpiKey()">
-      <span *ngSwitchCase="'revenue'">R$ {{ value() | number:'1.0-0' }}</span>
-      <span *ngSwitchDefault>{{ value() | number:'1.0-0' }}</span>
-    </ng-container>
+<div class="h-full min-h-[172px] rounded-xl border border-[color:var(--border-1)] bg-[color:var(--surface)] shadow-card p-4 flex flex-col overflow-hidden">
+  <!-- título -->
+  <div class="text-[15px] md:text-base font-medium text-[color:var(--ink-3)]">
+    {{ title() }}
   </div>
 
-  <div class="mt-2 flex items-center gap-2 text-sm"
-       [class.text-emerald-600]="isUp" [class.text-rose-600]="!isUp">
-    <!-- seta verde ↗ -->
-    <svg *ngIf="isUp" width="16" height="16" viewBox="0 0 24 24" class="shrink-0">
-      <path d="M6 18 L18 6 M10 6h8v8" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <!-- seta vermelha ↙ -->
-    <svg *ngIf="!isUp" width="16" height="16" viewBox="0 0 24 24" class="shrink-0">
-      <path d="M18 6 L6 18 M14 18H6v-8" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+  <!-- valor -->
+  <div class="mt-0.5 text-3xl md:text-4xl font-semibold text-[color:var(--ink-1)] leading-tight">
+    @switch (kpiKey()) {
+      @case ('revenue') { R$ {{ value() | number:'1.0-0' }} }
+      @default { {{ value() | number:'1.0-0' }} }
+    }
+  </div>
 
-    <span>{{ isUp ? '+' : '' }}{{ pct() | number:'1.0-1' }}%</span>
-    <span class="text-slate-500">vs período anterior</span>
+  <!-- variação (tamanho base para servir de referência) -->
+  <div class="mt-1.5 flex items-center gap-2 text-sm md:text-base"
+       [class.text-emerald-600]="isUp" [class.text-rose-600]="!isUp">
+    @if (isUp) {
+      <svg width="16" height="16" viewBox="0 0 24 24" class="shrink-0">
+        <path d="M6 18 L18 6 M10 6h8v8" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    } @else {
+      <svg width="16" height="16" viewBox="0 0 24 24" class="shrink-0">
+        <path d="M18 6 L6 18 M14 18H6v-8" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    }
+    <span class="font-semibold">{{ isUp ? '+' : '' }}{{ pct() | number:'1.0-1' }}%</span>
+    <span class="text-[color:var(--ink-3)]">vs período anterior</span>
+  </div>
+
+  <!-- gráfico FINO, 100% do bloco, legenda em MESMO tamanho da variação -->
+  <div class="mt-2">
+    <app-sparkline
+      [data]="weekly()"
+      [height]="16"
+      [stroke]="sparkColor"
+      [areaFill]="sparkColor"
+      [strokeWidth]="2"
+      [ticks]="['1','2','3','4']"
+    />
   </div>
 </div>

@@ -20,45 +20,48 @@ type OrderSold = {
   standalone: true,
   imports: [BlockComponent, CommonModule, DatePipe, CurrencyPipe],
   template: `
-    <app-block>
-      <div block-actions class="flex items-center gap-2 text-sm">
-        <button class="px-2 py-1 rounded bg-muted hover:bg-muted/80" (click)="exportCSV()">
+    <app-block class="text-lg">
+      <div block-actions class="flex items-center gap-2 text-base">
+        <button class="px-2.5 py-1.5 rounded bg-muted hover:bg-muted/80" (click)="exportCSV()">
           Exportar CSV
         </button>
-        <button class="px-2 py-1 rounded bg-muted hover:bg-muted/80" (click)="printPDF()">
+        <button class="px-2.5 py-1.5 rounded bg-muted hover:bg-muted/80" (click)="printPDF()">
           Imprimir PDF
         </button>
       </div>
 
-      <div class="mb-3 text-lg font-semibold text-slate-700">Pedidos Vendidos</div>
-
       <!-- cabeçalho -->
-      <div class="hidden md:grid grid-cols-7 gap-3 px-3 py-2 rounded bg-brand-100/60 text-sm text-slate-700">
-        <div>#</div><div>Data</div><div>Cliente</div><div>Livro</div><div>Status</div><div>Valor</div><div>Canal</div>
+      <div class="hidden md:grid grid-cols-7 gap-3 px-3 py-2 rounded bg-brand-100/60 text-base text-slate-700">
+        <div>TXID</div><div>Data</div><div>Cliente</div><div>Livro</div><div>Status</div><div>Valor</div><div>Canal</div>
       </div>
 
       <!-- linhas -->
-      <div class="mt-2 space-y-2" id="orders-print-area">
+      <div class="mt-3 space-y-2" id="orders-print-area">
         <div
           class="grid grid-cols-1 md:grid-cols-7 gap-3 items-center px-3 py-3 rounded border border-slate-200 bg-white"
           *ngFor="let o of orders(); index as i"
         >
-          <div class="text-xs md:text-sm text-slate-700">#{{ o.id }}</div>
-          <div class="text-xs md:text-sm text-slate-700">{{ o.date | date:'dd/MM/yyyy HH:mm' }}</div>
-          <div class="text-xs md:text-sm text-slate-700 truncate">{{ o.customer }}</div>
-          <div class="text-xs md:text-sm text-slate-700 truncate">{{ o.book }}</div>
-          <div class="text-xs md:text-sm">
-            <span
-              class="px-2 py-0.5 rounded-full text-[11px] md:text-xs"
-              [ngClass]="statusBadge[o.status]"
-            >
+          <div class="text-slate-700 tabular">#{{ o.id }}</div>
+
+          <!-- dd/MM/yyyy às HH:mm -->
+          <div class="text-slate-700">
+            {{ o.date | date:'dd/MM/yyyy' }} às {{ o.date | date:'HH:mm' }}
+          </div>
+
+          <div class="text-slate-700 truncate">{{ o.customer }}</div>
+          <div class="text-slate-700 truncate">{{ o.book }}</div>
+
+          <div>
+            <span class="px-2 py-0.5 rounded-full text-sm" [ngClass]="statusBadge[o.status]">
               {{ statusLabel[o.status] }}
             </span>
           </div>
-          <div class="text-xs md:text-sm tabular-nums text-slate-700">
+
+          <div class="tabular-nums text-slate-700">
             {{ o.total | currency:'BRL':'symbol-narrow':'1.2-2':'pt-BR' }}
           </div>
-          <div class="text-xs md:text-sm text-slate-700">{{ o.channel }}</div>
+
+          <div class="text-slate-700">{{ o.channel }}</div>
         </div>
       </div>
     </app-block>
@@ -71,14 +74,12 @@ export class OrdersSoldComponent {
     CANCELED: 'Cancelado',
   };
 
-  // badges por status (mapeie para seus tokens se preferir)
   readonly statusBadge: Record<OrderStatus, string> = {
     PAID: 'bg-emerald-100 text-emerald-800',
     WAITING: 'bg-amber-100 text-amber-800',
     CANCELED: 'bg-red-100 text-red-800',
   };
 
-  // MOCK com seus livros
   readonly orders = signal<OrderSold[]>([
     {
       id: '8453',
@@ -114,7 +115,7 @@ export class OrdersSoldComponent {
       ['id', 'data', 'cliente', 'livro', 'status', 'valor_brl', 'canal'],
       ...this.orders().map(o => [
         o.id,
-        o.date.toISOString(),
+        this.formatDate(o.date), // dd/MM/yyyy às HH:mm
         o.customer.replaceAll('"', '""'),
         o.book.replaceAll('"', '""'),
         this.statusLabel[o.status],
@@ -131,21 +132,18 @@ export class OrdersSoldComponent {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pedidos_vendidos_${this.todaySlug()}.csv`;
+    a.download = `pedidos_${this.todaySlug()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
   printPDF(): void {
-    // Abre uma janela com HTML simples e estilo de impressão
-    const win = window.open('', '_blank', 'width=1024,height=768');
-    if (!win) return;
-
     const style = `
       <style>
         * { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
-        h1 { font-size: 18px; margin: 0 0 12px; }
-        table { border-collapse: collapse; width: 100%; font-size: 12px; }
+        h1 { font-size: 20px; margin: 0 0 12px; }
+        .meta { color:#334155; margin-bottom: 10px; font-size: 14px; }
+        table { border-collapse: collapse; width: 100%; font-size: 14px; }
         th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
         th { background: #f1f5f9; }
         .right { text-align: right; }
@@ -153,27 +151,26 @@ export class OrdersSoldComponent {
       </style>
     `;
 
-    const rows = this.orders()
-      .map(
-        o => `
-        <tr>
-          <td>#${o.id}</td>
-          <td>${this.formatDate(o.date)}</td>
-          <td>${this.escape(o.customer)}</td>
-          <td>${this.escape(o.book)}</td>
-          <td>${this.statusLabel[o.status]}</td>
-          <td class="right">${this.formatCurrency(o.total)}</td>
-          <td>${o.channel}</td>
-        </tr>`
-      )
-      .join('');
+    const rows = this.orders().map(o => `
+      <tr>
+        <td>#${o.id}</td>
+        <td>${this.formatDate(o.date)}</td>
+        <td>${this.escape(o.customer)}</td>
+        <td>${this.escape(o.book)}</td>
+        <td>${this.statusLabel[o.status]}</td>
+        <td class="right">${this.formatCurrency(o.total)}</td>
+        <td>${o.channel}</td>
+      </tr>
+    `).join('');
 
-    win.document.write(`
+    const now = new Date();
+    const html = `
       <!doctype html>
       <html lang="pt-BR">
-        <head><meta charset="utf-8">${style}<title>Pedidos Vendidos</title></head>
+        <head><meta charset="utf-8">${style}<title>Pedidos</title></head>
         <body>
-          <h1>Pedidos Vendidos</h1>
+          <h1>Pedidos</h1>
+          <div class="meta">Gerado em ${this.formatDate(now)}</div>
           <table>
             <thead>
               <tr>
@@ -182,11 +179,21 @@ export class OrdersSoldComponent {
             </thead>
             <tbody>${rows}</tbody>
           </table>
-          <script>window.addEventListener('load', () => { window.print(); setTimeout(() => window.close(), 300); });</script>
+          <script>
+            window.addEventListener('load', () => {
+              window.print();
+              setTimeout(() => window.close(), 300);
+            });
+          </script>
         </body>
       </html>
-    `);
-    win.document.close();
+    `;
+
+    // sem document.write: abre via Blob de HTML
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank', 'width=1024,height=768');
+    if (!win) window.location.href = url; // fallback
   }
 
   private todaySlug(): string {
@@ -202,9 +209,14 @@ export class OrdersSoldComponent {
   }
 
   private formatDate(d: Date): string {
-    // dd/MM/yyyy HH:mm
+    // dd/MM/yyyy às HH:mm
     const pad = (n: number) => String(n).padStart(2, '0');
-    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const dd = pad(d.getDate());
+    const mm = pad(d.getMonth() + 1);
+    const yyyy = d.getFullYear();
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${dd}/${mm}/${yyyy} às ${hh}:${mi}`;
   }
 
   private formatCurrency(v: number): string {

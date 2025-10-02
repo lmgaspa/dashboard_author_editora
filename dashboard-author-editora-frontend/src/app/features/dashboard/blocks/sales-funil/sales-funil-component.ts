@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, ViewChild, effect, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, effect, signal, input } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { BlockComponent } from '@/app/shared/block.component';
 import * as echarts from 'echarts';
@@ -11,17 +11,27 @@ type Step = { name: string; value: number; note?: string };
   imports: [BlockComponent, CommonModule, DecimalPipe],
   template: `
     <app-block title="Funil de Vendas">
-      <div class="grid gap-6 md:grid-cols-2 items-center">
-        <div class="flex items-center justify-center">
-          <div #chart class="size-56 md:size-64" role="img" aria-label="Etapas do funil de vendas"></div>
+      <div class="grid gap-6 md:grid-cols-2 items-stretch"
+           [style.minHeight.px]="blockMinHeight()">
+        <div class="flex items-center justify-center h-full">
+          <div #chart class="w-full" [style.height.px]="chartMaxHeight()"
+               role="img" aria-label="Etapas do funil de vendas"></div>
         </div>
-        <ol class="space-y-3" aria-label="Resumo das etapas do funil">
-          <li class="flex items-center gap-3" *ngFor="let s of steps(); let i = index">
-            <span class="inline-block size-2 rounded-full" [ngClass]="dotClasses[i]"></span>
-            <span class="text-sm text-foreground/80">{{ s.name }}</span>
-            <span class="ml-auto text-xs tabular-nums text-foreground/70">{{ s.value | number:'1.0-0' }}</span>
-            <span class="text-xs text-foreground/60" *ngIf="i>0">(−{{ drop(i) }}% drop-off)</span>
-          </li>
+
+        <ol class="space-y-3 md:h-full md:overflow-auto" aria-label="Resumo das etapas do funil">
+          @for (s of steps(); let i = $index; track i) {
+            <li class="flex items-center gap-3">
+              <span class="inline-block size-2 rounded-full"
+                    [style.background-color]="palette[i % palette.length]"></span>
+              <span class="text-sm text-foreground/80">{{ s.name }}</span>
+              <span class="ml-auto text-xs tabular-nums text-foreground/70">
+                {{ s.value | number:'1.0-0' }}
+              </span>
+              @if (i > 0) {
+                <span class="text-xs text-foreground/60">(−{{ drop(i) }}% drop-off)</span>
+              }
+            </li>
+          }
         </ol>
       </div>
     </app-block>
@@ -30,15 +40,19 @@ type Step = { name: string; value: number; note?: string };
 export class SalesFunilComponent {
   @ViewChild('chart', { static: true }) chartEl!: ElementRef<HTMLDivElement>;
 
-  // mock inicial (altere livre)
+  /** Altura mínima do CARD (não do funil) */
+  blockMinHeight = input<number>(360);
+  /** Altura máxima do funil (limita o gráfico) */
+  chartMaxHeight = input<number>(260);
+
   readonly steps = signal<Step[]>([
     { name: 'Visitas', value: 10000 },
-    { name: 'Carrinho', value: 7000, note: '-30%' },
-    { name: 'Checkout', value: 6300, note: '-10%' },
+    { name: 'Carrinho', value: 7000 },
+    { name: 'Checkout', value: 6300 },
     { name: 'Pagamento Aprovado', value: 4200 },
   ]);
 
-  readonly dotClasses = ['bg-brand-400','bg-brand-500','bg-brand-300','bg-brand-600'];
+  readonly palette = ['#638cf7', '#9ad95a', '#5a6b85', '#f5a524'];
 
   private chart?: echarts.ECharts;
   private ro?: ResizeObserver;
@@ -56,46 +70,27 @@ export class SalesFunilComponent {
   }
 
   drop(i: number): number {
-    if (i <= 0) return 0;
-    const prev = this.steps()[i - 1].value || 1;
-    const cur = this.steps()[i].value;
-    return Math.round(((prev - cur) / prev) * 100);
+    const prev = this.steps()[i - 1]?.value ?? 1;
+    const cur  = this.steps()[i]?.value ?? 0;
+    return i <= 0 ? 0 : Math.round(((prev - cur) / prev) * 100);
   }
 
   private render(steps: Step[]) {
     if (!this.chart) return;
     const option: echarts.EChartsOption = {
-      tooltip: { trigger: 'item', formatter: '{b}: {c}' },
-      series: [
-        {
-          type: 'funnel',
-          left: '5%',
-          top: 10,
-          bottom: 10,
-          width: '90%',
-          min: 0,
-          max: Math.max(...steps.map(s => s.value)),
-          sort: 'descending',
-          gap: 6,
-          label: { show: true, position: 'inside', color: '#fff', formatter: '{b}' },
-          itemStyle: {
-            borderColor: 'var(--color-background, #fff)',
-            borderWidth: 2,
-          },
-          data: steps.map((s, i) => ({
-            name: s.name,
-            value: s.value,
-            itemStyle: { color: getComputedStyle(document.documentElement)
-              .getPropertyValue(['--brand-300','--brand-500','--brand-400','--brand-600'][i] as any) || undefined },
-          })),
-        },
-      ],
+      tooltip: { trigger: 'item', formatter: (p: any) => new Intl.NumberFormat('pt-BR').format(p?.value ?? 0) },
+      series: [{
+        type: 'funnel',
+        left: '4%', right: '4%', top: 12, bottom: 12, width: '92%',
+        min: 0, max: Math.max(...steps.map(s => s.value)),
+        sort: 'descending', gap: 6,
+        label: { show: false }, emphasis: { label: { show: false } },
+        itemStyle: { borderColor: 'var(--surface, #fff)', borderWidth: 2 },
+        data: steps.map((s, i) => ({ name: s.name, value: s.value, itemStyle: { color: this.palette[i % this.palette.length] } })),
+      }],
     };
     this.chart.setOption(option, true);
   }
 
-  private dispose() {
-    this.ro?.disconnect();
-    this.chart?.dispose();
-  }
+  private dispose() { this.ro?.disconnect(); this.chart?.dispose(); }
 }
