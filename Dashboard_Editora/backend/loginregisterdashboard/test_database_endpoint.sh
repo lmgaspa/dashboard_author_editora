@@ -3,9 +3,22 @@
 # Script para testar o endpoint de verificação do banco de dados
 # Uso: ./test_database_endpoint.sh [admin_email] [admin_password]
 
-ADMIN_EMAIL="${1:-${ADMIN_EMAIL:-andescoresoftware@gmail.com}}"
-ADMIN_PASSWORD="${2:-${ADMIN_PASSWORD:-Lila1210@}}"
-BASE_URL="http://localhost:8000"
+ADMIN_EMAIL="${1:-${ADMIN_EMAIL}}"
+ADMIN_PASSWORD="${2:-${ADMIN_PASSWORD}}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
+
+if [ -z "$ADMIN_EMAIL" ] || [ -z "$ADMIN_PASSWORD" ]; then
+  echo "❌ Erro: Email e senha são obrigatórios"
+  echo ""
+  echo "Uso:"
+  echo "  ./test_database_endpoint.sh seu-email@exemplo.com sua-senha"
+  echo ""
+  echo "Ou defina as variáveis de ambiente:"
+  echo "  export ADMIN_EMAIL=seu-email@exemplo.com"
+  echo "  export ADMIN_PASSWORD=sua-senha"
+  echo "  ./test_database_endpoint.sh"
+  exit 1
+fi
 
 echo "🧪 Testando endpoint de verificação do banco de dados"
 echo "📧 Email: $ADMIN_EMAIL"

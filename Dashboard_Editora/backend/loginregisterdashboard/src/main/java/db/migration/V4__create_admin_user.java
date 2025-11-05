@@ -3,6 +3,7 @@ package db.migration;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.flywaydb.core.api.migration.BaseJavaMigration;
@@ -38,6 +39,22 @@ public class V4__create_admin_user extends BaseJavaMigration {
         
         Connection connection = context.getConnection();
         
+        // Verifica se o tipo da coluna id é UUID ou VARCHAR
+        // Se for UUID, usa UUID.randomUUID(). Se for VARCHAR, usa adminId diretamente
+        String checkColumnTypeSql = """
+            SELECT data_type 
+            FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name = 'id'
+            """;
+        
+        String idType = "UUID"; // default
+        try (var checkStmt = connection.createStatement();
+             var rs = checkStmt.executeQuery(checkColumnTypeSql)) {
+            if (rs.next()) {
+                idType = rs.getString("data_type");
+            }
+        }
+        
         String sql = """
             INSERT INTO users (id, name, email, password, email_confirmed, auth_provider, role)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -45,7 +62,13 @@ public class V4__create_admin_user extends BaseJavaMigration {
             """;
         
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, adminId);
+            // Se o tipo é UUID, gera um UUID temporário (V6 vai converter depois)
+            // Se o tipo é VARCHAR, usa o adminId diretamente
+            if ("uuid".equalsIgnoreCase(idType)) {
+                stmt.setObject(1, UUID.randomUUID());
+            } else {
+                stmt.setString(1, adminId);
+            }
             stmt.setString(2, adminUsername.trim());
             stmt.setString(3, normalizedEmail);
             stmt.setString(4, hashedPassword);

@@ -90,12 +90,39 @@ export class LoginPageComponent implements OnInit {
     this.error.set(null);
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('✅ Login bem-sucedido!');
+        console.log('📦 Resposta completa:', response);
+        
+        const currentUser = this.authService.currentUser();
+        console.log('👤 Usuário atual do service:', currentUser);
+        console.log('🎭 Role do usuário:', currentUser?.role);
+        
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || 
-          (this.authService.currentUser()?.role === 'ADMIN' ? '/admin/dashboard' : '/user/dashboard');
-        this.router.navigate([returnUrl]);
+          (currentUser?.role === 'ADMIN' ? '/admin/dashboard' : '/user/dashboard');
+        
+        console.log('🚀 Redirecionando para:', returnUrl);
+        
+        // Pequeno delay para garantir que o estado foi atualizado
+        setTimeout(() => {
+          this.router.navigate([returnUrl]).then(
+            (success) => {
+              if (success) {
+                console.log('✅ Redirecionamento bem-sucedido para:', returnUrl);
+              } else {
+                console.error('❌ Falha no redirecionamento');
+              }
+            }
+          );
+        }, 100);
       },
       error: (err) => {
+        console.error('❌ Erro no login:', err);
+        console.error('📋 Detalhes do erro:', {
+          status: err.status,
+          message: err.message,
+          error: err.error
+        });
         this.error.set(err.error?.message || 'Erro ao fazer login. Verifique suas credenciais.');
         this.loading.set(false);
       }

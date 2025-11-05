@@ -1,5 +1,6 @@
 package com.dianaglobal.loginregisterdashboardeditora.adapter.in.web.util;
 
+import com.dianaglobal.loginregisterdashboardeditora.config.ApiPaths;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,7 @@ public class AuthCookieUtil {
     private static final String HDR_CSRF = "X-CSRF-Token";
     private static final String COOKIE_REFRESH = "refresh_token";
     private static final String COOKIE_CSRF = "csrf_token";
-    private static final String COOKIE_PATH = "/api/auth";
+    private static final String COOKIE_PATH = "/"; // Root path so cookies are sent to all API routes
     private static final String SAME_SITE_NONE = "None";
     private static final String SAME_SITE_LAX = "Lax";
 

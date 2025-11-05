@@ -8,6 +8,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS id_new VARCHAR(20);
 -- Admin gets "admin-1", others get "user-X" based on creation order
 -- If no existing data, this will be empty
 -- Using subquery approach since window functions aren't allowed in UPDATE directly
+-- Note: ADMIN_ID from env var will be handled by V4 migration if needed
 UPDATE users u
 SET id_new = CASE 
     WHEN u.role = 'ADMIN' THEN 'admin-1'

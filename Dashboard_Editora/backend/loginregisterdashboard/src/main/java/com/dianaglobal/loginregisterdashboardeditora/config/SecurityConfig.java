@@ -101,13 +101,11 @@ public class SecurityConfig {
         cfg.setAllowedOriginPatterns(List.of(
                 "https://www.dashboard-author-editora.vercel.app",
                 "https://dashboard-author-editora.vercel.app",
-                "https://www.dianaglobal.com.br",
-                "https://dianaglobal.com.br",
-                "http://localhost:3000" // dev local
+                "http://localhost:4200" // dev local Angular
         ));
 
         // métodos liberados
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
 
         // headers que o front-end pode mandar
         cfg.setAllowedHeaders(List.of(
@@ -116,7 +114,9 @@ public class SecurityConfig {
                 "Accept",
                 "X-CSRF-Token",
                 "X-Requested-With",
-                "Origin"
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
         ));
 
         // permitir cookies (refresh_token httpOnly + csrf_token)

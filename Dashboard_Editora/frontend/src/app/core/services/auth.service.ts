@@ -47,13 +47,51 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     this._loading.set(true);
-    return this.http.post<AuthResponse>(`${this.API_URL}/api/v1/auth/login`, credentials)
+    return this.http.post<any>(`${this.API_URL}/api/v1/auth/login`, credentials)
       .pipe(
         tap(response => {
-          this.setAuth(response);
+          console.log('🔐 Login Response completa:', response);
+          console.log('📋 Chaves da resposta:', Object.keys(response || {}));
+          
+          // Normalizar resposta - pode vir como 'token' ou 'accessToken'
+          const normalizedResponse: AuthResponse = {
+            accessToken: response?.accessToken || response?.token || response?.access_token,
+            user: response?.user || response?.userData || response?.userInfo
+          };
+          
+          console.log('🔑 AccessToken encontrado:', normalizedResponse.accessToken ? 'Sim' : 'Não');
+          if (normalizedResponse.accessToken) {
+            console.log('🔑 Token (primeiros 20 chars):', normalizedResponse.accessToken.substring(0, 20) + '...');
+          }
+          
+          console.log('👤 User encontrado:', normalizedResponse.user ? 'Sim' : 'Não');
+          if (normalizedResponse.user) {
+            console.log('👤 User data:', normalizedResponse.user);
+          }
+          
+          if (!normalizedResponse.accessToken) {
+            console.error('❌ Erro: accessToken não encontrado na resposta');
+            console.error('🔍 Resposta original:', response);
+            throw new Error('Token de acesso não recebido do servidor');
+          }
+          
+          if (!normalizedResponse.user) {
+            console.error('❌ Erro: user não encontrado na resposta');
+            console.error('🔍 Resposta original:', response);
+            throw new Error('Dados do usuário não recebidos do servidor');
+          }
+          
+          this.setAuth(normalizedResponse);
+          console.log('✅ Auth configurado com sucesso');
+          console.log('👤 Usuário atual:', this._currentUser());
+          console.log('🔐 Token salvo:', localStorage.getItem('accessToken') ? 'Sim' : 'Não');
           this._loading.set(false);
         }),
         catchError(error => {
+          console.error('❌ Erro no login:', error);
+          console.error('📋 Status:', error.status);
+          console.error('📋 Message:', error.message);
+          console.error('📋 Error object:', error.error);
           this._loading.set(false);
           throw error;
         })
@@ -181,12 +219,28 @@ export class AuthService {
   }
 
   private setAuth(response: AuthResponse): void {
-    localStorage.setItem('accessToken', response.accessToken);
+    console.log('🔧 setAuth chamado com:', response);
+    
+    if (response.accessToken) {
+      localStorage.setItem('accessToken', response.accessToken);
+      console.log('✅ Token salvo no localStorage');
+    } else {
+      console.error('❌ Token não encontrado na resposta');
+    }
+    
     // refreshToken agora é gerenciado pelo backend via cookies (httpOnly)
     // Não precisa armazenar no localStorage
-    localStorage.setItem('currentUser', JSON.stringify(response.user));
-    this._currentUser.set(response.user);
+    
+    if (response.user) {
+      localStorage.setItem('currentUser', JSON.stringify(response.user));
+      this._currentUser.set(response.user);
+      console.log('✅ User salvo e atualizado:', response.user);
+    } else {
+      console.error('❌ User não encontrado na resposta');
+    }
+    
     this._isAuthenticated.set(true);
+    console.log('✅ Estado de autenticação atualizado:', this._isAuthenticated());
   }
 
   private clearAuth(): void {
