@@ -1,28 +1,72 @@
-<div class="p-8">
-  <h1 class="text-3xl font-bold mb-8 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Administradores</h1>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="space-y-2">
+    <h1 class="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
+      Administradores
+    </h1>
+    <p class="text-gray-400">Lista de todos os administradores do sistema</p>
+  </div>
 
+  <!-- Loading State -->
   @if (loading()) {
-    <div class="flex flex-col items-center justify-center p-16 gap-4">
-      <span class="w-10 h-10 border-4 border-white/10 border-t-pink-500 rounded-full animate-spin"></span>
-      <p class="text-gray-300">Carregando administradores...</p>
+    <div class="flex flex-col items-center justify-center py-24 gap-6">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+        <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-pink-500/30 rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
+      </div>
+      <p class="text-gray-400 text-lg font-medium">Carregando administradores...</p>
     </div>
-  } @else if (error()) {
-    <div class="flex flex-col items-center justify-center p-16 gap-4">
-      <span class="material-icons text-4xl text-red-400">error_outline</span>
-      <p class="text-gray-300">{{ error() }}</p>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-6 bg-red-500/10 border border-red-500/30 rounded-2xl">
+      <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+        <span class="material-icons text-4xl text-red-400">error_outline</span>
+      </div>
+      <div class="text-center">
+        <p class="text-red-400 font-semibold text-lg mb-2">Erro ao carregar administradores</p>
+        <p class="text-gray-400">{{ error() }}</p>
+      </div>
     </div>
-  } @else {
+  }
+
+  <!-- Empty State -->
+  @else if (admins().length === 0) {
+    <div class="flex flex-col items-center justify-center py-24 gap-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-600/20 flex items-center justify-center">
+        <span class="material-icons text-5xl text-purple-400">admin_panel_settings</span>
+      </div>
+      <div class="text-center space-y-2">
+        <h3 class="text-2xl font-bold text-white">Nenhum administrador encontrado</h3>
+        <p class="text-gray-400 max-w-md">Não há administradores registrados no sistema.</p>
+      </div>
+    </div>
+  }
+
+  <!-- Admins Grid -->
+  @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (admin of admins(); track admin.id) {
-        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)] hover:border-pink-500/50 transition-all duration-200">
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 via-pink-500 to-purple-500 text-white flex items-center justify-center text-2xl font-bold">
-              {{ admin.name.charAt(0).toUpperCase() }}
+        <div class="group relative bg-gradient-to-br from-purple-500/10 via-pink-600/10 to-purple-500/10 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-2 hover:border-purple-400/40 overflow-hidden">
+          <!-- Background Gradient Effect -->
+          <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          <div class="relative z-10">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform duration-300">
+                {{ admin.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-xl font-bold text-white truncate group-hover:text-purple-300 transition-colors">
+                  {{ admin.name }}
+                </h3>
+                <p class="text-sm text-gray-400 truncate">{{ admin.email }}</p>
+              </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="text-lg font-semibold text-white truncate">{{ admin.name }}</h3>
-              <p class="text-sm text-gray-400 truncate">{{ admin.email }}</p>
-              <small class="text-xs text-gray-500">Criado em {{ admin.createdAt | date:'dd/MM/yyyy' }}</small>
+            <div class="flex items-center gap-2 text-gray-500 text-xs">
+              <span class="material-icons text-base">calendar_today</span>
+              <span>Criado em {{ admin.createdAt | date:'dd/MM/yyyy' }}</span>
             </div>
           </div>
         </div>

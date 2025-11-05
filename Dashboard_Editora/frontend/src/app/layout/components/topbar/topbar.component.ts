@@ -26,6 +26,10 @@ export class TopbarComponent {
 
   toggleSidebar(): void {
     this.sidebarOpen.update(v => !v);
+    // Atualiza localStorage para sincronizar com sidebar
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebarOpen', String(this.sidebarOpen()));
+    }
   }
 
   logout(): void {

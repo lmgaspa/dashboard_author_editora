@@ -1,49 +1,132 @@
-<div class="max-w-[600px]">
-  <h1 class="text-3xl font-bold mb-6 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Criar Usuário</h1>
+<div class="max-w-2xl w-full">
+  <!-- Header -->
+  <div class="mb-6 sm:mb-8 space-y-2">
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-sky-400 via-blue-500 to-sky-400 bg-clip-text text-transparent">
+      Criar Usuário
+    </h1>
+    <p class="text-gray-400 text-sm sm:text-base">Adicione um novo usuário ao sistema</p>
+  </div>
 
+  <!-- Error Alert -->
   @if (error()) {
-    <div class="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 mb-6">
-      <span class="material-icons">error_outline</span>
-      <span>{{ error() }}</span>
+    <div class="mb-6 flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-sm">
+      <span class="material-icons text-red-400 flex-shrink-0 mt-0.5">error_outline</span>
+      <div>
+        <p class="text-red-300 font-semibold">Erro ao criar usuário</p>
+        <p class="text-red-400/80 text-sm mt-1">{{ error() }}</p>
+      </div>
     </div>
   }
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-8 flex flex-col gap-6">
-    <div class="flex flex-col gap-2">
-      <label for="name" class="font-semibold text-gray-200">Nome</label>
-      <input type="text" id="name" formControlName="name" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40" />
-    </div>
-
-    <div class="flex flex-col gap-2">
-      <label for="email" class="font-semibold text-gray-200">E-mail</label>
-      <input type="email" id="email" formControlName="email" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40" />
-    </div>
-
-    <div class="flex flex-col gap-2">
-      <label for="password" class="font-semibold text-gray-200">Senha</label>
-      <input type="password" id="password" formControlName="password" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40" />
-    </div>
-
-    <div class="flex flex-col gap-2">
-      <label for="role" class="font-semibold text-gray-200">Role</label>
-      <select id="role" formControlName="role" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 cursor-pointer">
-        <option value="USER">Usuário</option>
-        <option value="ADMIN">Administrador</option>
-      </select>
-    </div>
-
-    <div class="flex gap-4 justify-end pt-4">
-      <button type="button" class="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white font-semibold cursor-pointer transition-all duration-200 hover:bg-white/10 hover:border-white/20" (click)="onCancel()">
-        Cancelar
-      </button>
-      <button type="submit" class="px-6 py-3 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white border-none rounded-lg font-semibold cursor-pointer transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(14,165,233,0.5)] hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0" [disabled]="form.invalid || loading()">
-        @if (loading()) {
-          <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-          <span>Criando...</span>
-        } @else {
-          <span>Criar Usuário</span>
+  <!-- Form Card -->
+  <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Name Field -->
+      <div class="space-y-2">
+        <label for="name" class="block text-sm font-semibold text-gray-200">
+          Nome Completo
+        </label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">person</span>
+          <input 
+            type="text" 
+            id="name" 
+            formControlName="name" 
+            placeholder="Digite o nome completo"
+            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200"
+            [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
+            [class.focus:border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
+          />
+        </div>
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <p class="text-red-400 text-xs">Nome é obrigatório</p>
         }
-      </button>
-    </div>
-  </form>
+      </div>
+
+      <!-- Email Field -->
+      <div class="space-y-2">
+        <label for="email" class="block text-sm font-semibold text-gray-200">
+          E-mail
+        </label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">email</span>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            placeholder="usuario@exemplo.com"
+            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200"
+            [class.border-red-500]="form.get('email')?.invalid && form.get('email')?.touched"
+          />
+        </div>
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <p class="text-red-400 text-xs">E-mail inválido</p>
+        }
+      </div>
+
+      <!-- Password Field -->
+      <div class="space-y-2">
+        <label for="password" class="block text-sm font-semibold text-gray-200">
+          Senha
+        </label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">lock</span>
+          <input 
+            type="password" 
+            id="password" 
+            formControlName="password" 
+            placeholder="Mínimo 6 caracteres"
+            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200"
+            [class.border-red-500]="form.get('password')?.invalid && form.get('password')?.touched"
+          />
+        </div>
+        @if (form.get('password')?.invalid && form.get('password')?.touched) {
+          <p class="text-red-400 text-xs">Senha deve ter pelo menos 6 caracteres</p>
+        }
+      </div>
+
+      <!-- Role Field -->
+      <div class="space-y-2">
+        <label for="role" class="block text-sm font-semibold text-gray-200">
+          Perfil de Acesso
+        </label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">badge</span>
+          <select 
+            id="role" 
+            formControlName="role" 
+            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 cursor-pointer appearance-none"
+          >
+            <option value="USER" class="bg-[#0f172a] text-white">Usuário</option>
+            <option value="ADMIN" class="bg-[#0f172a] text-white">Administrador</option>
+          </select>
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 pointer-events-none">expand_more</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-white/10">
+        <button 
+          type="button" 
+          class="px-6 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-200"
+          (click)="onCancel()"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="px-6 py-3.5 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg flex items-center justify-center gap-2"
+          [disabled]="form.invalid || loading()"
+        >
+          @if (loading()) {
+            <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            <span>Criando...</span>
+          } @else {
+            <span class="material-icons text-lg">person_add</span>
+            <span>Criar Usuário</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

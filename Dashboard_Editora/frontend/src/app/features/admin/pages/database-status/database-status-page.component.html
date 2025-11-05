@@ -1,39 +1,90 @@
-<div class="p-8">
-  <h1 class="text-3xl font-bold mb-8 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Status do Banco de Dados</h1>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="space-y-2">
+    <h1 class="text-4xl md:text-5xl font-black bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-400 bg-clip-text text-transparent">
+      Status do Banco de Dados
+    </h1>
+    <p class="text-gray-400">Monitoramento em tempo real do sistema</p>
+  </div>
 
+  <!-- Loading State -->
   @if (loading()) {
-    <div class="flex flex-col items-center justify-center p-16 gap-4">
-      <span class="w-10 h-10 border-4 border-white/10 border-t-pink-500 rounded-full animate-spin"></span>
-      <p class="text-gray-300">Carregando status...</p>
-    </div>
-  } @else if (error()) {
-    <div class="flex flex-col items-center justify-center p-16 gap-4">
-      <span class="material-icons text-4xl text-red-400">error_outline</span>
-      <p class="text-gray-300">{{ error() }}</p>
-    </div>
-  } @else if (status()) {
-    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-      <div class="flex items-center gap-4 mb-8">
-        <span class="w-4 h-4 rounded-full bg-red-500 transition-all duration-300" [class.bg-green-500]="status()!.status === 'online'" [class.shadow-[0_0_10px_rgba(34,197,94,0.6)]]="status()!.status === 'online'"></span>
-        <h2 class="text-2xl font-bold text-white">Status: {{ status()!.status }}</h2>
+    <div class="flex flex-col items-center justify-center py-24 gap-6">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+        <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-teal-500/30 rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
       </div>
-      <div class="flex flex-col gap-4">
+      <p class="text-gray-400 text-lg font-medium">Carregando status...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-6 bg-red-500/10 border border-red-500/30 rounded-2xl">
+      <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+        <span class="material-icons text-4xl text-red-400">error_outline</span>
+      </div>
+      <div class="text-center">
+        <p class="text-red-400 font-semibold text-lg mb-2">Erro ao carregar status</p>
+        <p class="text-gray-400">{{ error() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Status Card -->
+  @else if (status()) {
+    <div class="bg-gradient-to-br from-emerald-500/10 via-teal-600/10 to-emerald-500/10 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-8 shadow-2xl shadow-emerald-500/10">
+      <!-- Status Header -->
+      <div class="flex items-center gap-4 mb-8 pb-6 border-b border-white/10">
+        <div class="relative">
+          <span class="w-5 h-5 rounded-full bg-red-500 block transition-all duration-300" 
+                [class.bg-emerald-500]="status()!.status === 'online'"
+                [class.shadow-[0_0_20px_rgba(34,197,94,0.8)]="status()!.status === 'online'"
+                [class.animate-pulse]="status()!.status === 'online'"></span>
+          @if (status()!.status === 'online') {
+            <span class="absolute inset-0 w-5 h-5 rounded-full bg-emerald-500 animate-ping opacity-75"></span>
+          }
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold text-white">
+            Status: 
+            <span class="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent" 
+                  [class.from-red-400]="status()!.status !== 'online'"
+                  [class.to-red-300]="status()!.status !== 'online'">
+              {{ status()!.status }}
+            </span>
+          </h2>
+          <p class="text-gray-400 text-sm mt-1">Conexão ativa e funcionando</p>
+        </div>
+      </div>
+
+      <!-- Status Details -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         @if (status()!.version) {
-          <div class="flex justify-between p-4 bg-white/5 rounded-lg">
-            <span class="font-semibold text-gray-300">Versão:</span>
-            <span class="text-white">{{ status()!.version }}</span>
+          <div class="bg-white/5 rounded-xl p-6 border border-white/10 hover:border-emerald-500/30 transition-all duration-200">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="material-icons text-emerald-400">code</span>
+              <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Versão</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ status()!.version }}</p>
           </div>
         }
-        @if (status()!.connections) {
-          <div class="flex justify-between p-4 bg-white/5 rounded-lg">
-            <span class="font-semibold text-gray-300">Conexões:</span>
-            <span class="text-white">{{ status()!.connections }}</span>
+        @if (status()!.connections !== undefined) {
+          <div class="bg-white/5 rounded-xl p-6 border border-white/10 hover:border-emerald-500/30 transition-all duration-200">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="material-icons text-blue-400">link</span>
+              <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Conexões</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ status()!.connections }}</p>
           </div>
         }
         @if (status()!.uptime) {
-          <div class="flex justify-between p-4 bg-white/5 rounded-lg">
-            <span class="font-semibold text-gray-300">Uptime:</span>
-            <span class="text-white">{{ status()!.uptime }}</span>
+          <div class="bg-white/5 rounded-xl p-6 border border-white/10 hover:border-emerald-500/30 transition-all duration-200">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="material-icons text-purple-400">schedule</span>
+              <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Uptime</span>
+            </div>
+            <p class="text-xl font-bold text-white">{{ status()!.uptime }}</p>
           </div>
         }
       </div>
