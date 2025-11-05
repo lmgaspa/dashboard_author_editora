@@ -1,0 +1,24 @@
+<div class="confirm-account-container">
+  <div class="confirm-account-card">
+    @if (loading()) {
+      <div class="loading-state">
+        <span class="spinner-large"></span>
+        <p>Confirmando sua conta...</p>
+      </div>
+    } @else if (success()) {
+      <div class="success-state">
+        <span class="material-icons">check_circle</span>
+        <h1>Conta Confirmada!</h1>
+        <p>Sua conta foi confirmada com sucesso. Redirecionando para o login...</p>
+      </div>
+    } @else {
+      <div class="error-state">
+        <span class="material-icons">error_outline</span>
+        <h1>Erro ao Confirmar</h1>
+        <p>{{ error() }}</p>
+        <a [routerLink]="['/login']" class="link-button">Voltar ao login</a>
+      </div>
+    }
+  </div>
+</div>
+

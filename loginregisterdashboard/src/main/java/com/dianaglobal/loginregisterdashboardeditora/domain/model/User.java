@@ -1,0 +1,25 @@
+// src/main/java/com/dianaglobal/loginregister/domain/model/User.java
+package com.dianaglobal.loginregisterdashboardeditora.domain.model;
+
+import lombok.*;
+
+// src/main/java/com/dianaglobal/loginregister/domain/model/User.java
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
+public class User {
+    private String id;  // Format: "admin-1", "user-1", "user-2", etc.
+    private String name;
+    private String email;
+    private String password;          // pode ficar null
+    private boolean emailConfirmed;
+
+    // NOVOS:
+    private String authProvider;      // "LOCAL" | "GOOGLE" | null
+    private boolean passwordSet;      // true quando o usuário definiu senha conscientemente
+    
+    @Builder.Default
+    private Role role = Role.USER;   // Role padrão é USER
+}
+
+//

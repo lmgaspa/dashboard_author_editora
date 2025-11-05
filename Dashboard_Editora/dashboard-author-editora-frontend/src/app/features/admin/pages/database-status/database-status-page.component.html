@@ -1,0 +1,43 @@
+<div class="database-status-page">
+  <h1>Status do Banco de Dados</h1>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Carregando status...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <span class="material-icons">error_outline</span>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (status()) {
+    <div class="status-card">
+      <div class="status-header">
+        <span class="status-indicator" [class.active]="status()!.status === 'online'"></span>
+        <h2>Status: {{ status()!.status }}</h2>
+      </div>
+      <div class="status-details">
+        @if (status()!.version) {
+          <div class="detail-item">
+            <span class="label">Versão:</span>
+            <span class="value">{{ status()!.version }}</span>
+          </div>
+        }
+        @if (status()!.connections) {
+          <div class="detail-item">
+            <span class="label">Conexões:</span>
+            <span class="value">{{ status()!.connections }}</span>
+          </div>
+        }
+        @if (status()!.uptime) {
+          <div class="detail-item">
+            <span class="label">Uptime:</span>
+            <span class="value">{{ status()!.uptime }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+

@@ -1,0 +1,50 @@
+<div class="create-user-page">
+  <h1>Criar Usuário</h1>
+
+  @if (error()) {
+    <div class="error-message">
+      <span class="material-icons">error_outline</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+    <div class="form-group">
+      <label for="name">Nome</label>
+      <input type="text" id="name" formControlName="name" class="form-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" formControlName="email" class="form-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input type="password" id="password" formControlName="password" class="form-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="role">Role</label>
+      <select id="role" formControlName="role" class="form-input">
+        <option value="USER">Usuário</option>
+        <option value="ADMIN">Administrador</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="cancel-button" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="submit-button" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <span class="spinner"></span>
+          <span>Criando...</span>
+        } @else {
+          <span>Criar Usuário</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>
+

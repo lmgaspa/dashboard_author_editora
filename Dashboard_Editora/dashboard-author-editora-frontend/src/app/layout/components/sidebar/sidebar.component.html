@@ -1,0 +1,72 @@
+<aside class="sidebar">
+  <nav class="sidebar-nav">
+    @for (item of menuItems(); track item.label) {
+      @if (item.divider) {
+        <div class="sidebar-divider"></div>
+      } @else if (item.children && item.children.length > 0) {
+        <div class="sidebar-group">
+          <button
+            type="button"
+            class="sidebar-item"
+            [class.active]="hasActiveChild(item)"
+            [class.expanded]="isExpanded(item)"
+            (click)="toggleExpand(item)"
+            [attr.aria-expanded]="isExpanded(item)"
+          >
+            @if (item.icon) {
+              <span class="material-icons">{{ item.icon }}</span>
+            }
+            <span class="sidebar-label">{{ item.label }}</span>
+            <span class="material-icons expand-icon">chevron_right</span>
+          </button>
+          @if (isExpanded(item)) {
+            <div class="sidebar-children">
+              @for (child of item.children; track child.label) {
+                @if (!child.divider) {
+                  <a
+                    [routerLink]="child.route"
+                    class="sidebar-child"
+                    [class.active]="isActive(child.route)"
+                  >
+                    @if (child.icon) {
+                      <span class="material-icons">{{ child.icon }}</span>
+                    }
+                    <span>{{ child.label }}</span>
+                  </a>
+                }
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        @if (item.route === '/logout') {
+          <button
+            type="button"
+            class="sidebar-item"
+            (click)="handleLogout(item)"
+          >
+            @if (item.icon) {
+              <span class="material-icons">{{ item.icon }}</span>
+            }
+            <span class="sidebar-label">{{ item.label }}</span>
+          </button>
+        } @else {
+          <a
+            [routerLink]="item.route"
+            class="sidebar-item"
+            [class.active]="isActive(item.route)"
+          >
+            @if (item.icon) {
+              <span class="material-icons">{{ item.icon }}</span>
+            }
+            <span class="sidebar-label">{{ item.label }}</span>
+            @if (item.badge) {
+              <span class="sidebar-badge">{{ item.badge }}</span>
+            }
+          </a>
+        }
+      }
+    }
+  </nav>
+</aside>
+

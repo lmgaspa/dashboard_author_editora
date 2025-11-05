@@ -1,0 +1,48 @@
+<div class="profile-page">
+  <h1>Meu Perfil</h1>
+
+  @if (success()) {
+    <div class="success-message">
+      <span class="material-icons">check_circle</span>
+      <span>Perfil atualizado com sucesso!</span>
+    </div>
+  }
+
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+    <div class="form-group">
+      <label for="name">Nome</label>
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+        class="form-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="email">E-mail</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        class="form-input"
+        disabled
+      />
+      <small>Para alterar o email, use a opção "Alterar Email" no menu.</small>
+    </div>
+
+    <button
+      type="submit"
+      class="submit-button"
+      [disabled]="profileForm.invalid || loading()"
+    >
+      @if (loading()) {
+        <span class="spinner"></span>
+        <span>Salvando...</span>
+      } @else {
+        <span>Salvar Alterações</span>
+      }
+    </button>
+  </form>
+</div>
+

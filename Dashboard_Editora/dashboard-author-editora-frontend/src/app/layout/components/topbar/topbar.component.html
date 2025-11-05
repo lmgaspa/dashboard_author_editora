@@ -1,0 +1,44 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <button type="button" class="menu-toggle" (click)="toggleSidebar()" aria-label="Toggle menu">
+      <span class="material-icons">menu</span>
+    </button>
+    <h1 class="topbar-title">Dashboard Author Editora</h1>
+  </div>
+  
+  <div class="topbar-right">
+    <div class="user-menu" (click)="toggleMenu()">
+      <div class="user-avatar">
+        @if (currentUser()?.avatar) {
+          <img [src]="currentUser()?.avatar" [alt]="currentUser()?.name" />
+        } @else {
+          <span>{{ getInitials(currentUser()?.name || 'User') }}</span>
+        }
+      </div>
+      <div class="user-info">
+        <span class="user-name">{{ currentUser()?.name }}</span>
+        <span class="user-role">{{ currentUser()?.role === 'ADMIN' ? 'Administrador' : 'Usuário' }}</span>
+      </div>
+      <span class="material-icons">expand_more</span>
+      
+      @if (isMenuOpen()) {
+        <div class="user-dropdown">
+          <a [routerLink]="['/user/profile']" class="dropdown-item">
+            <span class="material-icons">person</span>
+            <span>Meu Perfil</span>
+          </a>
+          <a [routerLink]="['/user/change-password']" class="dropdown-item">
+            <span class="material-icons">lock</span>
+            <span>Alterar Senha</span>
+          </a>
+          <div class="dropdown-divider"></div>
+          <button type="button" class="dropdown-item" (click)="logout()">
+            <span class="material-icons">logout</span>
+            <span>Sair</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>
+

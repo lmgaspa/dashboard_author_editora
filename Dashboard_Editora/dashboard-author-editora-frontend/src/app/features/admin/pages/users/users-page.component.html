@@ -1,0 +1,55 @@
+<div class="users-page">
+  <div class="page-header">
+    <h1>Usuários</h1>
+    <a [routerLink]="['/admin/users/create']" class="create-button">
+      <span class="material-icons">add</span>
+      <span>Criar Usuário</span>
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Carregando usuários...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <span class="material-icons">error_outline</span>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="users-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Data de Criação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="badge" [class.badge-admin]="user.role === 'ADMIN'">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td>{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="action-button" title="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
