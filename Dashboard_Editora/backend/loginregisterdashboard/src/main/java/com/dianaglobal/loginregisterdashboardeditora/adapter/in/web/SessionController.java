@@ -116,7 +116,22 @@ public class SessionController {
         authCookieUtil.setAuthCookies(response, refresh, csrf);
         authCookieUtil.exposeCsrfHeader(response, csrf);
 
-        return ResponseEntity.ok(new LoginResponse(access, null));
+        // Criar objeto UserInfo para a resposta
+        String provider = user.getAuthProvider();
+        if (provider == null || provider.trim().isEmpty()) {
+            provider = "LOCAL";
+        }
+        
+        var userInfo = new LoginResponse.UserInfo(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name(), // ADMIN ou USER
+                provider,
+                user.isPasswordSet()
+        );
+
+        return ResponseEntity.ok(new LoginResponse(access, null, userInfo));
     }
 
     // ------------------------------------------------------------------------------------
@@ -186,7 +201,22 @@ public class SessionController {
             authCookieUtil.setAuthCookies(response, refresh, csrf);
             authCookieUtil.exposeCsrfHeader(response, csrf);
 
-            return ResponseEntity.ok(new LoginResponse(access, null));
+            // Criar objeto UserInfo para a resposta
+            String provider = user.getAuthProvider();
+            if (provider == null || provider.trim().isEmpty()) {
+                provider = "GOOGLE";
+            }
+            
+            var userInfo = new LoginResponse.UserInfo(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getRole().name(), // ADMIN ou USER
+                    provider,
+                    user.isPasswordSet()
+            );
+
+            return ResponseEntity.ok(new LoginResponse(access, null, userInfo));
 
         } catch (GeneralSecurityException e) {
             log.error("[GOOGLE OAUTH ERROR] Security error: {}", e.getMessage(), e);

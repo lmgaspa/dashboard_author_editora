@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <footer class="w-full bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] border-t border-white/10 py-8 px-4 md:px-6">
+    <footer class="w-full bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] border-t border-white/10 py-8 px-4 md:px-6 mt-auto">
       <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
           
