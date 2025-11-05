@@ -1,6 +1,7 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '@/environments/environment';
 
 interface Admin {
   id: string;
@@ -14,11 +15,11 @@ interface Admin {
   standalone: true,
   imports: [CommonModule, DatePipe],
   templateUrl: './admin-info-page.component.html',
-  styleUrl: './admin-info-page.component.scss'
+  styles: []
 })
 export class AdminInfoPageComponent implements OnInit {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'https://www.dashboard-author-editora.vercel.app';
+  private readonly API_URL = environment.apiUrl;
 
   readonly admins = signal<Admin[]>([]);
   readonly loading = signal<boolean>(false);

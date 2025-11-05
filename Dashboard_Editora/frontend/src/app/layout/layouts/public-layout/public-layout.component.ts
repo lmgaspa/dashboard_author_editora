@@ -1,28 +1,31 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, FooterComponent],
   template: `
     <div class="public-layout">
       <main class="public-content">
         <router-outlet />
       </main>
+      <app-footer />
     </div>
   `,
   styles: [`
     .public-layout {
       min-height: 100vh;
+      width: 100%;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
     .public-content {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%;
+      display: block;
     }
   `]
 })

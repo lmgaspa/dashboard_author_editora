@@ -8,7 +8,7 @@ import { AuthService } from '@/app/core/services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './user-profile-page.component.html',
-  styleUrl: './user-profile-page.component.scss'
+  styles: []
 })
 export class UserProfilePageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

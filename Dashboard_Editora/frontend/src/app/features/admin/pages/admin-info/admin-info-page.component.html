@@ -1,31 +1,32 @@
-<div class="admin-info-page">
-  <h1>Administradores</h1>
+<div class="p-8">
+  <h1 class="text-3xl font-bold mb-8 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Administradores</h1>
 
   @if (loading()) {
-    <div class="loading-state">
-      <span class="spinner"></span>
-      <p>Carregando administradores...</p>
+    <div class="flex flex-col items-center justify-center p-16 gap-4">
+      <span class="w-10 h-10 border-4 border-white/10 border-t-pink-500 rounded-full animate-spin"></span>
+      <p class="text-gray-300">Carregando administradores...</p>
     </div>
   } @else if (error()) {
-    <div class="error-state">
-      <span class="material-icons">error_outline</span>
-      <p>{{ error() }}</p>
+    <div class="flex flex-col items-center justify-center p-16 gap-4">
+      <span class="material-icons text-4xl text-red-400">error_outline</span>
+      <p class="text-gray-300">{{ error() }}</p>
     </div>
   } @else {
-    <div class="admins-grid">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (admin of admins(); track admin.id) {
-        <div class="admin-card">
-          <div class="admin-avatar">
-            {{ admin.name.charAt(0).toUpperCase() }}
-          </div>
-          <div class="admin-info">
-            <h3>{{ admin.name }}</h3>
-            <p>{{ admin.email }}</p>
-            <small>Criado em {{ admin.createdAt | date:'dd/MM/yyyy' }}</small>
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)] hover:border-pink-500/50 transition-all duration-200">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 via-pink-500 to-purple-500 text-white flex items-center justify-center text-2xl font-bold">
+              {{ admin.name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-semibold text-white truncate">{{ admin.name }}</h3>
+              <p class="text-sm text-gray-400 truncate">{{ admin.email }}</p>
+              <small class="text-xs text-gray-500">Criado em {{ admin.createdAt | date:'dd/MM/yyyy' }}</small>
+            </div>
           </div>
         </div>
       }
     </div>
   }
 </div>
-

@@ -1,8 +1,10 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, throwError } from 'rxjs';
 import { User, AuthResponse, LoginRequest, ResetPasswordRequest, ChangePasswordRequest, ChangeEmailRequest } from '../models/menu-item.model';
+import { environment } from '@/environments/environment';
+import { getCsrfTokenFromCookie, hasCookie } from '../utils/cookie.util';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,7 @@ import { User, AuthResponse, LoginRequest, ResetPasswordRequest, ChangePasswordR
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly API_URL = 'https://www.dashboard-author-editora.vercel.app';
+  private readonly API_URL = environment.apiUrl;
 
   // Signals para estado reativo
   private readonly _currentUser = signal<User | null>(null);
@@ -99,19 +101,89 @@ export class AuthService {
     );
   }
 
-  refreshToken(): Observable<AuthResponse> {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) {
-      return of({} as AuthResponse);
+  /**
+   * Verifica se o frontend deve tentar fazer refresh do token
+   * @returns true se deve tentar refresh, false caso contrário
+   */
+  shouldAttemptRefresh(): boolean {
+    // Verificar se existe cookie de refresh_token
+    const hasRefreshToken = hasCookie('refresh_token');
+    
+    // Lista de páginas públicas onde refresh não deve ser tentado
+    const publicPages = [
+      '/login',
+      '/register',
+      '/forgot-password',
+      '/reset-password',
+      '/confirm-account',
+      '/set-password',
+      '' // landing page
+    ];
+    
+    const currentPath = this.router.url;
+    const isPublicPage = publicPages.some(path => 
+      currentPath.includes(path) || currentPath === path
+    );
+    
+    // Só tenta refresh se tem token E não está em página pública
+    return hasRefreshToken && !isPublicPage;
+  }
+
+  /**
+   * Faz refresh do token de acesso usando o refresh token do cookie
+   * @returns Observable com o novo access token
+   */
+  refreshToken(): Observable<{ token: string }> {
+    // ✅ VALIDAÇÃO: Não faz requisição se não deve
+    if (!this.shouldAttemptRefresh()) {
+      return throwError(() => new Error('Should not refresh token on public pages'));
     }
-    return this.http.post<AuthResponse>(`${this.API_URL}/api/v1/auth/refresh`, { refreshToken });
+
+    // Obter CSRF token do cookie
+    const csrfToken = getCsrfTokenFromCookie();
+    if (!csrfToken) {
+      return throwError(() => new Error('CSRF token not found'));
+    }
+
+    // Fazer requisição com CSRF token no header
+    const headers = new HttpHeaders({
+      'X-CSRF-Token': csrfToken
+    });
+
+    return this.http.post<{ token: string }>(
+      `${this.API_URL}/api/v1/auth/refresh-token`,
+      {}, // Body vazio - o refresh token vem do cookie
+      {
+        headers,
+        withCredentials: true // Importante para enviar cookies
+      }
+    ).pipe(
+      tap(response => {
+        // Atualizar access token no localStorage
+        if (response.token) {
+          localStorage.setItem('accessToken', response.token);
+        }
+      }),
+      catchError(error => {
+        // Tratar erros
+        if (error.status === 401) {
+          // Token expirado ou inválido - redirecionar para login
+          this.clearAuth();
+        } else if (error.status === 403) {
+          // CSRF inválido - pode tentar novamente ou redirecionar
+          console.warn('CSRF token validation failed');
+          // Tentar novamente pode ser feito aqui, mas por segurança vamos limpar
+          this.clearAuth();
+        }
+        return throwError(() => error);
+      })
+    );
   }
 
   private setAuth(response: AuthResponse): void {
     localStorage.setItem('accessToken', response.accessToken);
-    if (response.refreshToken) {
-      localStorage.setItem('refreshToken', response.refreshToken);
-    }
+    // refreshToken agora é gerenciado pelo backend via cookies (httpOnly)
+    // Não precisa armazenar no localStorage
     localStorage.setItem('currentUser', JSON.stringify(response.user));
     this._currentUser.set(response.user);
     this._isAuthenticated.set(true);
@@ -119,7 +191,7 @@ export class AuthService {
 
   private clearAuth(): void {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    // refreshToken está nos cookies, será limpo pelo backend no logout
     localStorage.removeItem('currentUser');
     this._currentUser.set(null);
     this._isAuthenticated.set(false);

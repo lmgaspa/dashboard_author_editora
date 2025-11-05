@@ -9,7 +9,7 @@ import { MenuService } from '@/app/core/services/menu.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './topbar.component.html',
-  styleUrl: './topbar.component.scss'
+  styles: []
 })
 export class TopbarComponent {
   private readonly authService = inject(AuthService);

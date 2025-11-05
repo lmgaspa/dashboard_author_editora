@@ -10,7 +10,7 @@ import { MenuItem } from '@/app/core/models/menu-item.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+  styles: []
 })
 export class SidebarComponent {
   private readonly menuService = inject(MenuService);
@@ -28,6 +28,7 @@ export class SidebarComponent {
 
   toggleExpand(item: MenuItem): void {
     if (!item.children || item.children.length === 0) return;
+    if (!item.label) return;
     
     const expanded = new Set(this.expandedItems());
     if (expanded.has(item.label)) {
@@ -39,6 +40,7 @@ export class SidebarComponent {
   }
 
   isExpanded(item: MenuItem): boolean {
+    if (!item.label) return false;
     return this.expandedItems().has(item.label);
   }
 

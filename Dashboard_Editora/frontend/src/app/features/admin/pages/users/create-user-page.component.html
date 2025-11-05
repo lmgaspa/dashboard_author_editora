@@ -1,44 +1,44 @@
-<div class="create-user-page">
-  <h1>Criar Usuário</h1>
+<div class="max-w-[600px]">
+  <h1 class="text-3xl font-bold mb-6 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Criar Usuário</h1>
 
   @if (error()) {
-    <div class="error-message">
+    <div class="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 mb-6">
       <span class="material-icons">error_outline</span>
       <span>{{ error() }}</span>
     </div>
   }
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
-    <div class="form-group">
-      <label for="name">Nome</label>
-      <input type="text" id="name" formControlName="name" class="form-input" />
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-8 flex flex-col gap-6">
+    <div class="flex flex-col gap-2">
+      <label for="name" class="font-semibold text-gray-200">Nome</label>
+      <input type="text" id="name" formControlName="name" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40" />
     </div>
 
-    <div class="form-group">
-      <label for="email">E-mail</label>
-      <input type="email" id="email" formControlName="email" class="form-input" />
+    <div class="flex flex-col gap-2">
+      <label for="email" class="font-semibold text-gray-200">E-mail</label>
+      <input type="email" id="email" formControlName="email" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40" />
     </div>
 
-    <div class="form-group">
-      <label for="password">Senha</label>
-      <input type="password" id="password" formControlName="password" class="form-input" />
+    <div class="flex flex-col gap-2">
+      <label for="password" class="font-semibold text-gray-200">Senha</label>
+      <input type="password" id="password" formControlName="password" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40" />
     </div>
 
-    <div class="form-group">
-      <label for="role">Role</label>
-      <select id="role" formControlName="role" class="form-input">
+    <div class="flex flex-col gap-2">
+      <label for="role" class="font-semibold text-gray-200">Role</label>
+      <select id="role" formControlName="role" class="px-3 py-3 border border-white/10 rounded-lg bg-white/5 text-white text-base focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 cursor-pointer">
         <option value="USER">Usuário</option>
         <option value="ADMIN">Administrador</option>
       </select>
     </div>
 
-    <div class="form-actions">
-      <button type="button" class="cancel-button" (click)="onCancel()">
+    <div class="flex gap-4 justify-end pt-4">
+      <button type="button" class="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white font-semibold cursor-pointer transition-all duration-200 hover:bg-white/10 hover:border-white/20" (click)="onCancel()">
         Cancelar
       </button>
-      <button type="submit" class="submit-button" [disabled]="form.invalid || loading()">
+      <button type="submit" class="px-6 py-3 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white border-none rounded-lg font-semibold cursor-pointer transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(14,165,233,0.5)] hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0" [disabled]="form.invalid || loading()">
         @if (loading()) {
-          <span class="spinner"></span>
+          <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
           <span>Criando...</span>
         } @else {
           <span>Criar Usuário</span>
@@ -47,4 +47,3 @@
     </div>
   </form>
 </div>
-

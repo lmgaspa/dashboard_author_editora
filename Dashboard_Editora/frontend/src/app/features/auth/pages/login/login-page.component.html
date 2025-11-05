@@ -1,83 +1,115 @@
-<div class="login-container">
-  <div class="login-card">
-    <h1 class="login-title">Entrar</h1>
+<div class="min-h-screen w-full relative overflow-hidden bg-transition flex items-center justify-center p-8"
+     [ngClass]="{
+       'bg-weak': colorIntensity() === 'weak',
+       'bg-medium': colorIntensity() === 'medium',
+       'bg-strong': colorIntensity() === 'strong'
+     }">
+  
+  <!-- Animated Background Orbs - Azul Marinho para Azul Celeste para Branco (3 segundos) -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <!-- Orb 1 - Top Left -->
+    <div class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
+         style="width: 500px; height: 500px; top: -250px; left: -250px; animation-delay: 0s;"></div>
+    
+    <!-- Orb 2 - Center Right -->
+    <div class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
+         style="width: 450px; height: 450px; top: 50%; right: 25%; transform: translateY(-50%); animation-delay: -5s;"></div>
+    
+    <!-- Orb 3 - Bottom Right -->
+    <div class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
+         style="width: 480px; height: 480px; bottom: -240px; right: -240px; animation-delay: -10s;"></div>
+  </div>
+
+  <!-- Grid Pattern Overlay - Intensidade Progressiva -->
+  <div class="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out"
+       [ngClass]="{
+         'opacity-[0.03]': colorIntensity() === 'weak',
+         'opacity-[0.05]': colorIntensity() === 'medium',
+         'opacity-[0.08]': colorIntensity() === 'strong'
+       }"
+       style="background-image: linear-gradient(rgba(125, 211, 252, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(125, 211, 252, 0.2) 1px, transparent 1px); background-size: 50px 50px;"></div>
+
+  <div class="bg-[rgba(15,23,42,0.9)] backdrop-blur-xl rounded-3xl p-12 w-full max-w-[440px] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 relative z-10">
+    <h1 class="text-3xl font-bold text-white mb-8 text-center">Entrar</h1>
     
     @if (error()) {
-      <div class="error-message">
-        <span class="material-icons">error_outline</span>
+      <div class="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 mb-6 text-sm">
+        <span class="material-icons text-xl">error_outline</span>
         <span>{{ error() }}</span>
       </div>
     }
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-      <div class="form-group">
-        <label for="email">E-mail</label>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+      <div class="flex flex-col gap-2">
+        <label for="email" class="text-sm font-semibold text-gray-200">E-mail</label>
         <input
           type="email"
           id="email"
           formControlName="email"
-          placeholder="seu@email.com"
-          class="form-input"
+          placeholder="seuemail@gmail.com"
+          class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white text-base transition-all duration-200 focus:outline-none focus:border-blue-600 focus:bg-white/[0.08] focus:ring-4 focus:ring-blue-600/20 placeholder:text-white/40 [&.error]:border-red-500"
           [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
         />
         @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-          <span class="error-text">E-mail inválido</span>
+          <span class="text-xs text-red-400">E-mail inválido</span>
         }
       </div>
 
-      <div class="form-group">
-        <label for="password">Senha</label>
-        <div class="password-input-wrapper">
+      <div class="flex flex-col gap-2">
+        <label for="password" class="text-sm font-semibold text-gray-200">Senha</label>
+        <div class="relative">
           <input
             [type]="showPassword() ? 'text' : 'password'"
             id="password"
             formControlName="password"
             placeholder="••••••••"
-            class="form-input"
+            class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white text-base transition-all duration-200 focus:outline-none focus:border-pink-500 focus:bg-white/[0.08] focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40 [&.error]:border-red-500 pr-12"
             [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
           />
           <button
             type="button"
-            class="password-toggle"
+            class="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-white/60 cursor-pointer p-2 flex items-center justify-center transition-colors duration-200 hover:text-white/90"
             (click)="togglePassword()"
             [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
           >
-            <span class="material-icons">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+            <span class="material-icons text-xl">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
           </button>
         </div>
         @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-          <span class="error-text">Senha deve ter pelo menos 6 caracteres</span>
+          <span class="text-xs text-red-400">Senha deve ter pelo menos 8 caracteres, sendo 1 letra maiúscula, e pelo menos 1 numero.</span>
         }
       </div>
 
-      <div class="form-footer">
-        <a [routerLink]="['/forgot-password']" class="forgot-link">Esqueceu sua senha?</a>
+      <div class="flex justify-end">
+        <a [routerLink]="['/forgot-password']" class="text-sm text-blue-400 no-underline transition-colors duration-200 hover:text-blue-300 hover:underline">Esqueceu sua senha?</a>
       </div>
 
       <button
         type="submit"
-        class="login-button"
+        class="w-full px-6 py-3.5 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white border-none rounded-xl text-base font-semibold cursor-pointer transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(14,165,233,0.5)] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         [disabled]="loginForm.invalid || loading()"
       >
         @if (loading()) {
-          <span class="spinner"></span>
+          <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
           <span>Entrando...</span>
         } @else {
           <span>Entrar</span>
         }
       </button>
 
-      <div class="divider">
-        <span>ou</span>
+      <div class="flex items-center text-center text-white/50 text-sm my-2">
+        <div class="flex-1 border-b border-white/10"></div>
+        <span class="px-4">ou</span>
+        <div class="flex-1 border-b border-white/10"></div>
       </div>
 
       <button
         type="button"
-        class="google-button"
+        class="w-full px-6 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white text-base font-semibold cursor-pointer transition-all duration-200 flex items-center justify-center gap-3 hover:bg-white/10 hover:border-white/20 disabled:opacity-60 disabled:cursor-not-allowed"
         (click)="loginWithGoogle()"
         [disabled]="loading()"
       >
-        <svg class="google-icon" viewBox="0 0 24 24">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -88,4 +120,3 @@
     </form>
   </div>
 </div>
-

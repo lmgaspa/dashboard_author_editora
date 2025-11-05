@@ -1,24 +1,32 @@
-<div class="confirm-account-container">
-  <div class="confirm-account-card">
+<div class="min-h-screen flex items-center justify-center p-8 bg-gradient-to-br from-[#0a0a0f] via-[#1a0a1a] to-[#0f0a1a] relative overflow-hidden">
+  <!-- Background Orbs -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute w-[500px] h-[500px] -top-[250px] -left-[250px] rounded-full bg-gradient-radial from-red-500/30 via-red-400/20 to-transparent blur-[120px] animate-float"></div>
+    <div class="absolute w-[450px] h-[450px] top-1/2 right-1/4 -translate-y-1/2 rounded-full bg-gradient-radial from-pink-500/30 via-pink-400/20 to-transparent blur-[120px] animate-float" style="animation-delay: -5s;"></div>
+    <div class="absolute w-[480px] h-[480px] -bottom-[240px] -right-[240px] rounded-full bg-gradient-radial from-purple-500/30 via-purple-400/20 to-transparent blur-[120px] animate-float" style="animation-delay: -10s;"></div>
+  </div>
+
+  <div class="bg-[rgba(15,23,42,0.9)] backdrop-blur-xl rounded-3xl p-12 w-full max-w-[440px] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 relative z-10 text-center">
     @if (loading()) {
-      <div class="loading-state">
-        <span class="spinner-large"></span>
-        <p>Confirmando sua conta...</p>
+      <div class="flex flex-col items-center gap-4">
+        <span class="w-12 h-12 border-4 border-white/30 border-t-pink-500 rounded-full animate-spin"></span>
+        <p class="text-white">Confirmando sua conta...</p>
       </div>
     } @else if (success()) {
-      <div class="success-state">
-        <span class="material-icons">check_circle</span>
-        <h1>Conta Confirmada!</h1>
-        <p>Sua conta foi confirmada com sucesso. Redirecionando para o login...</p>
+      <div class="flex flex-col items-center gap-4">
+        <span class="material-icons text-6xl text-green-400">check_circle</span>
+        <h1 class="text-3xl font-bold text-white">Conta Confirmada!</h1>
+        <p class="text-gray-300">Sua conta foi confirmada com sucesso. Redirecionando para o login...</p>
       </div>
     } @else {
-      <div class="error-state">
-        <span class="material-icons">error_outline</span>
-        <h1>Erro ao Confirmar</h1>
-        <p>{{ error() }}</p>
-        <a [routerLink]="['/login']" class="link-button">Voltar ao login</a>
+      <div class="flex flex-col items-center gap-4">
+        <span class="material-icons text-6xl text-red-400">error_outline</span>
+        <h1 class="text-3xl font-bold text-white">Erro ao Confirmar</h1>
+        <p class="text-red-300">{{ error() }}</p>
+        <a [routerLink]="['/login']" class="px-6 py-3 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white rounded-xl font-semibold no-underline transition-all duration-200 hover:shadow-[0_10px_25px_rgba(14,165,233,0.5)] hover:-translate-y-0.5">
+          Voltar ao login
+        </a>
       </div>
     }
   </div>
 </div>
-

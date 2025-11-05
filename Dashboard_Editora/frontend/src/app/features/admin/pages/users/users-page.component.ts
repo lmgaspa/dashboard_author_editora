@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '@/environments/environment';
 
 interface User {
   id: string;
@@ -16,11 +17,11 @@ interface User {
   standalone: true,
   imports: [CommonModule, RouterModule, DatePipe],
   templateUrl: './users-page.component.html',
-  styleUrl: './users-page.component.scss'
+  styles: []
 })
 export class UsersPageComponent implements OnInit {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'https://www.dashboard-author-editora.vercel.app';
+  private readonly API_URL = environment.apiUrl;
 
   readonly users = signal<User[]>([]);
   readonly loading = signal<boolean>(false);

@@ -1,47 +1,47 @@
-<div class="users-page">
-  <div class="page-header">
-    <h1>Usuários</h1>
-    <a [routerLink]="['/admin/users/create']" class="create-button">
+<div class="p-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold bg-gradient-to-r from-sky-400 via-blue-600 to-sky-400 bg-clip-text text-transparent">Usuários</h1>
+    <a [routerLink]="['/admin/users/create']" class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white no-underline rounded-lg font-semibold transition-all duration-200 hover:shadow-[0_0_20px_rgba(14,165,233,0.5)] hover:-translate-y-0.5">
       <span class="material-icons">add</span>
       <span>Criar Usuário</span>
     </a>
   </div>
 
   @if (loading()) {
-    <div class="loading-state">
-      <span class="spinner"></span>
-      <p>Carregando usuários...</p>
+    <div class="flex flex-col items-center justify-center p-16 gap-4">
+      <span class="w-10 h-10 border-4 border-white/10 border-t-pink-500 rounded-full animate-spin"></span>
+      <p class="text-gray-300">Carregando usuários...</p>
     </div>
   } @else if (error()) {
-    <div class="error-state">
-      <span class="material-icons">error_outline</span>
-      <p>{{ error() }}</p>
+    <div class="flex flex-col items-center justify-center p-16 gap-4">
+      <span class="material-icons text-4xl text-red-400">error_outline</span>
+      <p class="text-gray-300">{{ error() }}</p>
     </div>
   } @else {
-    <div class="users-table">
-      <table>
-        <thead>
+    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+      <table class="w-full border-collapse">
+        <thead class="bg-white/5">
           <tr>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Data de Criação</th>
-            <th>Ações</th>
+            <th class="p-4 text-left font-semibold text-white border-b border-white/10">Nome</th>
+            <th class="p-4 text-left font-semibold text-white border-b border-white/10">Email</th>
+            <th class="p-4 text-left font-semibold text-white border-b border-white/10">Role</th>
+            <th class="p-4 text-left font-semibold text-white border-b border-white/10">Data de Criação</th>
+            <th class="p-4 text-left font-semibold text-white border-b border-white/10">Ações</th>
           </tr>
         </thead>
         <tbody>
           @for (user of users(); track user.id) {
-            <tr>
-              <td>{{ user.name }}</td>
-              <td>{{ user.email }}</td>
-              <td>
-                <span class="badge" [class.badge-admin]="user.role === 'ADMIN'">
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 border-b border-white/10 text-gray-300">{{ user.name }}</td>
+              <td class="p-4 border-b border-white/10 text-gray-300">{{ user.email }}</td>
+              <td class="p-4 border-b border-white/10">
+                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-red-500/30 via-pink-500/30 to-purple-500/30 text-pink-300 border border-pink-500/50" [class.bg-gradient-to-r]="user.role === 'ADMIN'" [class.from-yellow-500/30]="user.role === 'ADMIN'" [class.via-orange-500/30]="user.role === 'ADMIN'" [class.to-red-500/30]="user.role === 'ADMIN'" [class.text-yellow-300]="user.role === 'ADMIN'">
                   {{ user.role }}
                 </span>
               </td>
-              <td>{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
-              <td>
-                <button class="action-button" title="Editar">
+              <td class="p-4 border-b border-white/10 text-gray-300">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="p-4 border-b border-white/10">
+                <button class="bg-transparent border-none text-gray-400 cursor-pointer p-2 rounded transition-all duration-200 hover:bg-white/10 hover:text-pink-400" title="Editar">
                   <span class="material-icons">edit</span>
                 </button>
               </td>
@@ -52,4 +52,3 @@
     </div>
   }
 </div>
-

@@ -23,9 +23,9 @@
   --ink-2:           #2b3a55;   /* corpo */
   --ink-3:           #6b7a91;   /* fraco */
 
-  /* marca e estados */
-  --brand:           #2a95ff;
-  --brand-contrast:  #0b5aa7;
+  /* marca e estados - Cores Azul Celeste Suave */
+  --brand:           #38bdf8;  /* sky-400 */
+  --brand-contrast:  #7dd3fc;  /* sky-300 */
 
   --success:         #12b886;
   --warning:         #f59e0b;
@@ -35,12 +35,12 @@
   --ring:            color-mix(in oklab, var(--brand) 55%, white 45%);
   --focus:           color-mix(in oklab, var(--brand) 75%, white 25%);
 
-  /* gráficos (sequência agradável) */
-  --chart-1:         #60a5fa;
-  --chart-2:         #34d399;
-  --chart-3:         #a78bfa;
-  --chart-4:         #f59e0b;
-  --chart-5:         #f472b6;
+  /* gráficos - Cores Azul Celeste Suave */
+  --chart-1:         #7dd3fc;  /* sky-300 */
+  --chart-2:         #38bdf8;  /* sky-400 */
+  --chart-3:         #7dd3fc;  /* sky-300 */
+  --chart-4:         #f59e0b;  /* warning mantém */
+  --chart-5:         #bae6fd;  /* sky-200 */
 
   /* sombras */
   --shadow-card:     0 1px 2px rgba(16,24,40,.06), 0 1px 1px rgba(16,24,40,.04);
@@ -72,32 +72,36 @@
   --ink-2:           #cfe0f1;
   --ink-3:           #97a9c4;
 
-  /* marca e estados */
-  --brand:           #60b3f6;
-  --brand-contrast:  #93cdfa;
+  /* marca e estados - Cores Azul Celeste Suave */
+  --brand:           #38bdf8;  /* sky-400 */
+  --brand-contrast:  #7dd3fc;  /* sky-300 */
 
   --success:         #34d399;
   --warning:         #fbbf24;
   --danger:          #f87171;
 
   /* UI feedback */
-  --ring:            color-mix(in oklab, var(--brand) 55%, black 45%);
-  --focus:           color-mix(in oklab, var(--brand) 75%, black 25%);
+  --ring:            color-mix(in oklab, var(--brand) 55%, #1e293b 45%);
+  --focus:           color-mix(in oklab, var(--brand) 75%, #1e293b 25%);
 
-  /* gráficos */
-  --chart-1:         #60a5fa;
-  --chart-2:         #34d399;
-  --chart-3:         #94a3b8;
-  --chart-4:         #f59e0b;
-  --chart-5:         #f472b6;
+  /* gráficos - Cores Azul Celeste Suave */
+  --chart-1:         #7dd3fc;  /* sky-300 */
+  --chart-2:         #38bdf8;  /* sky-400 */
+  --chart-3:         #7dd3fc;  /* sky-300 */
+  --chart-4:         #f59e0b;  /* warning mantém */
+  --chart-5:         #bae6fd;  /* sky-200 */
 
   --shadow-card:     0 1px 2px rgba(2,6,23,.55), 0 1px 1px rgba(2,6,23,.45);
-  --shadow-pop:      0 10px 30px -12px rgba(0,0,0,.55);
+  --shadow-pop:      0 10px 30px -12px rgba(30,41,59,.55);
 }
 
 /* ============ BASE ============ */
 @layer base {
-  html { @apply antialiased; }
+  html { 
+    @apply antialiased;
+    height: 100%;
+    width: 100%;
+  }
 
   body {
     background: var(--bg);
@@ -106,6 +110,23 @@
     font-size: theme('fontSize.base.0');             /* escala maior */
     line-height: theme('fontSize.base.1.lineHeight');/* caminho correto */
     transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Garantir que router-outlet preencha toda a área */
+  router-outlet {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  router-outlet ~ * {
+    display: block;
+    width: 100%;
+    min-height: 100%;
   }
 
   h1 {
@@ -201,3 +222,98 @@
 
 /* Garantir truncamento seguro dentro de grids/flex */
 .min-w-0 { min-width: 0; }
+
+/* Gradientes radiais para orbs */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+.from-angular {
+  --tw-gradient-from: #DD0031;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(221, 0, 49, 0));
+}
+
+.from-sky-600 {
+  --tw-gradient-from: #0284c7;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(2, 132, 199, 0));
+}
+
+.from-sky-400 {
+  --tw-gradient-from: #38bdf8;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(56, 189, 248, 0));
+}
+
+.from-sky-300 {
+  --tw-gradient-from: #7dd3fc;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(125, 211, 252, 0));
+}
+
+.from-sky-200 {
+  --tw-gradient-from: #bae6fd;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(186, 230, 253, 0));
+}
+
+/* Background Styles - 3 Diferentes Intensidades (Azul Escuro Suave) */
+.bg-weak {
+  background: linear-gradient(to bottom right, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+.bg-medium {
+  background: linear-gradient(to bottom right, #0f172a 0%, #334155 50%, #1e293b 100%);
+}
+
+.bg-strong {
+  background: linear-gradient(to bottom right, #1e293b 0%, #475569 50%, #334155 100%);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.animate-fade-in-delay {
+  animation: fadeIn 1s ease-out 0.3s both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes countdownWeak {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.5;
+  }
+}
+
+@keyframes countdownMedium {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes countdownStrong {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.9;
+  }
+}

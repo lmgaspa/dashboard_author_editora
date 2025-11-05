@@ -8,7 +8,7 @@ import { AuthService } from '@/app/core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './confirm-account-page.component.html',
-  styleUrl: './confirm-account-page.component.scss'
+  styles: []
 })
 export class ConfirmAccountPageComponent implements OnInit {
   private readonly authService = inject(AuthService);

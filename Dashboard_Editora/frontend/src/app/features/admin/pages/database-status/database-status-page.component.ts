@@ -1,6 +1,7 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '@/environments/environment';
 
 interface DatabaseStatus {
   status: string;
@@ -14,11 +15,11 @@ interface DatabaseStatus {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './database-status-page.component.html',
-  styleUrl: './database-status-page.component.scss'
+  styles: []
 })
 export class DatabaseStatusPageComponent implements OnInit {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'https://www.dashboard-author-editora.vercel.app';
+  private readonly API_URL = environment.apiUrl;
 
   readonly status = signal<DatabaseStatus | null>(null);
   readonly loading = signal<boolean>(false);

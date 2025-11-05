@@ -3,19 +3,20 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '@/environments/environment';
 
 @Component({
   selector: 'app-create-user-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './create-user-page.component.html',
-  styleUrl: './create-user-page.component.scss'
+  styles: []
 })
 export class CreateUserPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly API_URL = 'https://www.dashboard-author-editora.vercel.app';
+  private readonly API_URL = environment.apiUrl;
 
   readonly form: FormGroup = this.fb.group({
     name: ['', [Validators.required]],

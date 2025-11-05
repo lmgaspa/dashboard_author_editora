@@ -172,7 +172,7 @@ export class MenuService {
       return this._adminMenuItems().filter(item => this.canAccess(item, userRole));
     }
 
-    return this._userMenuItems().filter(item => this.canAccess(item, userRole));
+    return this._userMenuItems().filter(item => this.canAccess(item, userRole ?? null));
   });
 
   readonly sidebarItems = computed(() => {
@@ -182,7 +182,7 @@ export class MenuService {
       return this._adminMenuItems().filter(item => this.canAccess(item, userRole) && !item.divider);
     }
 
-    return this._userMenuItems().filter(item => this.canAccess(item, userRole) && !item.divider);
+    return this._userMenuItems().filter(item => this.canAccess(item, userRole ?? null) && !item.divider);
   });
 
   private canAccess(item: MenuItem, role: string | null): boolean {

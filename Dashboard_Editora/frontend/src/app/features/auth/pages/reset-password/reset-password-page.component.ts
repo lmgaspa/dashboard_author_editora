@@ -9,7 +9,7 @@ import { AuthService } from '@/app/core/services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './reset-password-page.component.html',
-  styleUrl: './reset-password-page.component.scss'
+  styles: []
 })
 export class ResetPasswordPageComponent {
   private readonly fb = inject(FormBuilder);

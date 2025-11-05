@@ -2,6 +2,14 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.3.
 
+## Configuração da API
+
+A URL da API está configurada nos arquivos de environment:
+- `src/environments/environment.ts` - Ambiente de desenvolvimento
+- `src/environments/environment.prod.ts` - Ambiente de produção
+
+API URL: `https://dashboard-painel-autores-vl-26b242c59563.herokuapp.com`
+
 ## Development server
 
 To start a local development server, run:

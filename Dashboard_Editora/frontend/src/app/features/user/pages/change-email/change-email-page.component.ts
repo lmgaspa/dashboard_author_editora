@@ -9,7 +9,7 @@ import { AuthService } from '@/app/core/services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './change-email-page.component.html',
-  styleUrl: './change-email-page.component.scss'
+  styles: []
 })
 export class ChangeEmailPageComponent {
   private readonly fb = inject(FormBuilder);
