@@ -35,12 +35,14 @@ export class UsersPageComponent implements OnInit {
     this.loading.set(true);
     this.http.get<User[]>(`${this.API_URL}/api/admin/users`).subscribe({
       next: (users) => {
-        this.users.set(users);
+        // Garante que sempre seja um array
+        this.users.set(Array.isArray(users) ? users : []);
         this.loading.set(false);
       },
       error: (err) => {
         this.error.set('Erro ao carregar usuários.');
         this.loading.set(false);
+        this.users.set([]); // Garante array vazio em caso de erro
       }
     });
   }

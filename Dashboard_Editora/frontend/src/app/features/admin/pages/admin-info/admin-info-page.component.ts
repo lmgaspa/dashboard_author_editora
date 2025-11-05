@@ -33,12 +33,14 @@ export class AdminInfoPageComponent implements OnInit {
     this.loading.set(true);
     this.http.get<Admin[]>(`${this.API_URL}/api/admin/admin-info`).subscribe({
       next: (admins) => {
-        this.admins.set(admins);
+        // Garante que sempre seja um array
+        this.admins.set(Array.isArray(admins) ? admins : []);
         this.loading.set(false);
       },
       error: (err) => {
         this.error.set('Erro ao carregar administradores.');
         this.loading.set(false);
+        this.admins.set([]); // Garante array vazio em caso de erro
       }
     });
   }
