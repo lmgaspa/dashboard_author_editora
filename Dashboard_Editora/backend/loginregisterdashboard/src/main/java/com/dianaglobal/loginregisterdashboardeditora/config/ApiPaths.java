@@ -21,9 +21,9 @@ public final class ApiPaths {
     // Rotas de dados do usuário autenticado
     public static final String USER_BASE         = API_V1_BASE + "/user";
     
-    // Painel admin
-    public static final String ADMIN_BASE        = "/api/admin";
+    // Painel admin (agora em v1)
+    public static final String ADMIN_BASE        = API_V1_BASE + "/admin";
     
-    // Painel user
-    public static final String USER_PANEL_BASE  = "/api/user";
+    // Painel user (agora em v1)
+    public static final String USER_PANEL_BASE  = API_V1_BASE + "/user";
 }

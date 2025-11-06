@@ -34,9 +34,9 @@ public class RegisterUserService implements RegisterUserUseCase {
         }
 
         // Nota: Este método não é mais usado para registro público
-        // Usuários devem ser criados via /api/admin/users
+        // Usuários devem ser criados via /api/v1/admin/users
         // Se necessário, injetar UserIdGeneratorService aqui
-        throw new UnsupportedOperationException("Use /api/admin/users to create users");
+        throw new UnsupportedOperationException("Use /api/v1/admin/users to create users");
     }
 
     @Override

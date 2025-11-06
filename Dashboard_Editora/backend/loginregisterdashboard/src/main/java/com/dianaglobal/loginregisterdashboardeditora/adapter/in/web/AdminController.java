@@ -24,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -73,16 +74,35 @@ public class AdminController {
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
-        // Nota: Esta implementação é básica. Em produção, você deve implementar
-        // um método no repository para listar todos os usuários com paginação
-        // Por enquanto, retornamos apenas uma mensagem informativa
-        return ResponseEntity.ok(new MessageResponse(
-                "Lista de usuários - endpoint para implementação futura com paginação"
-        ));
+        try {
+            var users = userRepositoryPort.findAll();
+            
+            List<UserListResponse> userList = users.stream()
+                    .map(user -> new UserListResponse(
+                            user.getId(),
+                            user.getName(),
+                            user.getEmail(),
+                            user.getRole().name(),
+                            user.isEmailConfirmed(),
+                            user.getAuthProvider()
+                    ))
+                    .toList();
+            
+            return ResponseEntity.ok(new UsersListResponse(
+                    "Lista de usuários",
+                    userList.size(),
+                    userList
+            ));
+        } catch (Exception e) {
+            log.error("Erro ao listar usuários: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Erro ao listar usuários: " + e.getMessage()));
+        }
     }
 
     @PostMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> createUser(
             @RequestBody @Valid CreateUserRequest request,
             @AuthenticationPrincipal UserDetails userDetails
@@ -104,6 +124,7 @@ public class AdminController {
             newUser.setName(request.name());
             newUser.setEmail(normalizedEmail);
             newUser.setPassword(passwordEncoder.encode(request.password()));
+            newUser.setPasswordSet(true); // Admin define senha, então passwordSet = true
             // Admin pode criar já confirmado (default: false se não especificado)
             newUser.setEmailConfirmed(request.emailConfirmed() != null ? request.emailConfirmed() : false);
             newUser.setAuthProvider("LOCAL");
@@ -337,6 +358,21 @@ public class AdminController {
             String email,
             String role,
             Boolean emailConfirmed
+    ) {}
+
+    public record UserListResponse(
+            String id,
+            String name,
+            String email,
+            String role,
+            Boolean emailConfirmed,
+            String authProvider
+    ) {}
+
+    public record UsersListResponse(
+            String message,
+            Integer total,
+            List<UserListResponse> users
     ) {}
 }
 

@@ -34,7 +34,7 @@ export class CreateUserPageComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    this.http.post(`${this.API_URL}/api/admin/users`, this.form.value).subscribe({
+    this.http.post(`${this.API_URL}/api/v1/admin/users`, this.form.value).subscribe({
       next: () => {
         this.router.navigate(['/admin/users']);
       },

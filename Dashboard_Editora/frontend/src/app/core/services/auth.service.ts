@@ -126,7 +126,7 @@ export class AuthService {
   }
 
   getUserProfile(): Observable<User> {
-    return this.http.get<User>(`${this.API_URL}/api/user/profile`).pipe(
+    return this.http.get<User>(`${this.API_URL}/api/v1/user/profile`).pipe(
       tap(user => {
         this._currentUser.set(user);
         localStorage.setItem('currentUser', JSON.stringify(user));

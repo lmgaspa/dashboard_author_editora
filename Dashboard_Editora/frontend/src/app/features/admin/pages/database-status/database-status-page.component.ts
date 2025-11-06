@@ -31,7 +31,7 @@ export class DatabaseStatusPageComponent implements OnInit {
 
   loadStatus(): void {
     this.loading.set(true);
-    this.http.get<DatabaseStatus>(`${this.API_URL}/api/admin/database/status`).subscribe({
+    this.http.get<DatabaseStatus>(`${this.API_URL}/api/v1/admin/database/status`).subscribe({
       next: (status) => {
         this.status.set(status);
         this.loading.set(false);

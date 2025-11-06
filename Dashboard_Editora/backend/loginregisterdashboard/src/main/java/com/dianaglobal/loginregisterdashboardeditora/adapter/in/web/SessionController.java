@@ -286,8 +286,8 @@ public class SessionController {
             }
 
             // 2. Este endpoint requer ADMIN agora - não deve criar usuários aqui
-            // Use /api/admin/users para criar usuários
-            throw new UnsupportedOperationException("Direct user registration is disabled. Use /api/admin/users");
+            // Use /api/v1/admin/users para criar usuários
+            throw new UnsupportedOperationException("Direct user registration is disabled. Use /api/v1/admin/users");
 
         } catch (IllegalArgumentException ex) {
             // validação de domínio, etc.

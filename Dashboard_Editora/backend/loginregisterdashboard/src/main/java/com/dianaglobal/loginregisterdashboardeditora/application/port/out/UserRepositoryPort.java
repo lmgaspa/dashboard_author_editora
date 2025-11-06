@@ -2,6 +2,7 @@ package com.dianaglobal.loginregisterdashboardeditora.application.port.out;
 
 import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepositoryPort {
@@ -14,4 +15,6 @@ public interface UserRepositoryPort {
     void markEmailConfirmed(String userId);
     // NEW: deletar usuário
     void deleteById(String id);
+    // NEW: listar todos os usuários
+    List<User> findAll();
 }

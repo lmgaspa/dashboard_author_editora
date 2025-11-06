@@ -31,7 +31,7 @@ export class AdminInfoPageComponent implements OnInit {
 
   loadAdmins(): void {
     this.loading.set(true);
-    this.http.get<Admin[]>(`${this.API_URL}/api/admin/admin-info`).subscribe({
+    this.http.get<Admin[]>(`${this.API_URL}/api/v1/admin/admin-info`).subscribe({
       next: (admins) => {
         // Garante que sempre seja um array
         this.admins.set(Array.isArray(admins) ? admins : []);

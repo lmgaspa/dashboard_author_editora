@@ -7,7 +7,9 @@ import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -53,5 +55,12 @@ public class JpaUserRepository implements UserRepositoryPort {
             throw new IllegalArgumentException("User not found: " + id);
         }
         repository.deleteById(id);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return repository.findAll().stream()
+                .map(UserEntity::toDomain)
+                .collect(Collectors.toList());
     }
 }

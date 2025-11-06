@@ -7,6 +7,9 @@
         <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(12px);">Usuários</span>
       </h1>
       <p class="text-gray-400 mt-2 text-sm sm:text-base">Gerencie todos os usuários do sistema</p>
+      @if (total() > 0) {
+        <p class="text-gray-500 text-xs mt-1">Total: {{ total() }} usuário(s)</p>
+      }
     </div>
     <a [routerLink]="['/admin/users/create']" 
        class="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 text-sm sm:text-base whitespace-nowrap">
@@ -86,13 +89,26 @@
             }
           </div>
           <div class="flex items-center justify-between pt-4 border-t border-white/10">
-            <span class="text-gray-400 text-xs">Criado em {{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+            @if (user.createdAt) {
+              <span class="text-gray-400 text-xs">Criado em {{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+            } @else {
+              <span class="text-gray-500 text-xs">Data não disponível</span>
+            }
             <div class="flex items-center gap-2">
               <button class="p-2 rounded-lg text-gray-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all duration-200" title="Editar">
                 <span class="material-icons text-lg">edit</span>
               </button>
-              <button class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200" title="Excluir">
-                <span class="material-icons text-lg">delete</span>
+              <button 
+                class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                title="Excluir"
+                (click)="deleteUser(user)"
+                [disabled]="deletingUserId() === user.id"
+              >
+                @if (deletingUserId() === user.id) {
+                  <span class="w-4 h-4 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin inline-block"></span>
+                } @else {
+                  <span class="material-icons text-lg">delete</span>
+                }
               </button>
             </div>
           </div>
@@ -141,15 +157,28 @@
                   }
                 </td>
                 <td class="px-6 py-4">
-                  <span class="text-gray-400 text-sm">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+                  @if (user.createdAt) {
+                    <span class="text-gray-400 text-sm">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+                  } @else {
+                    <span class="text-gray-500 text-sm">-</span>
+                  }
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center justify-center gap-2">
                     <button class="p-2 rounded-lg text-gray-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all duration-200 group-hover:scale-110" title="Editar usuário">
                       <span class="material-icons text-lg">edit</span>
                     </button>
-                    <button class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group-hover:scale-110" title="Excluir usuário">
-                      <span class="material-icons text-lg">delete</span>
+                    <button 
+                      class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group-hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed" 
+                      title="Excluir usuário"
+                      (click)="deleteUser(user)"
+                      [disabled]="deletingUserId() === user.id"
+                    >
+                      @if (deletingUserId() === user.id) {
+                        <span class="w-4 h-4 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin inline-block"></span>
+                      } @else {
+                        <span class="material-icons text-lg">delete</span>
+                      }
                     </button>
                   </div>
                 </td>

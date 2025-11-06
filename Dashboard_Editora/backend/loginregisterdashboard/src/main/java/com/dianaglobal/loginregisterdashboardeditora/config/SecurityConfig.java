@@ -59,12 +59,6 @@ public class SecurityConfig {
                                 "/api-docs/**"
                         ).permitAll()
                         
-                        // Painel admin - apenas ADMIN
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        
-                        // Painel user - apenas USER ou ADMIN
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
-
                         // --- ROTAS PÚBLICAS DA V1 ---
                         // login/oauth/refresh/etc (register agora é apenas ADMIN)
                         .requestMatchers("/api/v1/auth/login").permitAll()
@@ -75,7 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/forgot-password").permitAll()
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
                         
-                        // REGISTRO - APENAS ADMIN (endpoint movido para /api/admin/users)
+                        // REGISTRO - APENAS ADMIN (endpoint movido para /api/v1/admin/users)
                         .requestMatchers("/api/v1/auth/register").hasRole("ADMIN")
 
                         // confirmação de conta (request link, resend, verify)
@@ -83,6 +77,12 @@ public class SecurityConfig {
 
                         // esqueci-minha-senha e reset já estão dentro de /api/v1/auth/**,
                         // então já estão cobertas acima.
+
+                        // Painel admin - apenas ADMIN (agora em v1)
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        
+                        // Painel user - apenas USER ou ADMIN (agora em v1)
+                        .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
 
                         // tudo o resto precisa de JWT válido
                         .anyRequest().authenticated()
