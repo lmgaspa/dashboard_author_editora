@@ -124,15 +124,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
-    // 429 - Throttling de reenvio
-    @ExceptionHandler(com.dianaglobal.loginregisterdashboardeditora.application.service.exception.TooManyRequestsException.class)
-    public ResponseEntity<Object> handleTooManyRequests(Exception ex, HttpServletRequest req) {
-        Map<String, Object> body = baseBody(HttpStatus.TOO_MANY_REQUESTS, "Aguarde para reenviar.", req);
-        body.put("error", "TOO_MANY_REQUESTS");
-        return new ResponseEntity<>(body, HttpStatus.TOO_MANY_REQUESTS);
-    }
-
-    // 410 - Token expirado
+    // 410 - Token expirado (para mudança de email)
     @ExceptionHandler(com.dianaglobal.loginregisterdashboardeditora.application.service.exception.TokenExpiredException.class)
     public ResponseEntity<Object> handleTokenExpired(Exception ex, HttpServletRequest req) {
         Map<String, Object> body = baseBody(HttpStatus.GONE, "Token expirado.", req);
@@ -140,14 +132,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.GONE);
     }
 
-    // 409 - Token já usado/invalidado
+    // 409 - Token já usado/invalidado (para mudança de email)
     @ExceptionHandler(com.dianaglobal.loginregisterdashboardeditora.application.service.exception.TokenAlreadyUsedException.class)
     public ResponseEntity<Object> handleTokenUsed(Exception ex, HttpServletRequest req) {
         Map<String, Object> body = baseBody(HttpStatus.CONFLICT, "Token já utilizado.", req);
         body.put("error", "TOKEN_ALREADY_USED");
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
-
 
     /* 500 - Fallback */
     @ExceptionHandler(Exception.class)

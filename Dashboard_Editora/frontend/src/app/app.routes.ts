@@ -31,10 +31,6 @@ export const routes: Routes = [
       {
         path: 'reset-password',
         loadComponent: () => import('./features/auth/pages/reset-password/reset-password-page.component').then(m => m.ResetPasswordPageComponent)
-      },
-      {
-        path: 'confirm-account',
-        loadComponent: () => import('./features/auth/pages/confirm-account/confirm-account-page.component').then(m => m.ConfirmAccountPageComponent)
       }
     ]
   },

@@ -24,14 +24,6 @@ public class UserConfig {
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username)
                 .map(user -> {
-                    // Para usuários Google OAuth que ainda não setaram senha,
-                    // usar uma senha dummy que nunca será validada via password
-                    String password = user.getPassword();
-                    if ("GOOGLE".equalsIgnoreCase(user.getAuthProvider()) && !user.isPasswordSet()) {
-                        // Usar senha dummy que nunca será usada para login por senha
-                        password = "{noop}dummy-google-oauth-user";
-                    }
-                    
                     // Converter Role para authorities Spring Security
                     List<SimpleGrantedAuthority> authorities = List.of(
                             new SimpleGrantedAuthority("ROLE_" + (user.getRole() != null ? user.getRole().name() : Role.USER.name()))
@@ -39,7 +31,7 @@ public class UserConfig {
                     
                     return (UserDetails) org.springframework.security.core.userdetails.User
                             .withUsername(user.getEmail())
-                            .password(password)
+                            .password(user.getPassword() != null ? user.getPassword() : "{noop}") // Sempre tem senha (admin define)
                             .authorities(authorities)
                             .build();
                 })

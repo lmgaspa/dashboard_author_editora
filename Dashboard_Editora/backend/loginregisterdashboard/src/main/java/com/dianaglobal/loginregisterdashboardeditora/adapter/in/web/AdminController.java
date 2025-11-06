@@ -1,11 +1,9 @@
 package com.dianaglobal.loginregisterdashboardeditora.adapter.in.web;
 
-import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.AccountConfirmationTokenRepository;
+import com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail.DeleteAccountEmailService;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.EmailChangeTokenRepository;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.PasswordResetTokenRepository;
-import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.RefreshTokenRepository;
 import com.dianaglobal.loginregisterdashboardeditora.application.port.out.UserRepositoryPort;
-import com.dianaglobal.loginregisterdashboardeditora.application.service.AccountConfirmationService;
 import com.dianaglobal.loginregisterdashboardeditora.application.service.UserIdGeneratorService;
 import com.dianaglobal.loginregisterdashboardeditora.config.ApiPaths;
 import com.dianaglobal.loginregisterdashboardeditora.domain.model.Role;
@@ -40,12 +38,11 @@ public class AdminController {
     private final UserRepositoryPort userRepositoryPort;
     private final JdbcTemplate jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
-    private final AccountConfirmationService accountConfirmationService;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
-    private final AccountConfirmationTokenRepository accountConfirmationTokenRepository;
     private final EmailChangeTokenRepository emailChangeTokenRepository;
     private final UserIdGeneratorService userIdGeneratorService;
+    private final com.dianaglobal.loginregisterdashboardeditora.application.event.UserConfirmedListener userConfirmedListener;
+    private final DeleteAccountEmailService deleteAccountEmailService;
     
     @Value("${application.frontend.base-url}")
     private String frontendBaseUrl;
@@ -142,12 +139,17 @@ public class AdminController {
 
             userRepositoryPort.save(newUser);
 
-            // Se não estiver confirmado, enviar email de confirmação
-            if (!newUser.isEmailConfirmed()) {
-                accountConfirmationService.requestConfirmation(
-                        normalizedEmail,
-                        frontendBaseUrl
-                );
+            // Enviar welcome email se o usuário já estiver confirmado
+            if (newUser.isEmailConfirmed()) {
+                log.info("[ADMIN CREATE USER] Sending welcome email to {} (name: {})", normalizedEmail, newUser.getName());
+                try {
+                    userConfirmedListener.onUserConfirmed(newUser);
+                    log.info("[ADMIN CREATE USER] ✅ Welcome email successfully sent to {}", normalizedEmail);
+                } catch (Exception e) {
+                    log.error("[ADMIN CREATE USER] ❌ Failed to send welcome email to {}: {}", normalizedEmail, e.getMessage(), e);
+                }
+            } else {
+                log.info("[ADMIN CREATE USER] User {} created but email not confirmed - no welcome email sent", normalizedEmail);
             }
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -279,15 +281,22 @@ public class AdminController {
             // Limpar tokens relacionados antes de deletar o usuário
             log.info("[DELETE USER {}] Cleaning related tokens for user: {}", requestId, userId);
             try {
-                // Refresh tokens usa email, não userId
-                refreshTokenRepository.deleteByEmail(userToDelete.getEmail());
                 passwordResetTokenRepository.deleteByUserId(userId);
-                accountConfirmationTokenRepository.deleteByUserId(userId);
                 emailChangeTokenRepository.deleteByUserId(userId);
                 log.info("[DELETE USER {}] All tokens cleaned successfully", requestId);
             } catch (Exception e) {
                 log.warn("[DELETE USER {}] Warning: Some tokens could not be deleted: {}", requestId, e.getMessage());
                 // Continuar com a deleção mesmo se alguns tokens não forem deletados
+            }
+
+            // Enviar email de notificação de deleção antes de deletar o usuário
+            log.info("[DELETE USER {}] Sending delete account email to {} (name: {})", requestId, userToDelete.getEmail(), userToDelete.getName());
+            try {
+                deleteAccountEmailService.send(userToDelete.getEmail(), userToDelete.getName());
+                log.info("[DELETE USER {}] ✅ Delete account email successfully sent to {}", requestId, userToDelete.getEmail());
+            } catch (Exception e) {
+                log.error("[DELETE USER {}] ❌ Failed to send delete account email to {}: {}", requestId, userToDelete.getEmail(), e.getMessage(), e);
+                // Continuar com a deleção mesmo se o email falhar
             }
 
             // Deletar o usuário

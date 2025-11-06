@@ -51,7 +51,7 @@ public class MailConfig {
 
     @Bean
     public MailBranding mailBranding(
-            @Value("${application.brand.name:Diana Global}") String brandName,
+            @Value("${application.brand.name:Painel do Autor da Editora Via Litterarum}") String brandName,
             @Value("${brand.frontend-url:https://www.dashboard-author-editora.vercel.app}") String frontendUrl,
             @Value("${application.brand.logo-url:https://www.andescoresoftware.com.br/AndesCore.jpg}") String logoUrl
     ) {

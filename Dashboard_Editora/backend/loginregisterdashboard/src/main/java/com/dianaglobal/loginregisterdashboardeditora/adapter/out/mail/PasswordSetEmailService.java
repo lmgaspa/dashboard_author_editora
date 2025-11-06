@@ -29,62 +29,42 @@ public class PasswordSetEmailService {
      * @param toEmail recipient e-mail
      * @param name    user name (can be null/blank)
      * @param firstDefinition true = first password setup; false = password change
-     * @param isGoogleUser true = user came from Google OAuth; false = traditional user
      */
-    public void send(String toEmail, String name, boolean firstDefinition, boolean isGoogleUser) {
+    public void send(String toEmail, String name, boolean firstDefinition) {
         try {
-            String subject = buildSubject(firstDefinition, isGoogleUser);
-            String html = buildHtml(name, firstDefinition, isGoogleUser);
+            String subject = buildSubject(firstDefinition);
+            String html = buildHtml(name, firstDefinition);
 
             MimeMessagePreparator preparator = MailConfig.createPreparator(toEmail, subject, html, fromAddress, branding.brandName());
             mailSender.send(preparator);
             
-            log.info("Password {} e-mail sent to {} (Google user: {})", (firstDefinition ? "creation" : "change"), toEmail, isGoogleUser);
+            log.info("Password {} e-mail sent to {}", (firstDefinition ? "creation" : "change"), toEmail);
         } catch (MailSendException e) {
             log.error("Error sending password {} e-mail to {}: {}", (firstDefinition ? "creation" : "change"), toEmail, e.getMessage(), e);
         }
     }
 
-    /**
-     * Legacy method for backward compatibility.
-     */
-    public void send(String toEmail, String name, boolean firstDefinition) {
-        send(toEmail, name, firstDefinition, false);
-    }
-
     public void sendFirstDefinition(String toEmail, String name) { send(toEmail, name, true); }
     public void sendChange(String toEmail, String name) { send(toEmail, name, false); }
-    
-    public void sendFirstDefinitionForGoogle(String toEmail, String name) { send(toEmail, name, true, true); }
 
-    private String buildSubject(boolean firstDefinition, boolean isGoogleUser) {
-        if (firstDefinition && isGoogleUser) {
-            return "🎉 Sua conta está completa! - " + branding.brandName();
-        } else if (firstDefinition) {
+    private String buildSubject(boolean firstDefinition) {
+        if (firstDefinition) {
             return "✅ Sua senha foi criada em " + branding.brandName();
         } else {
             return "🔐 Sua senha do " + branding.brandName() + " foi alterada";
         }
     }
 
-    private String buildHtml(String name, boolean firstDefinition, boolean isGoogleUser) {
+    private String buildHtml(String name, boolean firstDefinition) {
         String safeName = (name == null || name.isBlank()) ? "você" : escapeHtml(name);
 
         String title, lead, sub, actionHref, actionLabel, advisory;
 
-        if (firstDefinition && isGoogleUser) {
-            // Special message for Google users completing their account
-            title = "Conta Completa";
-            lead = "Sua conta foi criada com sucesso e está 100%% configurada";
-            sub = "Agora você pode fazer login usando tanto o Google quanto sua combinação de e-mail/senha. Sua conta está pronta para uso completo!";
-            actionHref = branding.frontendUrl() + "/dashboard";
-            actionLabel = "Acessar sua conta";
-            advisory = "Bem-vindo ao " + branding.brandName() + "! Se você não solicitou isso, entre em contato com o suporte imediatamente.";
-        } else if (firstDefinition) {
-            // Traditional user password creation
+        if (firstDefinition) {
+            // Password creation
             title = "Senha criada";
             lead = "Sua senha foi criada com sucesso";
-            sub = "A partir de agora, você pode fazer login usando seu e-mail e esta senha (além do Login com Google).";
+            sub = "A partir de agora, você pode fazer login usando seu e-mail e esta senha.";
             actionHref = branding.frontendUrl() + "/login";
             actionLabel = "Acessar sua conta";
             advisory = "Se você não solicitou isso, recomendamos alterar sua senha.";
@@ -154,7 +134,7 @@ public class PasswordSetEmailService {
                 logoUrl,                    // header logo src
                 branding.brandName(),       // header logo alt
                 branding.brandName(),       // header brand text
-                isGoogleUser && firstDefinition ? "Bem-vindo!" : "Aviso de segurança da conta", // header subtitle
+                firstDefinition ? "Bem-vindo!" : "Aviso de segurança da conta", // header subtitle
                 safeName,                   // Hello, X
                 lead,                       // "Password created/changed ..."
                 branding.brandName(),       // "... at BRAND"

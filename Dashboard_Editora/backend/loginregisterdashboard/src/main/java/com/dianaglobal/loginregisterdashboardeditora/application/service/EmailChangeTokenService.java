@@ -28,3 +28,4 @@ public interface EmailChangeTokenService {
      */
     Payload consume(String rawToken);
 }
+

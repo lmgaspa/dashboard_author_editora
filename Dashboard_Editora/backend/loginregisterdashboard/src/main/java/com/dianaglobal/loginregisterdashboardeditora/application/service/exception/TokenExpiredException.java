@@ -3,3 +3,4 @@ package com.dianaglobal.loginregisterdashboardeditora.application.service.except
 public class TokenExpiredException extends RuntimeException {
     public TokenExpiredException(String msg) { super(msg); }
 }
+

@@ -99,3 +99,4 @@ public class EmailChangeTokenServiceImpl implements EmailChangeTokenService {
         return new Payload(t.getUserId(), t.getNewEmailNormalized());
     }
 }
+

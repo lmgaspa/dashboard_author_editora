@@ -16,11 +16,13 @@ public class WelcomeEmailOnConfirm implements UserConfirmedListener {
 
     @Override
     public void onUserConfirmed(User user) {
+        log.info("[WELCOME EMAIL] Preparing to send welcome email to {} (name: {})", user.getEmail(), user.getName());
         try {
             welcomeEmailService.send(user.getEmail(), user.getName());
-            log.info("Welcome e-mail successfully sent to {}", user.getEmail());
+            log.info("[WELCOME EMAIL] ✅ Successfully sent welcome email to {}", user.getEmail());
         } catch (Exception e) {
-            log.warn("Failed to send welcome e-mail to {}: {}", user.getEmail(), e.getMessage());
+            log.error("[WELCOME EMAIL] ❌ Failed to send welcome email to {}: {}", user.getEmail(), e.getMessage(), e);
+            throw e; // Re-throw para que o AdminController possa capturar e logar também
         }
     }
 }

@@ -49,3 +49,4 @@ public class EmailChangeTokenEntity {
         return Boolean.TRUE.equals(valid);
     }
 }
+

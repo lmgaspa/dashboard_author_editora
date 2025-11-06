@@ -37,8 +37,7 @@ public class SecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // CSRF padrão do Spring desabilitado.
-                // A gente faz CSRF manualmente via header X-CSRF-Token + cookie httpOnly.
+                // CSRF desabilitado - usando apenas JWT para autenticação
                 .csrf(AbstractHttpConfigurer::disable)
 
                 // CORS usa o bean corsConfigurationSource() lá embaixo
@@ -60,20 +59,14 @@ public class SecurityConfig {
                         ).permitAll()
                         
                         // --- ROTAS PÚBLICAS DA V1 ---
-                        // login/oauth/refresh/etc (register agora é apenas ADMIN)
+                        // login/logout (register agora é apenas ADMIN)
                         .requestMatchers("/api/v1/auth/login").permitAll()
-                        .requestMatchers("/api/v1/auth/google").permitAll() // GET para info OAuth
-                        .requestMatchers("/api/v1/auth/oauth/**").permitAll()
-                        .requestMatchers("/api/v1/auth/refresh-token").permitAll()
                         .requestMatchers("/api/v1/auth/logout").permitAll()
                         .requestMatchers("/api/v1/auth/forgot-password").permitAll()
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
                         
                         // REGISTRO - APENAS ADMIN (endpoint movido para /api/v1/admin/users)
                         .requestMatchers("/api/v1/auth/register").hasRole("ADMIN")
-
-                        // confirmação de conta (request link, resend, verify)
-                        .requestMatchers("/api/v1/confirm/**").permitAll()
 
                         // esqueci-minha-senha e reset já estão dentro de /api/v1/auth/**,
                         // então já estão cobertas acima.
@@ -113,18 +106,17 @@ public class SecurityConfig {
                 "Authorization",
                 "Content-Type",
                 "Accept",
-                "X-CSRF-Token",
                 "X-Requested-With",
                 "Origin",
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
         ));
 
-        // permitir cookies (refresh_token httpOnly + csrf_token)
+        // permitir cookies (se necessário no futuro)
         cfg.setAllowCredentials(true);
 
-        // headers que o browser PODE ENXERGAR na resposta (ex: nosso X-CSRF-Token)
-        cfg.setExposedHeaders(List.of("X-CSRF-Token"));
+        // headers expostos na resposta
+        cfg.setExposedHeaders(List.of());
 
         // cache do preflight
         cfg.setMaxAge(3600L);

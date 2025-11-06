@@ -12,3 +12,4 @@ public interface EmailChangeTokenRepository extends JpaRepository<EmailChangeTok
     Optional<EmailChangeTokenEntity> findByTokenHash(String tokenHash);
     void deleteByUserId(String userId);
 }
+

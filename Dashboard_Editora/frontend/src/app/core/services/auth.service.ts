@@ -1,10 +1,9 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, of, throwError } from 'rxjs';
+import { Observable, tap, catchError } from 'rxjs';
 import { User, AuthResponse, LoginRequest, ResetPasswordRequest, ChangePasswordRequest, ChangeEmailRequest } from '../models/menu-item.model';
 import { environment } from '@/environments/environment';
-import { getCsrfTokenFromCookie, hasCookie } from '../utils/cookie.util';
 
 @Injectable({
   providedIn: 'root'
@@ -113,9 +112,6 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.API_URL}/api/v1/auth/password/reset`, data);
   }
 
-  confirmAccount(token: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.API_URL}/api/v1/auth/confirm`, { token });
-  }
 
   changePassword(data: ChangePasswordRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.API_URL}/api/v1/auth/password/change`, data);
@@ -135,80 +131,14 @@ export class AuthService {
   }
 
   /**
-   * Verifica se o frontend deve tentar fazer refresh do token
-   * @returns true se deve tentar refresh, false caso contrário
+   * Deleta a conta do usuário atual (opcional)
+   * @returns Observable com mensagem de sucesso
    */
-  shouldAttemptRefresh(): boolean {
-    // Verificar se existe cookie de refresh_token
-    const hasRefreshToken = hasCookie('refresh_token');
-    
-    // Lista de páginas públicas onde refresh não deve ser tentado
-    const publicPages = [
-      '/login',
-      '/register',
-      '/forgot-password',
-      '/reset-password',
-      '/confirm-account',
-      '/set-password',
-      '' // landing page
-    ];
-    
-    const currentPath = this.router.url;
-    const isPublicPage = publicPages.some(path => 
-      currentPath.includes(path) || currentPath === path
-    );
-    
-    // Só tenta refresh se tem token E não está em página pública
-    return hasRefreshToken && !isPublicPage;
-  }
-
-  /**
-   * Faz refresh do token de acesso usando o refresh token do cookie
-   * @returns Observable com o novo access token
-   */
-  refreshToken(): Observable<{ token: string }> {
-    // ✅ VALIDAÇÃO: Não faz requisição se não deve
-    if (!this.shouldAttemptRefresh()) {
-      return throwError(() => new Error('Should not refresh token on public pages'));
-    }
-
-    // Obter CSRF token do cookie
-    const csrfToken = getCsrfTokenFromCookie();
-    if (!csrfToken) {
-      return throwError(() => new Error('CSRF token not found'));
-    }
-
-    // Fazer requisição com CSRF token no header
-    const headers = new HttpHeaders({
-      'X-CSRF-Token': csrfToken
-    });
-
-    return this.http.post<{ token: string }>(
-      `${this.API_URL}/api/v1/auth/refresh-token`,
-      {}, // Body vazio - o refresh token vem do cookie
-      {
-        headers,
-        withCredentials: true // Importante para enviar cookies
-      }
-    ).pipe(
-      tap(response => {
-        // Atualizar access token no localStorage
-        if (response.token) {
-          localStorage.setItem('accessToken', response.token);
-        }
-      }),
-      catchError(error => {
-        // Tratar erros
-        if (error.status === 401) {
-          // Token expirado ou inválido - redirecionar para login
-          this.clearAuth();
-        } else if (error.status === 403) {
-          // CSRF inválido - pode tentar novamente ou redirecionar
-          console.warn('CSRF token validation failed');
-          // Tentar novamente pode ser feito aqui, mas por segurança vamos limpar
-          this.clearAuth();
-        }
-        return throwError(() => error);
+  deleteAccount(): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.API_URL}/api/v1/user/account`).pipe(
+      tap(() => {
+        // Limpar autenticação após deletar conta
+        this.clearAuth();
       })
     );
   }
@@ -222,9 +152,6 @@ export class AuthService {
     } else {
       console.error('❌ Token não encontrado na resposta');
     }
-    
-    // refreshToken agora é gerenciado pelo backend via cookies (httpOnly)
-    // Não precisa armazenar no localStorage
     
     if (response.user) {
       localStorage.setItem('currentUser', JSON.stringify(response.user));
@@ -240,7 +167,6 @@ export class AuthService {
 
   private clearAuth(): void {
     localStorage.removeItem('accessToken');
-    // refreshToken está nos cookies, será limpo pelo backend no logout
     localStorage.removeItem('currentUser');
     this._currentUser.set(null);
     this._isAuthenticated.set(false);

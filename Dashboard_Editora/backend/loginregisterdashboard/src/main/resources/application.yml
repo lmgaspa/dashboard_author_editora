@@ -59,7 +59,7 @@ application:
   jwt:
     secret: ${JWT_SECRET}
   brand:
-    name: ${BRAND_NAME}
+    name: ${BRAND_NAME:Painel do Autor da Editora Via Litterarum}
     logo-url: "https://www.andescoresoftware.com.br/AndesCore.jpg"
   frontend:
     base-url: ${FRONTEND_BASE_URL:https://www.dashboard-author-editora.vercel.app}

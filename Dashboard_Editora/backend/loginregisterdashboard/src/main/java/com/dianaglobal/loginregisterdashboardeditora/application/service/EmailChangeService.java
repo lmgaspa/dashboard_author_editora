@@ -4,23 +4,14 @@ package com.dianaglobal.loginregisterdashboardeditora.application.service;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail.EmailChangeAlertOldEmailService;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail.EmailChangeChangedEmailService;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail.EmailChangeConfirmNewEmailService;
-import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.EmailChangeTokenRepository;
-import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.entity.EmailChangeTokenEntity;
 import com.dianaglobal.loginregisterdashboardeditora.application.port.out.UserRepositoryPort;
 import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.Base64;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -28,55 +19,25 @@ import java.util.UUID;
 public class EmailChangeService {
 
     private final UserRepositoryPort userRepository;
-    private final EmailChangeTokenRepository tokenRepo;
+    private final EmailChangeTokenService tokenService;
 
     // Serviços de e-mail divididos em 3 arquivos
     private final EmailChangeConfirmNewEmailService confirmNewEmailService;
     private final EmailChangeChangedEmailService changedEmailService;
     private final EmailChangeAlertOldEmailService alertOldEmailService;
 
-    // Opcional: pode não existir no projeto. Se presente, tentaremos revogar sessões via reflection.
-    @Autowired(required = false)
-    private RefreshTokenService refreshTokenService;
-
     @Value("${application.email-change.minutes:30}")
     private int ttlMinutes;
-
-    private static String sha256Base64(String raw) {
-        try {
-            var md = MessageDigest.getInstance("SHA-256");
-            return Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString(md.digest(raw.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception e) {
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
-    }
 
     public void requestChange(String userId, String newEmailNormalized, String frontendBaseUrl) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Invalida tokens antigos pendentes
-        tokenRepo.findAllByUserIdAndValidTrue(userId).forEach(t -> {
-            t.setValid(false);
-            tokenRepo.save(t);
-        });
+        tokenService.invalidateAllFor(userId);
 
-        // token bruto + hash
-        String rawToken = UUID.randomUUID() + "." + UUID.randomUUID();
-        String hash = sha256Base64(rawToken);
-
-        Instant now = Instant.now();
-        EmailChangeTokenEntity entity = EmailChangeTokenEntity.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .tokenHash(hash)
-                .newEmailNormalized(newEmailNormalized)
-                .createdAt(now)
-                .expiresAt(now.plus(Duration.ofMinutes(ttlMinutes)))
-                .valid(true)
-                .build();
-        tokenRepo.save(entity);
+        // Gera novo token usando o serviço
+        String rawToken = tokenService.issue(userId, newEmailNormalized, Duration.ofMinutes(ttlMinutes));
 
         // link para o NOVO e-mail
         String link = buildConfirmLink(frontendBaseUrl, rawToken);
@@ -98,24 +59,11 @@ public class EmailChangeService {
     }
 
     public void confirm(String rawToken) {
-        if (rawToken == null || rawToken.isBlank()) {
-            throw new IllegalArgumentException("Invalid token");
-        }
-        String hash = sha256Base64(rawToken);
+        // Consome o token usando o serviço (valida expiração, uso único, etc)
+        EmailChangeTokenService.Payload payload = tokenService.consume(rawToken);
 
-        EmailChangeTokenEntity t = tokenRepo.findByTokenHash(hash)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
-
-        Instant now = Instant.now();
-        if (!t.isValid() || t.getConsumedAt() != null) {
-            throw new IllegalArgumentException("Token already used or invalid");
-        }
-        if (t.getExpiresAt() != null && now.isAfter(t.getExpiresAt())) {
-            throw new IllegalArgumentException("Token expired");
-        }
-
-        String userId = t.getUserId();
-        String newEmail = t.getNewEmailNormalized();
+        String userId = payload.userId();
+        String newEmail = payload.newEmail();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -125,16 +73,8 @@ public class EmailChangeService {
         user.setEmailConfirmed(true);
         userRepository.save(user);
 
-        t.setConsumedAt(now);
-        t.setValid(false);
-        tokenRepo.save(t);
-        tokenRepo.findAllByUserIdAndValidTrue(userId).forEach(other -> {
-            other.setValid(false);
-            tokenRepo.save(other);
-        });
-
-        // Revoga sessões do e-mail antigo, se o serviço existir e expuser algum método compatível.
-        tryRevokeAllSessions(oldEmail);
+        // Invalida outros tokens pendentes do usuário
+        tokenService.invalidateAllFor(userId);
 
         try {
             changedEmailService.sendChanged(newEmail, user.getName());
@@ -145,37 +85,6 @@ public class EmailChangeService {
         log.info("[EMAIL-CHANGE] user {} changed e-mail {} -> {}", userId, oldEmail, newEmail);
     }
 
-    private void tryRevokeAllSessions(String oldEmail) {
-        if (refreshTokenService == null || oldEmail == null || oldEmail.isBlank()) return;
-        try {
-            // Tentativas de métodos comuns via reflection (sem quebrar o build se não existir)
-            Method m;
-            try {
-                m = refreshTokenService.getClass().getMethod("revokeAllFor", String.class);
-                m.invoke(refreshTokenService, oldEmail);
-                log.info("[EMAIL-CHANGE] revoked all sessions for {}", oldEmail);
-                return;
-            } catch (NoSuchMethodException ignore) {}
-
-            try {
-                m = refreshTokenService.getClass().getMethod("revokeAllForEmail", String.class);
-                m.invoke(refreshTokenService, oldEmail);
-                log.info("[EMAIL-CHANGE] revoked all sessions for {}", oldEmail);
-                return;
-            } catch (NoSuchMethodException ignore) {}
-
-            try {
-                m = refreshTokenService.getClass().getMethod("revokeAll", String.class);
-                m.invoke(refreshTokenService, oldEmail);
-                log.info("[EMAIL-CHANGE] revoked all sessions for {}", oldEmail);
-                return;
-            } catch (NoSuchMethodException ignore) {}
-
-            log.debug("[EMAIL-CHANGE] RefreshTokenService has no revokeAll* method; skipping session revocation");
-        } catch (Exception e) {
-            log.warn("[EMAIL-CHANGE] revoke sessions warn: {}", e.getMessage());
-        }
-    }
 
     private static String buildConfirmLink(String frontendBaseUrl, String token) {
         String base = (frontendBaseUrl == null || frontendBaseUrl.isBlank())

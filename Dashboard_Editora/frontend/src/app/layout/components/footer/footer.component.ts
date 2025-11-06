@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
           <!-- Copyright e Informações -->
           <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4 text-center md:text-left">
             <div class="flex flex-col md:flex-row items-center gap-2 md:gap-3">
-              <span class="text-gray-300 text-sm font-medium">© 2025 AndesCore</span>
+              <span class="text-gray-300 text-sm font-medium">© 2025 AndesCore Software</span>
               <span class="hidden md:inline text-gray-500 text-sm">•</span>
               <span class="text-gray-400 text-xs md:text-sm">Todos os direitos reservados</span>
             </div>
