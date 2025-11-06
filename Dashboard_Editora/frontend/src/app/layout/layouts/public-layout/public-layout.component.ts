@@ -16,16 +16,15 @@ import { FooterComponent } from '../../components/footer/footer.component';
   `,
   styles: [`
     .public-layout {
-      min-height: 100vh;
       width: 100%;
       display: flex;
       flex-direction: column;
       position: relative;
     }
     .public-content {
-      flex: 1;
       width: 100%;
       display: block;
+      flex-shrink: 0;
     }
   `]
 })

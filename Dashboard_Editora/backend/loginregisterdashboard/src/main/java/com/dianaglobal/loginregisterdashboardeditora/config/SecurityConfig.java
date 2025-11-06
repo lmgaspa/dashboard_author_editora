@@ -68,6 +68,7 @@ public class SecurityConfig {
                         // --- ROTAS PÚBLICAS DA V1 ---
                         // login/oauth/refresh/etc (register agora é apenas ADMIN)
                         .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/google").permitAll() // GET para info OAuth
                         .requestMatchers("/api/v1/auth/oauth/**").permitAll()
                         .requestMatchers("/api/v1/auth/refresh-token").permitAll()
                         .requestMatchers("/api/v1/auth/logout").permitAll()
@@ -138,3 +139,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
+//

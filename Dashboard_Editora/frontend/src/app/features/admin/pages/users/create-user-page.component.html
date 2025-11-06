@@ -1,121 +1,124 @@
-<div class="max-w-2xl w-full">
+<div class="max-w-2xl w-full mx-auto">
   <!-- Header -->
   <div class="mb-6 sm:mb-8 space-y-2">
-    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-sky-400 via-blue-500 to-sky-400 bg-clip-text text-transparent">
-      Criar Usuário
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black relative">
+      <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Criar Usuário</span>
+      <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(12px);">Criar Usuário</span>
     </h1>
     <p class="text-gray-400 text-sm sm:text-base">Adicione um novo usuário ao sistema</p>
   </div>
 
   <!-- Error Alert -->
   @if (error()) {
-    <div class="mb-6 flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-sm">
-      <span class="material-icons text-red-400 flex-shrink-0 mt-0.5">error_outline</span>
+    <div class="mb-4 sm:mb-6 flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-red-500/10 border border-red-500/30 rounded-lg sm:rounded-xl backdrop-blur-sm">
+      <span class="material-icons text-red-400 flex-shrink-0 mt-0.5 text-lg sm:text-xl">error_outline</span>
       <div>
-        <p class="text-red-300 font-semibold">Erro ao criar usuário</p>
-        <p class="text-red-400/80 text-sm mt-1">{{ error() }}</p>
+        <p class="text-red-300 font-semibold text-sm sm:text-base">Erro ao criar usuário</p>
+        <p class="text-red-400/80 text-xs sm:text-sm mt-1">{{ error() }}</p>
       </div>
     </div>
   }
 
   <!-- Form Card -->
-  <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+  <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 sm:space-y-6">
       <!-- Name Field -->
       <div class="space-y-2">
-        <label for="name" class="block text-sm font-semibold text-gray-200">
+        <label for="name" class="block text-xs sm:text-sm font-semibold text-gray-200">
           Nome Completo
         </label>
         <div class="relative">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">person</span>
+          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">person</span>
           <input 
             type="text" 
             id="name" 
             formControlName="name" 
-            placeholder="Digite o nome completo"
-            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200"
+            placeholder=""
+            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
             [class.focus:border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
           />
         </div>
         @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="text-red-400 text-xs">Nome é obrigatório</p>
+          <p class="text-red-400 text-[10px] sm:text-xs">Nome é obrigatório</p>
         }
       </div>
 
       <!-- Email Field -->
       <div class="space-y-2">
-        <label for="email" class="block text-sm font-semibold text-gray-200">
+        <label for="email" class="block text-xs sm:text-sm font-semibold text-gray-200">
           E-mail
         </label>
         <div class="relative">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">email</span>
+          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">email</span>
           <input 
             type="email" 
             id="email" 
             formControlName="email" 
-            placeholder="usuario@exemplo.com"
-            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200"
+            placeholder="User@gmail.com"
+            autocomplete="off"
+            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [class.border-red-500]="form.get('email')?.invalid && form.get('email')?.touched"
           />
         </div>
         @if (form.get('email')?.invalid && form.get('email')?.touched) {
-          <p class="text-red-400 text-xs">E-mail inválido</p>
+          <p class="text-red-400 text-[10px] sm:text-xs">E-mail inválido</p>
         }
       </div>
 
       <!-- Password Field -->
       <div class="space-y-2">
-        <label for="password" class="block text-sm font-semibold text-gray-200">
+        <label for="password" class="block text-xs sm:text-sm font-semibold text-gray-200">
           Senha
         </label>
         <div class="relative">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">lock</span>
+          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">lock</span>
           <input 
             type="password" 
             id="password" 
             formControlName="password" 
-            placeholder="Mínimo 6 caracteres"
-            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200"
+            placeholder="Senhadousuario"
+            autocomplete="new-password"
+            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [class.border-red-500]="form.get('password')?.invalid && form.get('password')?.touched"
           />
         </div>
         @if (form.get('password')?.invalid && form.get('password')?.touched) {
-          <p class="text-red-400 text-xs">Senha deve ter pelo menos 6 caracteres</p>
+          <p class="text-red-400 text-[10px] sm:text-xs">Senha deve ter pelo menos 6 caracteres</p>
         }
       </div>
 
       <!-- Role Field -->
       <div class="space-y-2">
-        <label for="role" class="block text-sm font-semibold text-gray-200">
+        <label for="role" class="block text-xs sm:text-sm font-semibold text-gray-200">
           Perfil de Acesso
         </label>
         <div class="relative">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">badge</span>
+          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">badge</span>
           <select 
             id="role" 
             formControlName="role" 
-            class="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 cursor-pointer appearance-none"
+            class="w-full pl-10 sm:pl-12 pr-8 sm:pr-10 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 cursor-pointer appearance-none text-sm sm:text-base"
           >
             <option value="USER" class="bg-[#0f172a] text-white">Usuário</option>
             <option value="ADMIN" class="bg-[#0f172a] text-white">Administrador</option>
           </select>
-          <span class="absolute right-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 pointer-events-none">expand_more</span>
+          <span class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 pointer-events-none text-lg sm:text-xl">expand_more</span>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-white/10">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end pt-4 sm:pt-6 border-t border-white/10">
         <button 
           type="button" 
-          class="px-6 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-200"
+          class="px-4 sm:px-6 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-200 text-sm sm:text-base"
           (click)="onCancel()"
         >
           Cancelar
         </button>
         <button 
           type="submit" 
-          class="px-6 py-3.5 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg flex items-center justify-center gap-2"
+          class="px-4 sm:px-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
           [disabled]="form.invalid || loading()"
         >
           @if (loading()) {

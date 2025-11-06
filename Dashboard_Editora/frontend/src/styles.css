@@ -110,8 +110,7 @@
     font-size: theme('fontSize.base.0');             /* escala maior */
     line-height: theme('fontSize.base.1.lineHeight');/* caminho correto */
     transition: background-color .25s ease, color .25s ease, border-color .25s ease;
-    min-height: 100vh;
-    width: 100%;
+      width: 100%;
     margin: 0;
     padding: 0;
   }
@@ -120,13 +119,11 @@
   router-outlet {
     display: block;
     width: 100%;
-    height: 100%;
   }
 
   router-outlet ~ * {
     display: block;
     width: 100%;
-    min-height: 100%;
   }
 
   h1 {

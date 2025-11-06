@@ -137,6 +137,22 @@ public class SessionController {
     // ------------------------------------------------------------------------------------
     // LOGIN VIA GOOGLE OAUTH
     // ------------------------------------------------------------------------------------
+    
+    // Endpoint GET para obter informações de configuração do OAuth (se necessário)
+    @GetMapping(value = "/google", produces = "application/json")
+    public ResponseEntity<?> getGoogleOAuthInfo() {
+        // Retorna informações sobre o OAuth Google (se habilitado)
+        // O frontend deve usar POST /oauth/google para fazer login
+        if (googleTokenVerifier == null) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
+                    .body(new MessageResponse("Google OAuth not configured on the server"));
+        }
+        
+        // Retorna status OK indicando que OAuth está disponível
+        // O frontend deve fazer POST /oauth/google com o idToken
+        return ResponseEntity.ok(new MessageResponse("Google OAuth is available. Use POST /api/v1/auth/oauth/google with idToken"));
+    }
+    
     @PostMapping(value = "/oauth/google", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> oauthWithGoogle(
             @RequestBody @Valid OAuthGoogleRequest req,

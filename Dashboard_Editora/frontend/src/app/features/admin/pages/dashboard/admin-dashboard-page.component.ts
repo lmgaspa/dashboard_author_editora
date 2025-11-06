@@ -11,8 +11,9 @@ import { AuthService } from '@/app/core/services/auth.service';
     <div class="space-y-1.5">
       <!-- Header Section -->
       <div>
-        <h1 class="text-lg font-bold bg-gradient-to-r from-sky-400 via-blue-500 to-sky-400 bg-clip-text text-transparent">
-          Dashboard Administrativo
+        <h1 class="text-lg font-bold relative">
+          <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dashboard Administrativo</span>
+          <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(8px);">Dashboard Administrativo</span>
         </h1>
         <p class="text-xs text-gray-400 mt-0.5">
           <span class="text-white">{{ authService.currentUser()?.name }}</span>
@@ -20,7 +21,7 @@ import { AuthService } from '@/app/core/services/auth.service';
       </div>
 
       <!-- Quick Actions Cards -->
-      <div class="grid grid-cols-3 gap-1.5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
         <!-- Usuários Card -->
         <a [routerLink]="['/admin/users']" 
            class="group relative bg-gradient-to-br from-sky-500/10 via-blue-600/10 to-sky-500/10 backdrop-blur-xl border border-sky-500/20 rounded-md p-2 shadow-sm hover:shadow-md hover:shadow-sky-500/20 transition-all duration-200 hover:border-sky-400/40 cursor-pointer overflow-hidden">

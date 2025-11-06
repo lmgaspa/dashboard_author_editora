@@ -128,9 +128,5 @@ export class LoginPageComponent implements OnInit {
       }
     });
   }
-
-  loginWithGoogle(): void {
-    this.authService.loginWithGoogle();
-  }
 }
 

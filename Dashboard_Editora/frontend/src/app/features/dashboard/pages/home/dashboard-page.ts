@@ -26,8 +26,8 @@ import { OrdersSoldComponent } from '../../blocks/orders-sold/orders-sold-compon
     NotificationBellComponent,
   ],
   template: `
-    <div class="min-h-screen bg-[color:var(--bg)]">
-      <div class="mx-auto w-full [max-width:100vw] px-3 md:px-6 py-6 space-y-6">
+    <div class="bg-[color:var(--bg)]">
+      <div class="mx-auto w-full [max-width:100vw] px-3 md:px-6 pt-2 pb-3 space-y-4">
         <!-- Header -->
         <div class="flex flex-wrap items-center gap-4">
           <h1 class="text-2xl md:text-3xl font-bold text-[color:var(--ink-1)] min-w-0 grow">

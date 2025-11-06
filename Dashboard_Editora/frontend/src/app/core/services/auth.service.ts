@@ -98,11 +98,6 @@ export class AuthService {
       );
   }
 
-  loginWithGoogle(): void {
-    // Redirecionar para endpoint OAuth do backend
-    window.location.href = `${this.API_URL}/api/v1/auth/google`;
-  }
-
   logout(): void {
     this.http.post(`${this.API_URL}/api/v1/auth/logout`, {}).subscribe({
       next: () => this.clearAuth(),
