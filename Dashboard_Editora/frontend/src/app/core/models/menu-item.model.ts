@@ -39,7 +39,14 @@ export interface ChangePasswordRequest {
 }
 
 export interface ChangeEmailRequest {
+  newEmail: string;
+}
+
+export interface ProfileResponse {
+  id: string;
+  name: string;
   email: string;
-  password: string;
+  authProvider: string;
+  passwordSet: boolean;
 }
 

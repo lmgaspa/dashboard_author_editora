@@ -55,7 +55,7 @@ export class LoginPageComponent implements OnInit {
 
   readonly loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(8)]]
   });
 
   readonly loading = signal<boolean>(false);

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dianaglobal.loginregisterdashboardeditora.adapter.in.dto.ApiError;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.in.dto.login.LoginRequest;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.in.dto.login.LoginResponse;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.in.dto.password.ForgotPasswordRequest;
@@ -65,14 +64,8 @@ public class SessionController {
                     .body(new MessageResponse("Invalid credentials"));
         }
 
-        // e-mail não confirmado => erro tipado EMAIL_UNCONFIRMED
-        if (!user.isEmailConfirmed()) {
-            var body = ApiError.builder()
-                    .error("EMAIL_UNCONFIRMED")
-                    .message("Unconfirmed email.")
-                    .build();
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(body); // 409
-        }
+        // Removida verificação de email confirmado - usuários são criados apenas por admins
+        // e não há mais fluxo de confirmação de email
 
         // Gerar apenas JWT access token
         String access = jwtService.generateToken(user.getEmail());

@@ -6,6 +6,7 @@ import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.Ema
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.PasswordResetTokenRepository;
 import com.dianaglobal.loginregisterdashboardeditora.application.port.out.UserRepositoryPort;
 import com.dianaglobal.loginregisterdashboardeditora.config.ApiPaths;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -84,6 +85,61 @@ public class UserPanelController {
         return ResponseEntity.ok(profile);
     }
 
+    @PutMapping("/profile")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Transactional
+    public ResponseEntity<?> updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody @Valid UpdateProfileRequest request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Not authenticated"));
+        }
+
+        try {
+            var user = userRepositoryPort.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Atualizar nome se fornecido
+            if (request.name() != null && !request.name().trim().isEmpty()) {
+                String newName = request.name().trim();
+                log.info("[UPDATE PROFILE] Updating name for user {}: {} -> {}", user.getEmail(), user.getName(), newName);
+                user.setName(newName);
+            }
+
+            // Salvar alterações
+            userRepositoryPort.save(user);
+
+            log.info("[UPDATE PROFILE] ✅ Profile updated successfully for user: {}", user.getEmail());
+
+            // Retornar perfil atualizado
+            String provider = user.getAuthProvider();
+            if (provider == null || provider.trim().isEmpty()) {
+                provider = "LOCAL";
+            }
+
+            var updatedProfile = new ProfileResponseDTO(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    provider,
+                    user.isPasswordSet()
+            );
+
+            return ResponseEntity.ok(updatedProfile);
+
+        } catch (IllegalArgumentException e) {
+            log.error("[UPDATE PROFILE] ❌ User not found: {}", userDetails.getUsername());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
+        } catch (Exception e) {
+            log.error("[UPDATE PROFILE] ❌ Error updating profile: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Erro ao atualizar perfil: " + e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/account")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Transactional
@@ -150,5 +206,9 @@ public class UserPanelController {
     ) {}
 
     public record MessageResponse(String message) {}
+
+    public record UpdateProfileRequest(
+            String name  // Nome do usuário (opcional, mas se fornecido deve ser válido)
+    ) {}
 }
 

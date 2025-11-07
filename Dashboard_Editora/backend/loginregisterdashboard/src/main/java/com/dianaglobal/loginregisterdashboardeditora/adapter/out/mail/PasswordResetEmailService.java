@@ -3,7 +3,7 @@ package com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail;
 
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSendException;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
@@ -33,9 +33,8 @@ public class PasswordResetEmailService {
             mailSender.send(preparator);
             
             log.info("Password reset e-mail sent to {}", to);
-        } catch (MailSendException e) {
+        } catch (MailException e) {
             log.error("Error sending password reset e-mail to {}: {}", to, e.getMessage(), e);
-            throw new RuntimeException("Failed to send password reset e-mail", e);
         }
     }
 

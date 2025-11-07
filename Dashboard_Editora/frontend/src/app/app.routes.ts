@@ -90,10 +90,6 @@ export const routes: Routes = [
           {
             path: 'admin-info',
             loadComponent: () => import('./features/admin/pages/admin-info/admin-info-page.component').then(m => m.AdminInfoPageComponent)
-          },
-          {
-            path: 'database/status',
-            loadComponent: () => import('./features/admin/pages/database-status/database-status-page.component').then(m => m.DatabaseStatusPageComponent)
           }
         ]
       }

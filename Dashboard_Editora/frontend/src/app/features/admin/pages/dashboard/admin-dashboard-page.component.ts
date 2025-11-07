@@ -21,7 +21,7 @@ import { AuthService } from '@/app/core/services/auth.service';
       </div>
 
       <!-- Quick Actions Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-w-2xl mx-auto">
         <!-- Usuários Card -->
         <a [routerLink]="['/admin/users']" 
            class="group relative bg-gradient-to-br from-sky-500/10 via-blue-600/10 to-sky-500/10 backdrop-blur-xl border border-sky-500/20 rounded-md p-2 shadow-sm hover:shadow-md hover:shadow-sky-500/20 transition-all duration-200 hover:border-sky-400/40 cursor-pointer overflow-hidden">
@@ -54,24 +54,6 @@ import { AuthService } from '@/app/core/services/auth.service';
             </h3>
             <p class="text-[10px] text-gray-400 leading-tight">
               Ver lista
-            </p>
-          </div>
-        </a>
-
-        <!-- Status do Sistema Card -->
-        <a [routerLink]="['/admin/database/status']" 
-           class="group relative bg-gradient-to-br from-emerald-500/10 via-teal-600/10 to-emerald-500/10 backdrop-blur-xl border border-emerald-500/20 rounded-md p-2 shadow-sm hover:shadow-md hover:shadow-emerald-500/20 transition-all duration-200 hover:border-emerald-400/40 cursor-pointer overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-          
-          <div class="relative z-10">
-            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-1.5 shadow-sm shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-200">
-              <span class="material-icons text-base text-white">monitoring</span>
-            </div>
-            <h3 class="text-xs font-bold text-white mb-0.5 group-hover:text-emerald-300 transition-colors">
-              Status
-            </h3>
-            <p class="text-[10px] text-gray-400 leading-tight">
-              Banco de dados
             </p>
           </div>
         </a>

@@ -44,7 +44,7 @@ public class UserService {
             userRepository.save(u);
 
             // OCP: evento externo para lidar com efeitos colaterais
-            userConfirmedListener.onUserConfirmed(u);
+            userConfirmedListener.onUserConfirmed(u, null);
         }
     }
 }

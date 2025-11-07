@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@/environments/environment';
 
@@ -29,6 +29,7 @@ interface UsersResponse {
 })
 export class UsersPageComponent implements OnInit {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly API_URL = environment.apiUrl;
 
   readonly users = signal<User[]>([]);
@@ -36,8 +37,15 @@ export class UsersPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly total = signal<number>(0);
   readonly deletingUserId = signal<string | null>(null);
+  readonly success = signal<string | null>(null);
 
   ngOnInit(): void {
+    const navigationState = history.state;
+    if (navigationState?.successMessage) {
+      this.success.set(navigationState.successMessage);
+      history.replaceState({}, '', this.router.url);
+    }
+
     this.loadUsers();
   }
 
@@ -82,9 +90,8 @@ export class UsersPageComponent implements OnInit {
         this.users.update(users => users.filter(u => u.id !== user.id));
         this.total.update(total => Math.max(0, total - 1));
         this.deletingUserId.set(null);
-        
-        // Opcional: mostrar mensagem de sucesso
-        console.log(`Usuário ${user.name} deletado com sucesso`);
+        this.success.set(`Usuário ${user.name} foi excluído com sucesso.`);
+        this.error.set(null);
       },
       error: (err) => {
         console.error('Erro ao deletar usuário:', err);

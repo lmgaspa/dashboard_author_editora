@@ -62,14 +62,9 @@ public class DatabaseInitializer {
                     datasourcePassword = ""; // Fallback
                 }
             }
-            
-            if (datasourceUsername == null || datasourceUsername.isEmpty()) {
-                log.warn("⚠️  DATABASE_USERNAME não está definido. Pulando criação do banco.");
-                return;
-            }
-            
+
             String dbName = extractDatabaseName(datasourceUrl);
-            if (dbName == null || dbName.isEmpty()) {
+            if (dbName.isEmpty()) {
                 log.warn("Não foi possível extrair o nome do banco de dados da URL: {}", datasourceUrl);
                 return;
             }
@@ -84,12 +79,12 @@ public class DatabaseInitializer {
                 
                 // Verifica se o banco existe
                 String checkDb = "SELECT 1 FROM pg_database WHERE datname = '" + dbName.replace("'", "''") + "'";
-                boolean exists = false;
+                boolean databaseExists;
                 try (ResultSet rs = stmt.executeQuery(checkDb)) {
-                    exists = rs.next();
+                    databaseExists = rs.next();
                 }
                 
-                if (!exists) {
+                if (!databaseExists) {
                     log.info("📦 Banco de dados '{}' não existe. Criando...", dbName);
                     // Cria o banco de dados
                     String createDb = "CREATE DATABASE \"" + dbName + "\"";
@@ -99,7 +94,7 @@ public class DatabaseInitializer {
                     log.info("✅ Banco de dados '{}' já existe.", dbName);
                 }
             }
-        } catch (Exception e) {
+        } catch (java.sql.SQLException e) {
             log.warn("⚠️  Erro ao verificar/criar banco de dados: {}", e.getMessage());
             // Não lança exceção para não bloquear a aplicação se o banco já existir
         }
@@ -108,25 +103,21 @@ public class DatabaseInitializer {
     private String extractDatabaseName(String url) {
         // Formato: jdbc:postgresql://localhost:5432/nome_do_banco
         if (url == null || url.isEmpty()) {
-            return null;
+            return "";
         }
         
-        try {
-            int lastSlash = url.lastIndexOf('/');
-            if (lastSlash == -1) return null;
-            
-            String dbPart = url.substring(lastSlash + 1);
-            // Remove query parameters se existirem
-            int questionMark = dbPart.indexOf('?');
-            if (questionMark != -1) {
-                dbPart = dbPart.substring(0, questionMark);
-            }
-            
-            return dbPart.trim();
-        } catch (Exception e) {
-            log.error("Erro ao extrair nome do banco: {}", e.getMessage());
-            return null;
+        int lastSlash = url.lastIndexOf('/');
+        if (lastSlash == -1) {
+            return "";
         }
+
+        String dbPart = url.substring(lastSlash + 1);
+        int questionMark = dbPart.indexOf('?');
+        if (questionMark != -1) {
+            dbPart = dbPart.substring(0, questionMark);
+        }
+
+        return dbPart.trim();
     }
 }
 

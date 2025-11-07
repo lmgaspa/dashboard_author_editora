@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
 
           <!-- Contato -->
           <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col md:flex-row items-center md:items-center gap-2 text-center md:text-left">
               <span class="material-icons text-base text-gray-400">email</span>
               <span class="text-gray-400 text-sm font-medium">Contato:</span>
               <a href="mailto:andescoresoftware@gmail.com" 

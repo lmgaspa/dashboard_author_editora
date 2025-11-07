@@ -1,20 +1,10 @@
 package com.dianaglobal.loginregisterdashboardeditora.adapter.in.web;
 
-import com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail.DeleteAccountEmailService;
-import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.EmailChangeTokenRepository;
-import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.PasswordResetTokenRepository;
-import com.dianaglobal.loginregisterdashboardeditora.application.port.out.UserRepositoryPort;
-import com.dianaglobal.loginregisterdashboardeditora.application.service.UserIdGeneratorService;
-import com.dianaglobal.loginregisterdashboardeditora.config.ApiPaths;
-import com.dianaglobal.loginregisterdashboardeditora.domain.model.Role;
-import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,11 +13,30 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail.DeleteAccountEmailService;
+import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.EmailChangeTokenRepository;
+import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.PasswordResetTokenRepository;
+import com.dianaglobal.loginregisterdashboardeditora.application.port.out.UserRepositoryPort;
+import com.dianaglobal.loginregisterdashboardeditora.application.service.UserIdGeneratorService;
+import com.dianaglobal.loginregisterdashboardeditora.config.ApiPaths;
+import com.dianaglobal.loginregisterdashboardeditora.domain.model.Role;
+import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -44,9 +53,6 @@ public class AdminController {
     private final com.dianaglobal.loginregisterdashboardeditora.application.event.UserConfirmedListener userConfirmedListener;
     private final DeleteAccountEmailService deleteAccountEmailService;
     
-    @Value("${application.frontend.base-url}")
-    private String frontendBaseUrl;
-
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getDashboard(@AuthenticationPrincipal UserDetails userDetails) {
@@ -122,8 +128,9 @@ public class AdminController {
             newUser.setEmail(normalizedEmail);
             newUser.setPassword(passwordEncoder.encode(request.password()));
             newUser.setPasswordSet(true); // Admin define senha, então passwordSet = true
-            // Admin pode criar já confirmado (default: false se não especificado)
-            newUser.setEmailConfirmed(request.emailConfirmed() != null ? request.emailConfirmed() : false);
+            // Usuários criados por admin são sempre confirmados (não há mais fluxo de confirmação)
+            boolean emailConfirmed = request.emailConfirmed() == null || Boolean.TRUE.equals(request.emailConfirmed());
+            newUser.setEmailConfirmed(emailConfirmed);
             newUser.setAuthProvider("LOCAL");
             // Admin pode definir role (default: USER se não especificado)
             Role userRole = Role.USER;
@@ -139,17 +146,15 @@ public class AdminController {
 
             userRepositoryPort.save(newUser);
 
-            // Enviar welcome email se o usuário já estiver confirmado
-            if (newUser.isEmailConfirmed()) {
-                log.info("[ADMIN CREATE USER] Sending welcome email to {} (name: {})", normalizedEmail, newUser.getName());
-                try {
-                    userConfirmedListener.onUserConfirmed(newUser);
-                    log.info("[ADMIN CREATE USER] ✅ Welcome email successfully sent to {}", normalizedEmail);
-                } catch (Exception e) {
-                    log.error("[ADMIN CREATE USER] ❌ Failed to send welcome email to {}: {}", normalizedEmail, e.getMessage(), e);
-                }
-            } else {
-                log.info("[ADMIN CREATE USER] User {} created but email not confirmed - no welcome email sent", normalizedEmail);
+            // Sempre enviar welcome email quando admin cria usuário (independente de emailConfirmed)
+            log.info("[ADMIN CREATE USER] Sending welcome email to {} (name: {}, emailConfirmed: {})", 
+                    normalizedEmail, newUser.getName(), newUser.isEmailConfirmed());
+            try {
+                userConfirmedListener.onUserConfirmed(newUser, request.password());
+                log.info("[ADMIN CREATE USER] ✅ Welcome email successfully sent to {}", normalizedEmail);
+            } catch (Exception e) {
+                log.error("[ADMIN CREATE USER] ❌ Failed to send welcome email to {}: {}", normalizedEmail, e.getMessage(), e);
+                // Não falhar a criação do usuário se o email falhar, apenas logar o erro
             }
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -176,23 +181,29 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAdminInfo() {
         try {
-            // Buscar todos os admins (sem created_at pois não existe na tabela)
-            List<Map<String, Object>> admins = jdbcTemplate.queryForList(
-                "SELECT id, name, email, role, email_confirmed, auth_provider " +
-                "FROM users " +
-                "WHERE role = 'ADMIN' " +
-                "ORDER BY email"
-            );
-
-            return ResponseEntity.ok(new AdminInfoResponse(
-                "Informações dos administradores",
-                admins.size(),
-                admins
+            // Buscar todos os admins usando o repositório
+            var admins = userRepositoryPort.findAllByRole(Role.ADMIN);
+            
+            List<UserListResponse> adminList = admins.stream()
+                    .map(admin -> new UserListResponse(
+                            admin.getId(),
+                            admin.getName(),
+                            admin.getEmail(),
+                            admin.getRole().name(),
+                            admin.isEmailConfirmed(),
+                            admin.getAuthProvider()
+                    ))
+                    .toList();
+            
+            return ResponseEntity.ok(new UsersListResponse(
+                    "Lista de administradores",
+                    adminList.size(),
+                    adminList
             ));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao listar administradores: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse("Erro ao buscar informações do admin: " + e.getMessage()));
+                    .body(new MessageResponse("Erro ao buscar informações dos administradores: " + e.getMessage()));
         }
     }
 
@@ -234,10 +245,57 @@ public class AdminController {
             );
 
             return ResponseEntity.ok(status);
+        } catch (DataAccessException dae) {
+            log.error("Erro de acesso ao banco ao verificar status: {}", dae.getMessage(), dae);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Erro ao acessar o banco de dados: " + dae.getMessage()));
         } catch (Exception e) {
-            e.printStackTrace(); // Log do erro
+            log.error("Erro inesperado ao verificar status do banco: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Erro ao verificar banco de dados: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/users/{identifier}/confirm-email")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ResponseEntity<?> confirmUserEmail(
+            @PathVariable String identifier
+    ) {
+        try {
+            // Tentar encontrar o usuário por ID ou email
+            User user;
+            var userById = userRepositoryPort.findById(identifier);
+            if (userById.isPresent()) {
+                user = userById.get();
+            } else {
+                String normalizedEmail = identifier.trim().toLowerCase();
+                user = userRepositoryPort.findByEmail(normalizedEmail)
+                        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            }
+
+            if (user.isEmailConfirmed()) {
+                return ResponseEntity.ok(new MessageResponse(
+                        String.format("Email do usuário %s já está confirmado.", user.getEmail())
+                ));
+            }
+
+            user.setEmailConfirmed(true);
+            userRepositoryPort.save(user);
+
+            log.info("[CONFIRM EMAIL] Email confirmed for user: {} ({})", user.getEmail(), user.getId());
+
+            return ResponseEntity.ok(new MessageResponse(
+                    String.format("Email do usuário %s confirmado com sucesso.", user.getEmail())
+            ));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Usuário não encontrado."));
+        } catch (Exception e) {
+            log.error("[CONFIRM EMAIL ERROR] Unexpected error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Erro ao confirmar email: " + e.getMessage()));
         }
     }
 
@@ -289,13 +347,19 @@ public class AdminController {
                 // Continuar com a deleção mesmo se alguns tokens não forem deletados
             }
 
-            // Enviar email de notificação de deleção antes de deletar o usuário
-            log.info("[DELETE USER {}] Sending delete account email to {} (name: {})", requestId, userToDelete.getEmail(), userToDelete.getName());
+            // Enviar email de notificação de deleção ANTES de deletar o usuário
+            log.info("[DELETE USER {}] Attempting to send delete account email to {} (name: {})", 
+                    requestId, userToDelete.getEmail(), userToDelete.getName());
             try {
                 deleteAccountEmailService.send(userToDelete.getEmail(), userToDelete.getName());
                 log.info("[DELETE USER {}] ✅ Delete account email successfully sent to {}", requestId, userToDelete.getEmail());
+            } catch (org.springframework.mail.MailSendException e) {
+                log.error("[DELETE USER {}] ❌ MailSendException when sending delete account email to {}: {}", 
+                        requestId, userToDelete.getEmail(), e.getMessage(), e);
+                // Continuar com a deleção mesmo se o email falhar
             } catch (Exception e) {
-                log.error("[DELETE USER {}] ❌ Failed to send delete account email to {}: {}", requestId, userToDelete.getEmail(), e.getMessage(), e);
+                log.error("[DELETE USER {}] ❌ Unexpected error sending delete account email to {}: {} - {}", 
+                        requestId, userToDelete.getEmail(), e.getClass().getSimpleName(), e.getMessage(), e);
                 // Continuar com a deleção mesmo se o email falhar
             }
 
@@ -338,11 +402,6 @@ public class AdminController {
             List<Map<String, Object>> flywayVersions
     ) {}
 
-    public record AdminInfoResponse(
-            String message,
-            Integer totalAdmins,
-            List<Map<String, Object>> admins
-    ) {}
 
     public record CreateUserRequest(
             @NotBlank(message = "Nome é obrigatório")

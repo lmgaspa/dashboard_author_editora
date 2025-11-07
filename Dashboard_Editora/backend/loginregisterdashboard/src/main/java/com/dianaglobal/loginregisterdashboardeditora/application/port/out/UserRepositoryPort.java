@@ -1,5 +1,6 @@
 package com.dianaglobal.loginregisterdashboardeditora.application.port.out;
 
+import com.dianaglobal.loginregisterdashboardeditora.domain.model.Role;
 import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface UserRepositoryPort {
     void deleteById(String id);
     // NEW: listar todos os usuários
     List<User> findAll();
+    // NEW: listar usuários por role
+    List<User> findAllByRole(Role role);
 }

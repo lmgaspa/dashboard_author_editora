@@ -3,7 +3,7 @@ package com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail;
 
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSendException;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class EmailChangeConfirmNewEmailService {
             MimeMessagePreparator preparator = MailConfig.createPreparator(toEmail, subject, html, fromAddress, branding.brandName());
             mailSender.send(preparator);
             log.info("[MAIL] Sent '{}' to {}", subject, toEmail);
-        } catch (MailSendException e) {
+        } catch (MailException e) {
             log.error("[MAIL] Error sending '{}' to {}: {}", subject, toEmail, e.getMessage(), e);
         }
     }

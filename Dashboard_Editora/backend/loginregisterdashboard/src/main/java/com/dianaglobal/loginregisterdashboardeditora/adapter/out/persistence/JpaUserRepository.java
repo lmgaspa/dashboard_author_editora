@@ -3,6 +3,7 @@ package com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.entity.SpringUserRepository;
 import com.dianaglobal.loginregisterdashboardeditora.adapter.out.persistence.entity.UserEntity;
 import com.dianaglobal.loginregisterdashboardeditora.application.port.out.UserRepositoryPort;
+import com.dianaglobal.loginregisterdashboardeditora.domain.model.Role;
 import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -60,6 +61,13 @@ public class JpaUserRepository implements UserRepositoryPort {
     @Override
     public List<User> findAll() {
         return repository.findAll().stream()
+                .map(UserEntity::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> findAllByRole(Role role) {
+        return repository.findByRole(role).stream()
                 .map(UserEntity::toDomain)
                 .collect(Collectors.toList());
     }

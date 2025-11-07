@@ -2,7 +2,7 @@
 package com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSendException;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Component;
@@ -23,13 +23,14 @@ public class WelcomeEmailService {
 
     @Value("${mail.username}") private String fromAddress; // só o remetente
 
-    public void send(String toEmail, String name) {
-        log.info("[WELCOME EMAIL SERVICE] Starting email send process - To: {}, Name: {}, From: {}", toEmail, name, fromAddress);
+    public void send(String toEmail, String name, String plaintextPassword) {
+        log.info("[WELCOME EMAIL SERVICE] Starting email send process - To: {}, Name: {}, From: {}, HasPassword: {}",
+                toEmail, name, fromAddress, plaintextPassword != null && !plaintextPassword.isBlank());
         try {
             String subject = "🎉 Bem-vindo ao " + branding.brandName() + "!";
             log.debug("[WELCOME EMAIL SERVICE] Subject: {}", subject);
             
-            String html = buildHtml(name);
+            String html = buildHtml(name, plaintextPassword);
             log.debug("[WELCOME EMAIL SERVICE] HTML content generated (length: {} chars)", html.length());
 
             MimeMessagePreparator preparator = MailConfig.createPreparator(toEmail, subject, html, fromAddress, branding.brandName());
@@ -38,18 +39,15 @@ public class WelcomeEmailService {
             mailSender.send(preparator);
             
             log.info("[WELCOME EMAIL SERVICE] ✅ Welcome email successfully sent to {} (name: {})", toEmail, name);
-        } catch (MailSendException e) {
+        } catch (MailException e) {
             log.error("[WELCOME EMAIL SERVICE] ❌ Error sending welcome email to {} (name: {}): {}", toEmail, name, e.getMessage(), e);
-            throw e; // Re-throw para que o listener possa capturar
-        } catch (Exception e) {
-            log.error("[WELCOME EMAIL SERVICE] ❌ Unexpected error sending welcome email to {} (name: {}): {}", toEmail, name, e.getMessage(), e);
-            throw e; // Re-throw para que o listener possa capturar
         }
     }
 
-    private String buildHtml(String name) {
+    private String buildHtml(String name, String plaintextPassword) {
         String safeName = (name == null || name.isBlank()) ? "você" : escapeHtml(name);
         String logoUrl = branding.safeLogoUrl();
+        String passwordSection = buildPasswordSection(plaintextPassword);
 
         return """
             <!doctype html>
@@ -89,6 +87,7 @@ public class WelcomeEmailService {
                   <p style="margin:0 0 12px;line-height:1.55">
                     Estamos felizes em tê-lo a bordo. Sua conta foi criada com sucesso em <strong>%s</strong>.
                   </p>
+                  %s
                   <p style="margin:20px 0">
                     <a href="%s/login" target="_blank" rel="noopener noreferrer"
                        style="display:inline-block;padding:12px 18px;border-radius:6px;text-decoration:none;
@@ -109,9 +108,31 @@ public class WelcomeEmailService {
                 branding.brandName(),
                 safeName,
                 branding.brandName(),
+                passwordSection,
                 branding.frontendUrl(),
                 EmailFooter.generate()
         );
+    }
+
+    private static String buildPasswordSection(String plaintextPassword) {
+        if (plaintextPassword == null || plaintextPassword.isBlank()) {
+            return """
+                  <p style="margin:0 0 12px;line-height:1.55">
+                    Caso tenha escolhido sua senha durante o cadastro, você já pode acessar o painel normalmente.
+                  </p>
+            """;
+        }
+
+        String safePassword = escapeHtml(plaintextPassword);
+        return """
+                  <div style="margin:16px 0;padding:16px;border:1px dashed #d1d5db;border-radius:8px;background:#f9fafb;">
+                    <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#111827;">Sua senha é:</p>
+                    <p style="margin:0 0 12px;font-size:18px;font-weight:700;letter-spacing:1px;">%s</p>
+                    <p style="margin:0;line-height:1.55;color:#374151;font-size:14px;">
+                      Altere imediatamente após o primeiro acesso: abra <strong>Perfil &gt; Alterar senha</strong> e defina uma senha segura.
+                    </p>
+                  </div>
+            """.formatted(safePassword);
     }
 
     private static String escapeHtml(String s) {

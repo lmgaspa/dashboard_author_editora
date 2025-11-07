@@ -2,7 +2,7 @@
 package com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSendException;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ public class PasswordSetEmailService {
             mailSender.send(preparator);
             
             log.info("Password {} e-mail sent to {}", (firstDefinition ? "creation" : "change"), toEmail);
-        } catch (MailSendException e) {
+        } catch (MailException e) {
             log.error("Error sending password {} e-mail to {}: {}", (firstDefinition ? "creation" : "change"), toEmail, e.getMessage(), e);
         }
     }

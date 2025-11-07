@@ -1,11 +1,7 @@
 package com.dianaglobal.loginregisterdashboardeditora.config;
 
-import com.dianaglobal.loginregisterdashboardeditora.application.service.JwtService;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +11,13 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
+import com.dianaglobal.loginregisterdashboardeditora.application.service.JwtService;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -24,15 +26,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    private static boolean isPublicAuthPath(String path, String method) {
+    private static boolean isPublicAuthPath(String path) {
         // somente estes endpoints não exigem JWT (usando /api/v1/auth conforme controllers):
         return
                 path.equals("/api/v1/auth/login") ||
                         path.equals("/api/v1/auth/register") ||
                         path.equals("/api/v1/auth/confirm-account") ||
                         path.equals("/api/v1/auth/forgot-password") ||
-                        path.equals("/api/v1/auth/reset-password") ||
-                        path.equals("/api/v1/auth/oauth/google");
+                path.equals("/api/v1/auth/reset-password");
         // OBS: /api/v1/auth/profile NÃO entra aqui (é protegido)
     }
 
@@ -42,17 +43,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String method = request.getMethod();
         String path = request.getServletPath();
 
         // Preflight CORS
-        if ("OPTIONS".equalsIgnoreCase(method)) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
 
         // Rotas públicas (não autenticadas)
-        if (isPublicAuthPath(path, method)) {
+        if (isPublicAuthPath(path)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -85,7 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token expired. Please login again.");
-        } catch (Exception e) {
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Invalid token.");
         }

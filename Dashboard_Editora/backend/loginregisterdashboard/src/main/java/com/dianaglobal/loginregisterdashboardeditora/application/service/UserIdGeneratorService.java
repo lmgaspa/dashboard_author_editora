@@ -1,12 +1,14 @@
 package com.dianaglobal.loginregisterdashboardeditora.application.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -48,7 +50,7 @@ public class UserIdGeneratorService {
             log.info("Generated new user ID: {}", newId);
             return newId;
             
-        } catch (Exception e) {
+        } catch (DataAccessException | NumberFormatException e) {
             log.error("Error generating user ID, defaulting to user-1", e);
             // Se der erro, começa do 1
             return "user-1";

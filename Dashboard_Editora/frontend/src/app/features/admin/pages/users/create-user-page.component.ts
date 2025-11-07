@@ -21,12 +21,13 @@ export class CreateUserPageComponent {
   readonly form: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
     role: ['USER', [Validators.required]]
   });
 
   readonly loading = signal<boolean>(false);
   readonly error = signal<string | null>(null);
+  readonly showPassword = signal<boolean>(false);
 
   onSubmit(): void {
     if (this.form.invalid) return;
@@ -36,7 +37,13 @@ export class CreateUserPageComponent {
 
     this.http.post(`${this.API_URL}/api/v1/admin/users`, this.form.value).subscribe({
       next: () => {
-        this.router.navigate(['/admin/users']);
+        const name = this.form.value.name;
+        this.loading.set(false);
+        this.router.navigate(['/admin/users'], {
+          state: {
+            successMessage: `Usuário ${name} foi criado com sucesso. Um email foi enviado com a senha.`
+          }
+        });
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Erro ao criar usuário.');
@@ -47,6 +54,10 @@ export class CreateUserPageComponent {
 
   onCancel(): void {
     this.router.navigate(['/admin/users']);
+  }
+
+  togglePassword(): void {
+    this.showPassword.update(v => !v);
   }
 }
 

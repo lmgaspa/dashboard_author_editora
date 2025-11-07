@@ -41,18 +41,28 @@ export class SidebarComponent {
       // Escuta mudanças de tamanho da tela
       window.addEventListener('resize', checkScreenSize);
 
-      // Escuta mudanças no localStorage (cross-component sync)
+      // Escuta mudanças no localStorage (cross-component sync - outras abas)
       window.addEventListener('storage', (e) => {
         if (e.key === 'sidebarOpen' && window.innerWidth < 1024) {
           this.isOpen.set(e.newValue === 'true');
         }
       });
 
+      // Escuta evento customizado do topbar (mesma página)
+      window.addEventListener('sidebarToggle', ((e: CustomEvent) => {
+        if (window.innerWidth < 1024) {
+          this.isOpen.set(e.detail.isOpen);
+        }
+      }) as EventListener);
+
       // Escuta cliques fora da sidebar em mobile
       document.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
         if (this.isOpen() && window.innerWidth < 1024) {
-          if (!target.closest('aside') && !target.closest('button[aria-label="Toggle menu"]')) {
+          // Não fecha se clicar no botão do menu ou dentro da sidebar
+          if (!target.closest('aside') && 
+              !target.closest('button[aria-label="Toggle menu"]') &&
+              !target.closest('button[type="button"]')?.closest('header')) {
             this.closeSidebar();
           }
         }
@@ -100,6 +110,21 @@ export class SidebarComponent {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       this.isOpen.set(false);
       localStorage.setItem('sidebarOpen', 'false');
+      // Notifica o topbar
+      window.dispatchEvent(new CustomEvent('sidebarToggle', { 
+        detail: { isOpen: false } 
+      }));
+    }
+  }
+
+  openSidebar(): void {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      this.isOpen.set(true);
+      localStorage.setItem('sidebarOpen', 'true');
+      // Notifica o topbar
+      window.dispatchEvent(new CustomEvent('sidebarToggle', { 
+        detail: { isOpen: true } 
+      }));
     }
   }
 }

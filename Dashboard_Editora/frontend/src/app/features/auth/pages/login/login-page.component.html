@@ -69,17 +69,16 @@
             class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white text-base transition-all duration-200 focus:outline-none focus:border-pink-500 focus:bg-white/[0.08] focus:ring-4 focus:ring-pink-500/20 placeholder:text-white/40 [&.error]:border-red-500 pr-12"
             [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
           />
-          <button
-            type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-white/60 cursor-pointer p-2 flex items-center justify-center transition-colors duration-200 hover:text-white/90"
+          <span
+            class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer text-lg transition-colors duration-200"
             (click)="togglePassword()"
             [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
-          >
-            <span class="material-icons text-xl">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
-          </button>
+            role="button"
+            tabindex="0"
+          >{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
         </div>
         @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-          <span class="text-xs text-red-400">Senha deve ter pelo menos 8 caracteres, sendo 1 letra maiúscula, e pelo menos 1 numero.</span>
+          <span class="text-xs text-red-400">A senha deve ter 8 caracteres, uma letra maiúscula, uma minúscula e 1 número</span>
         }
       </div>
 

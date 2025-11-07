@@ -4,5 +4,5 @@ package com.dianaglobal.loginregisterdashboardeditora.application.event;
 import com.dianaglobal.loginregisterdashboardeditora.domain.model.User;
 
 public interface UserConfirmedListener {
-    void onUserConfirmed(User user);
+    void onUserConfirmed(User user, String plaintextPassword);
 }

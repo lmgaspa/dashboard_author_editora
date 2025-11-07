@@ -1,8 +1,8 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError } from 'rxjs';
-import { User, AuthResponse, LoginRequest, ResetPasswordRequest, ChangePasswordRequest, ChangeEmailRequest } from '../models/menu-item.model';
+import { Observable, tap, catchError, map } from 'rxjs';
+import { User, AuthResponse, LoginRequest, ResetPasswordRequest, ChangePasswordRequest, ChangeEmailRequest, ProfileResponse } from '../models/menu-item.model';
 import { environment } from '@/environments/environment';
 
 @Injectable({
@@ -118,14 +118,71 @@ export class AuthService {
   }
 
   changeEmail(data: ChangeEmailRequest): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.API_URL}/api/v1/auth/email/change`, data);
+    return this.http.post<{ message: string }>(`${this.API_URL}/api/v1/auth/email/change-request`, data);
   }
 
   getUserProfile(): Observable<User> {
-    return this.http.get<User>(`${this.API_URL}/api/v1/user/profile`).pipe(
-      tap(user => {
+    return this.http.get<ProfileResponse>(`${this.API_URL}/api/v1/user/profile`).pipe(
+      map((response: ProfileResponse) => {
+        console.log('📦 ProfileResponse recebida (GET):', response);
+        
+        // Mapear ProfileResponse para User
+        const currentUser = this._currentUser();
+        const mappedUser: User = {
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          role: currentUser?.role || 'USER', // Manter o role atual ou default
+          avatar: currentUser?.avatar,
+          createdAt: currentUser?.createdAt
+        };
+        
+        console.log('✅ User mapeado (GET):', mappedUser);
+        return mappedUser;
+      }),
+      tap((user: User) => {
         this._currentUser.set(user);
         localStorage.setItem('currentUser', JSON.stringify(user));
+      }),
+      catchError((error) => {
+        console.error('❌ Erro ao buscar perfil:', error);
+        throw error;
+      })
+    );
+  }
+
+  updateProfile(data: { name: string }): Observable<User> {
+    return this.http.put<ProfileResponse>(`${this.API_URL}/api/v1/user/profile`, data).pipe(
+      map((response: ProfileResponse) => {
+        console.log('📦 ProfileResponse recebida:', response);
+        
+        // Mapear ProfileResponse para User
+        // O backend não retorna 'role' no ProfileResponse, então mantemos o role atual
+        const currentUser = this._currentUser();
+        const mappedUser: User = {
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          role: currentUser?.role || 'USER', // Manter o role atual ou default
+          avatar: currentUser?.avatar,
+          createdAt: currentUser?.createdAt
+        };
+        
+        console.log('✅ User mapeado:', mappedUser);
+        return mappedUser;
+      }),
+      tap((user: User) => {
+        console.log('💾 Salvando user atualizado:', user);
+        this._currentUser.set(user);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        console.log('✅ User salvo com sucesso');
+      }),
+      catchError((error) => {
+        console.error('❌ Erro ao atualizar perfil:', error);
+        console.error('📋 Status:', error.status);
+        console.error('📋 Message:', error.message);
+        console.error('📋 Error object:', error.error);
+        throw error;
       })
     );
   }

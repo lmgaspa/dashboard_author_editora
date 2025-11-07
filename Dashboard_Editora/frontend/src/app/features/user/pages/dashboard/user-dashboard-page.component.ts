@@ -8,8 +8,13 @@ import { AuthService } from '@/app/core/services/auth.service';
   imports: [CommonModule],
   template: `
     <div class="user-dashboard">
-      <h1>Dashboard do Usuário</h1>
-      <p>Bem-vindo, {{ authService.currentUser()?.name }}!</p>
+      <div class="header">
+        <h1>
+          <span class="title-main">Dashboard do Usuário</span>
+          <span class="title-glow">Dashboard do Usuário</span>
+        </h1>
+        <p>Bem-vindo, {{ authService.currentUser()?.name }}!</p>
+      </div>
       <div class="dashboard-content">
         <div class="card">
           <h2>Meu Perfil</h2>
@@ -26,8 +31,33 @@ import { AuthService } from '@/app/core/services/auth.service';
     .user-dashboard {
       padding: 2rem;
     }
-    h1 {
-      margin-bottom: 1rem;
+    .header h1 {
+      position: relative;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .header h1 .title-main {
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header h1 .title-glow {
+      position: absolute;
+      inset: 0;
+      filter: blur(8px);
+      opacity: 0.6;
+      background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p {
+      color: #94a3b8;
+      font-size: 0.9rem;
     }
     .dashboard-content {
       display: grid;

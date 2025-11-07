@@ -15,7 +15,7 @@ public class User {
     private boolean emailConfirmed;
 
     // NOVOS:
-    private String authProvider;      // "LOCAL" | "GOOGLE" | null
+    private String authProvider;      // ex.: "LOCAL" ou outros provedores futuros
     private boolean passwordSet;      // true quando o usuário definiu senha conscientemente
     
     @Builder.Default

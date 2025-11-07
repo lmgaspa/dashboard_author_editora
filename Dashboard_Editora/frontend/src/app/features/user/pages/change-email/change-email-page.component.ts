@@ -17,18 +17,12 @@ export class ChangeEmailPageComponent {
   private readonly router = inject(Router);
 
   readonly form: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]]
+    newEmail: ['', [Validators.required, Validators.email]]
   });
 
   readonly loading = signal<boolean>(false);
   readonly success = signal<boolean>(false);
   readonly error = signal<string | null>(null);
-  readonly showPassword = signal<boolean>(false);
-
-  togglePassword(): void {
-    this.showPassword.update(v => !v);
-  }
 
   onSubmit(): void {
     if (this.form.invalid) return;
@@ -37,15 +31,15 @@ export class ChangeEmailPageComponent {
     this.error.set(null);
 
     this.authService.changeEmail(this.form.value).subscribe({
-      next: () => {
+      next: (response) => {
         this.success.set(true);
         this.loading.set(false);
         setTimeout(() => {
           this.router.navigate(['/user/profile']);
-        }, 2000);
+        }, 3000);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Erro ao alterar email.');
+        this.error.set(err.error?.message || 'Erro ao solicitar alteração de email. Verifique o novo email e tente novamente.');
         this.loading.set(false);
       }
     });

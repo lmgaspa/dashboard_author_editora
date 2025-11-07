@@ -107,19 +107,6 @@ export class MenuService {
       roles: ['ADMIN']
     },
     {
-      label: 'Status do Sistema',
-      icon: 'monitoring',
-      roles: ['ADMIN'],
-      children: [
-        {
-          label: 'Banco de Dados',
-          icon: 'storage',
-          route: '/admin/database/status',
-          roles: ['ADMIN']
-        }
-      ]
-    },
-    {
       divider: true,
       roles: ['ADMIN']
     },

@@ -3,11 +3,20 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@/environments/environment';
 
-interface Admin {
+interface User {
   id: string;
   name: string;
   email: string;
-  createdAt: string;
+  role: string;
+  emailConfirmed: boolean;
+  authProvider: string;
+  createdAt?: string;
+}
+
+interface UsersResponse {
+  message: string;
+  total: number;
+  users: User[];
 }
 
 @Component({
@@ -21,9 +30,10 @@ export class AdminInfoPageComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly API_URL = environment.apiUrl;
 
-  readonly admins = signal<Admin[]>([]);
+  readonly admins = signal<User[]>([]);
   readonly loading = signal<boolean>(false);
   readonly error = signal<string | null>(null);
+  readonly total = signal<number>(0);
 
   ngOnInit(): void {
     this.loadAdmins();
@@ -31,16 +41,23 @@ export class AdminInfoPageComponent implements OnInit {
 
   loadAdmins(): void {
     this.loading.set(true);
-    this.http.get<Admin[]>(`${this.API_URL}/api/v1/admin/admin-info`).subscribe({
-      next: (admins) => {
-        // Garante que sempre seja um array
-        this.admins.set(Array.isArray(admins) ? admins : []);
+    this.error.set(null);
+    
+    this.http.get<UsersResponse>(`${this.API_URL}/api/v1/admin/admin-info`).subscribe({
+      next: (response) => {
+        // Extrair o array de usuários da resposta
+        const users = response?.users || [];
+        this.admins.set(users);
+        this.total.set(response?.total || 0);
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Erro ao carregar administradores.');
+        console.error('Erro ao carregar administradores:', err);
+        const errorMessage = err.error?.message || 'Erro ao carregar administradores.';
+        this.error.set(errorMessage);
         this.loading.set(false);
-        this.admins.set([]); // Garante array vazio em caso de erro
+        this.admins.set([]);
+        this.total.set(0);
       }
     });
   }

@@ -2,6 +2,7 @@
 package com.dianaglobal.loginregisterdashboardeditora.adapter.out.mail;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -41,8 +42,11 @@ public class DeleteAccountEmailService {
         } catch (MailSendException e) {
             log.error("[DELETE ACCOUNT EMAIL SERVICE] ❌ Error sending delete account email to {} (name: {}): {}", toEmail, name, e.getMessage(), e);
             throw e; // Re-throw para que o controller possa capturar
-        } catch (Exception e) {
-            log.error("[DELETE ACCOUNT EMAIL SERVICE] ❌ Unexpected error sending delete account email to {} (name: {}): {}", toEmail, name, e.getMessage(), e);
+        } catch (MailException e) {
+            log.error("[DELETE ACCOUNT EMAIL SERVICE] ❌ Mail exception when sending delete account email to {} (name: {}): {}", toEmail, name, e.getMessage(), e);
+            throw e;
+        } catch (RuntimeException e) {
+            log.error("[DELETE ACCOUNT EMAIL SERVICE] ❌ Unexpected runtime error sending delete account email to {} (name: {}): {}", toEmail, name, e.getMessage(), e);
             throw e; // Re-throw para que o controller possa capturar
         }
     }
@@ -90,8 +94,26 @@ public class DeleteAccountEmailService {
                     Informamos que sua conta no <strong>%s</strong> foi removida permanentemente.
                   </p>
                   <p style="margin:0 0 12px;line-height:1.55;color:#6b7280;">
-                    Todos os dados associados à sua conta foram excluídos de nossos sistemas. Caso tenha alguma dúvida ou precise de assistência, entre em contato conosco através do nosso suporte.
+                    Todos os dados associados à sua conta foram excluídos de nossos sistemas.
                   </p>
+                  <p style="margin:0 0 12px;line-height:1.55;color:#6b7280;">
+                    Conforme previsto em contrato, mantendo nossa política de retenção, preservaremos um backup (SQL dump) por até 30 dias utéis.
+                  </p>
+                  <p style="margin:0 0 12px;line-height:1.55;color:#6b7280;">
+                    Caso deseje receber os dados antes da exclusão definitiva, entre em contato com o suporte.
+                  </p>
+                  <p style="margin:0 0 12px;line-height:1.55;color:#6b7280;">
+                    Enviaremos um PDF consolidado com todos os relatórios vinculados à sua conta.
+                  </p>
+                  <div style="margin:16px 0;padding:16px;border:1px solid #d1d5db;border-radius:8px;background:#f9fafb;">
+                    <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#111827;">Fale com o suporte</p>
+                    <p style="margin:0 0 8px;line-height:1.55;color:#374151;font-size:14px;">
+                      📧 E-mail: <a href="mailto:andescoresoftware@gmail.com" style="color:#0e4b68;font-weight:600;">andescoresoftware@gmail.com</a>
+                    </p>
+                    <p style="margin:0;line-height:1.55;color:#374151;font-size:14px;">
+                      📱 WhatsApp: <a href="https://wa.me/5571994105740" style="color:#0e4b68;font-weight:600;" target="_blank" rel="noopener noreferrer">(71) 99410-5740</a>
+                    </p>
+                  </div>
                   <p style="margin:20px 0 0;line-height:1.55;color:#6b7280;font-size:14px;">
                     Esta é uma notificação automática. Por favor, não responda a este e-mail.
                   </p>

@@ -33,7 +33,7 @@
             type="text" 
             id="name" 
             formControlName="name" 
-            placeholder=""
+            placeholder="Nome Completo do Usuário"
             class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
             [class.focus:border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
@@ -74,17 +74,24 @@
         <div class="relative">
           <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">lock</span>
           <input 
-            type="password" 
+            [type]="showPassword() ? 'text' : 'password'" 
             id="password" 
             formControlName="password" 
             placeholder="Senhadousuario"
             autocomplete="new-password"
-            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+            class="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [class.border-red-500]="form.get('password')?.invalid && form.get('password')?.touched"
           />
+          <span
+            class="material-icons absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer text-lg sm:text-xl transition-colors duration-200"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+            role="button"
+            tabindex="0"
+          >{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
         </div>
         @if (form.get('password')?.invalid && form.get('password')?.touched) {
-          <p class="text-red-400 text-[10px] sm:text-xs">Senha deve ter pelo menos 6 caracteres</p>
+          <p class="text-red-400 text-[10px] sm:text-xs">A senha deve ter 8 caracteres, uma letra maiúscula, uma minúscula e 1 número</p>
         }
       </div>
 

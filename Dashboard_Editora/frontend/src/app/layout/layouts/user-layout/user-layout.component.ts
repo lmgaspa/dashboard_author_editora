@@ -14,7 +14,7 @@ import { AuthService } from '@/app/core/services/auth.service';
       <app-topbar />
       <div class="flex w-full mt-16 flex-1 min-h-0 overflow-hidden">
         <app-sidebar />
-        <main class="flex-1 w-full p-8 ml-[280px] overflow-y-auto overflow-x-hidden min-h-0 mb-0 md:ml-0 md:p-4">
+        <main class="flex-1 w-full px-3 sm:px-4 pt-1 pb-3 sm:pt-4 sm:pb-4 ml-0 lg:ml-[280px] overflow-y-auto overflow-x-hidden min-h-0 transition-all duration-300">
           <router-outlet />
         </main>
       </div>

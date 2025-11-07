@@ -19,8 +19,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    repositories:
-      enabled: true
+
+  data:
+    jpa:
+      repositories:
+        enabled: true
 
   flyway:
     enabled: true
@@ -50,11 +53,6 @@ brand:
   frontend-url: "https://www.dashboard-author-editora.vercel.app"
   logo-url: "https://www.andescoresoftware.com.br" # troque aqui quando quiser
 
-google:
-  oauth:
-    enabled: ${GOOGLE_OAUTH_ENABLED:false}  # defina true no Heroku quando quiser ativar
-    client-id: ${GOOGLE_CLIENT_ID}
-
 application:
   jwt:
     secret: ${JWT_SECRET}
@@ -68,7 +66,6 @@ application:
     cooldown-seconds: 60   # intervalo mínimo entre reenvios
     max-per-day: 5         # teto diário por dia
   admin:
-    # Variáveis de ambiente obrigatórias - não coloque valores padrão sensíveis aqui!
     username: ${ADMIN_USERNAME}
     email: ${ADMIN_EMAIL}
     password: ${ADMIN_PASSWORD}

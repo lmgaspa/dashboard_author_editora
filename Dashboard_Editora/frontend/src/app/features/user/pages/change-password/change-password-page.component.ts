@@ -18,7 +18,7 @@ export class ChangePasswordPageComponent {
 
   readonly form: FormGroup = this.fb.group({
     currentPassword: ['', [Validators.required]],
-    newPassword: ['', [Validators.required, Validators.minLength(6)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', [Validators.required]]
   }, { validators: this.passwordMatchValidator });
 

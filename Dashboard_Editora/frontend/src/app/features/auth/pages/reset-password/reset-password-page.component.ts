@@ -18,7 +18,7 @@ export class ResetPasswordPageComponent {
   private readonly route = inject(ActivatedRoute);
 
   readonly form: FormGroup = this.fb.group({
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', [Validators.required]]
   }, { validators: this.passwordMatchValidator });
 
