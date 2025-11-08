@@ -57,7 +57,12 @@ export class UsersPageComponent implements OnInit {
       next: (response) => {
         // Extrair o array de usuários da resposta
         const users = response?.users || [];
-        this.users.set(users);
+        const sortedUsers = [...users].sort((a, b) => {
+          if (a.role === 'ADMIN' && b.role !== 'ADMIN') return -1;
+          if (a.role !== 'ADMIN' && b.role === 'ADMIN') return 1;
+          return a.name.localeCompare(b.name);
+        });
+        this.users.set(sortedUsers);
         this.total.set(response?.total || 0);
         this.loading.set(false);
       },
