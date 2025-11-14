@@ -14,8 +14,14 @@ export interface User {
   email: string;
   name: string;
   role: 'ADMIN' | 'USER';
-  avatar?: string;
+  avatar?: string; // Deprecated - usar profilePhotoUrl
+  profilePhotoUrl?: string | null;
   createdAt?: string;
+  authorId?: string;
+  ecommerceUrl?: string;
+  ecommerceDbUrl?: string;
+  ecommerceDbUsername?: string;
+  ecommerceDbPassword?: string | null;
 }
 
 export interface AuthResponse {
@@ -48,5 +54,6 @@ export interface ProfileResponse {
   email: string;
   authProvider: string;
   passwordSet: boolean;
+  profilePhotoUrl?: string | null;
 }
 

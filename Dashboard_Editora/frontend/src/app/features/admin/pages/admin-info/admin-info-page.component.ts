@@ -11,6 +11,11 @@ interface User {
   emailConfirmed: boolean;
   authProvider: string;
   createdAt?: string;
+  authorId?: string;
+  ecommerceUrl?: string;
+  ecommerceDbUrl?: string;
+  ecommerceDbUsername?: string;
+  ecommerceDbPassword?: string | null;
 }
 
 interface UsersResponse {

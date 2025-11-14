@@ -1,8 +1,30 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '@/app/core/services/auth.service';
+
+// Validador customizado para força de senha
+function passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value || control.value.trim() === '') return null;
+  const password = control.value;
+  const errors: ValidationErrors = {};
+  
+  if (password.length < 8) {
+    errors['minLength'] = true;
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors['noUppercase'] = true;
+  }
+  if (!/[a-z]/.test(password)) {
+    errors['noLowercase'] = true;
+  }
+  if (!/\d/.test(password)) {
+    errors['noNumber'] = true;
+  }
+  
+  return Object.keys(errors).length > 0 ? errors : null;
+}
 
 @Component({
   selector: 'app-change-password-page',
@@ -17,8 +39,8 @@ export class ChangePasswordPageComponent {
   private readonly router = inject(Router);
 
   readonly form: FormGroup = this.fb.group({
-    currentPassword: ['', [Validators.required]],
-    newPassword: ['', [Validators.required, Validators.minLength(8)]],
+    currentPassword: [''], // Opcional - usuário pode mudar sem validar senha atual
+    newPassword: ['', [Validators.required, passwordStrengthValidator]],
     confirmPassword: ['', [Validators.required]]
   }, { validators: this.passwordMatchValidator });
 
@@ -56,10 +78,17 @@ export class ChangePasswordPageComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    this.authService.changePassword({
-      currentPassword: this.form.value.currentPassword,
+    // Construir payload - currentPassword é opcional
+    const payload: any = {
       newPassword: this.form.value.newPassword
-    }).subscribe({
+    };
+    
+    // Só incluir currentPassword se foi preenchido
+    if (this.form.value.currentPassword && this.form.value.currentPassword.trim() !== '') {
+      payload.currentPassword = this.form.value.currentPassword;
+    }
+
+    this.authService.changePassword(payload).subscribe({
       next: () => {
         this.success.set(true);
         this.loading.set(false);

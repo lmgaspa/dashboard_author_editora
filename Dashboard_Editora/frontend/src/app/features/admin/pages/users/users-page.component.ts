@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@/environments/environment';
+import { EditUserModalComponent } from './edit-user-modal.component';
 
 interface User {
   id: string;
@@ -12,6 +13,12 @@ interface User {
   emailConfirmed: boolean;
   authProvider: string;
   createdAt?: string;
+  authorId?: string | null;
+  ecommerceUrl?: string | null;
+  ecommerceDbUrl?: string | null;
+  ecommerceDbUsername?: string | null;
+  ecommerceDbPassword?: string | null;
+  profilePhotoUrl?: string | null;
 }
 
 interface UsersResponse {
@@ -23,7 +30,7 @@ interface UsersResponse {
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe],
+  imports: [CommonModule, RouterModule, DatePipe, EditUserModalComponent],
   templateUrl: './users-page.component.html',
   styles: []
 })
@@ -38,6 +45,7 @@ export class UsersPageComponent implements OnInit {
   readonly total = signal<number>(0);
   readonly deletingUserId = signal<string | null>(null);
   readonly success = signal<string | null>(null);
+  readonly editingUser = signal<User | null>(null);
 
   ngOnInit(): void {
     const navigationState = history.state;
@@ -75,6 +83,35 @@ export class UsersPageComponent implements OnInit {
         this.total.set(0);
       }
     });
+  }
+
+  editUser(user: User): void {
+    this.editingUser.set(user);
+  }
+
+  closeEditModal(): void {
+    this.editingUser.set(null);
+  }
+
+  onUserUpdated(updatedUser: User): void {
+    // Atualizar o usuário na lista
+    this.users.update(users => {
+      const index = users.findIndex(u => u.id === updatedUser.id);
+      if (index !== -1) {
+        const updated = [...users];
+        updated[index] = updatedUser;
+        // Reordenar para manter ADMINs no topo
+        return updated.sort((a, b) => {
+          if (a.role === 'ADMIN' && b.role !== 'ADMIN') return -1;
+          if (a.role !== 'ADMIN' && b.role === 'ADMIN') return 1;
+          return a.name.localeCompare(b.name);
+        });
+      }
+      return users;
+    });
+    this.closeEditModal();
+    this.success.set(`Usuário ${updatedUser.name} foi atualizado com sucesso.`);
+    this.error.set(null);
   }
 
   deleteUser(user: User): void {

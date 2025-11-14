@@ -38,6 +38,12 @@ export class MenuService {
       roles: ['USER', 'ADMIN']
     },
     {
+      label: 'Pagamentos',
+      icon: 'attach_money',
+      route: '/user/payments',
+      roles: ['USER', 'ADMIN']
+    },
+    {
       label: 'Meu Perfil',
       icon: 'person',
       route: '/user/profile',

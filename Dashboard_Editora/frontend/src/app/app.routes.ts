@@ -64,6 +64,10 @@ export const routes: Routes = [
           {
             path: 'change-email',
             loadComponent: () => import('./features/user/pages/change-email/change-email-page.component').then(m => m.ChangeEmailPageComponent)
+          },
+          {
+            path: 'payments',
+            loadComponent: () => import('./features/user/pages/payments/payments-page.component').then(m => m.PaymentsPageComponent)
           }
         ]
       }

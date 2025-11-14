@@ -151,7 +151,7 @@ export class AuthService {
     );
   }
 
-  updateProfile(data: { name: string }): Observable<User> {
+  updateProfile(data: { name?: string; profilePhotoUrl?: string }): Observable<User> {
     return this.http.put<ProfileResponse>(`${this.API_URL}/api/v1/user/profile`, data).pipe(
       map((response: ProfileResponse) => {
         console.log('📦 ProfileResponse recebida:', response);
@@ -164,7 +164,8 @@ export class AuthService {
           name: response.name,
           email: response.email,
           role: currentUser?.role || 'USER', // Manter o role atual ou default
-          avatar: currentUser?.avatar,
+          avatar: response.profilePhotoUrl || currentUser?.avatar, // Compatibilidade
+          profilePhotoUrl: response.profilePhotoUrl || null,
           createdAt: currentUser?.createdAt
         };
         

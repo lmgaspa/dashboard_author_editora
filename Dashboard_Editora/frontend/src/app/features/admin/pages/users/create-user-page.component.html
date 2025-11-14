@@ -114,6 +114,128 @@
         </div>
       </div>
 
+      <!-- Author ID Field (only for USER role) -->
+      @if (isUserRole) {
+        <div class="space-y-2">
+          <label for="authorId" class="block text-xs sm:text-sm font-semibold text-gray-200">
+            Author ID <span class="text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">fingerprint</span>
+            <input 
+              type="text" 
+              id="authorId" 
+              formControlName="authorId" 
+              placeholder="ID do autor (ex: 123)"
+              class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+              [class.border-red-500]="form.get('authorId')?.invalid && form.get('authorId')?.touched"
+            />
+          </div>
+          @if (form.get('authorId')?.invalid && form.get('authorId')?.touched) {
+            <p class="text-red-400 text-[10px] sm:text-xs">Author ID é obrigatório para usuários</p>
+          }
+          <small class="text-gray-500 text-[10px] sm:text-xs">ID único do autor no sistema de e-commerce</small>
+        </div>
+      }
+
+      <!-- E-commerce URL Field (only if authorId is filled) -->
+      @if (hasAuthorId && isUserRole) {
+        <div class="space-y-2">
+          <label for="ecommerceUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
+            URL do E-commerce <span class="text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">link</span>
+            <input 
+              type="url" 
+              id="ecommerceUrl" 
+              formControlName="ecommerceUrl" 
+              placeholder="https://loja.autor.com"
+              class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+              [class.border-red-500]="form.get('ecommerceUrl')?.invalid && form.get('ecommerceUrl')?.touched"
+            />
+          </div>
+          @if (form.get('ecommerceUrl')?.invalid && form.get('ecommerceUrl')?.touched) {
+            <p class="text-red-400 text-[10px] sm:text-xs">
+              @if (form.get('ecommerceUrl')?.errors?.['required']) {
+                URL do e-commerce é obrigatória
+              } @else if (form.get('ecommerceUrl')?.errors?.['invalidUrl']) {
+                URL inválida. Use http:// ou https://
+              }
+            </p>
+          }
+          <small class="text-gray-500 text-[10px] sm:text-xs">URL da loja virtual do autor</small>
+        </div>
+      }
+
+      <!-- Optional Database Credentials Section -->
+      @if (hasAuthorId && isUserRole) {
+        <div class="space-y-4 sm:space-y-6 pt-4 sm:pt-6 border-t border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="material-icons text-gray-400 text-lg sm:text-xl">storage</span>
+            <h3 class="text-sm sm:text-base font-semibold text-gray-200">Credenciais do Banco de Dados (Opcional)</h3>
+          </div>
+
+          <!-- Database URL -->
+          <div class="space-y-2">
+            <label for="ecommerceDbUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
+              URL do Banco de Dados
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">dns</span>
+              <input 
+                type="text" 
+                id="ecommerceDbUrl" 
+                formControlName="ecommerceDbUrl" 
+                placeholder="jdbc:postgresql://host:5432/database"
+                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+              />
+            </div>
+          </div>
+
+          <!-- Database Username -->
+          <div class="space-y-2">
+            <label for="ecommerceDbUsername" class="block text-xs sm:text-sm font-semibold text-gray-200">
+              Username do Banco
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">person</span>
+              <input 
+                type="text" 
+                id="ecommerceDbUsername" 
+                formControlName="ecommerceDbUsername" 
+                placeholder="Username do banco"
+                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+              />
+            </div>
+          </div>
+
+          <!-- Database Password -->
+          <div class="space-y-2">
+            <label for="ecommerceDbPassword" class="block text-xs sm:text-sm font-semibold text-gray-200">
+              Password do Banco
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">lock</span>
+              <input 
+                [type]="showDbPassword() ? 'text' : 'password'" 
+                id="ecommerceDbPassword" 
+                formControlName="ecommerceDbPassword" 
+                placeholder="Password do banco"
+                class="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+              />
+              <span
+                class="material-icons absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer text-lg sm:text-xl transition-colors duration-200"
+                (click)="toggleDbPassword()"
+                [attr.aria-label]="showDbPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+                role="button"
+                tabindex="0"
+              >{{ showDbPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end pt-4 sm:pt-6 border-t border-white/10">
         <button 

@@ -95,6 +95,27 @@
               </span>
             }
           </div>
+          <!-- Author ID and E-commerce URL (Mobile) -->
+          @if (user.role === 'USER' && (user.authorId || user.ecommerceUrl)) {
+            <div class="mb-3 sm:mb-4 space-y-2 sm:space-y-2.5 pt-3 sm:pt-4 border-t border-white/10">
+              @if (user.authorId) {
+                <div class="flex items-center gap-2 text-xs sm:text-sm">
+                  <span class="material-icons text-gray-400 text-base sm:text-lg">fingerprint</span>
+                  <span class="text-gray-400">Author ID:</span>
+                  <span class="text-white font-medium">{{ user.authorId }}</span>
+                </div>
+              }
+              @if (user.ecommerceUrl) {
+                <div class="flex items-center gap-2 text-xs sm:text-sm">
+                  <span class="material-icons text-gray-400 text-base sm:text-lg">link</span>
+                  <span class="text-gray-400">E-commerce:</span>
+                  <a [href]="user.ecommerceUrl" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 truncate max-w-[200px] sm:max-w-none underline">
+                    {{ user.ecommerceUrl }}
+                  </a>
+                </div>
+              }
+            </div>
+          }
           <div class="flex items-center justify-between pt-3 sm:pt-4 border-t border-white/10">
             <div class="flex-1 min-w-0">
               @if (user.createdAt) {
@@ -104,7 +125,11 @@
               }
             </div>
             <div class="flex items-center gap-1.5 sm:gap-2 ml-2">
-              <button class="p-1.5 sm:p-2 rounded-lg text-gray-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all duration-200 active:scale-95" title="Editar">
+              <button 
+                class="p-1.5 sm:p-2 rounded-lg text-gray-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all duration-200 active:scale-95" 
+                title="Editar"
+                (click)="editUser(user)"
+              >
                 <span class="material-icons text-base sm:text-lg">edit</span>
               </button>
               <button 
@@ -134,6 +159,8 @@
               <th class="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">Nome</th>
               <th class="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">Email</th>
               <th class="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">Role</th>
+              <th class="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">Author ID</th>
+              <th class="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">E-commerce URL</th>
               <th class="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">Data de Criação</th>
               <th class="px-6 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Ações</th>
             </tr>
@@ -166,6 +193,22 @@
                   }
                 </td>
                 <td class="px-6 py-4">
+                  @if (user.authorId) {
+                    <span class="text-gray-300 text-sm">{{ user.authorId }}</span>
+                  } @else {
+                    <span class="text-gray-500 text-sm">-</span>
+                  }
+                </td>
+                <td class="px-6 py-4">
+                  @if (user.ecommerceUrl) {
+                    <a [href]="user.ecommerceUrl" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 text-sm underline truncate block max-w-xs">
+                      {{ user.ecommerceUrl }}
+                    </a>
+                  } @else {
+                    <span class="text-gray-500 text-sm">-</span>
+                  }
+                </td>
+                <td class="px-6 py-4">
                   @if (user.createdAt) {
                     <span class="text-gray-400 text-sm">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
                   } @else {
@@ -174,7 +217,11 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center justify-center gap-2">
-                    <button class="p-2 rounded-lg text-gray-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all duration-200 group-hover:scale-110" title="Editar usuário">
+                    <button 
+                      class="p-2 rounded-lg text-gray-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all duration-200 group-hover:scale-110" 
+                      title="Editar usuário"
+                      (click)="editUser(user)"
+                    >
                       <span class="material-icons text-lg">edit</span>
                     </button>
                     <button 
@@ -197,5 +244,14 @@
         </table>
       </div>
     </div>
+  }
+
+  <!-- Edit User Modal -->
+  @if (editingUser()) {
+    <app-edit-user-modal
+      [user]="editingUser()!"
+      (onClose)="closeEditModal()"
+      (onSuccess)="onUserUpdated($event)"
+    />
   }
 </div>

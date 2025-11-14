@@ -1,0 +1,248 @@
+<div class="w-full space-y-4 sm:space-y-6">
+  <!-- Título -->
+  <div>
+    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold relative mb-2">
+      <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Painel de Pagamentos</span>
+      <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(8px);">Painel de Pagamentos</span>
+    </h1>
+    @if (painel()?.resumo) {
+      <p class="text-sm sm:text-base text-gray-400">Autor: {{ painel()!.resumo.nomeAutor }}</p>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-12 sm:py-16 space-y-4">
+      <span class="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin"></span>
+      <p class="text-gray-400 text-sm sm:text-base">Carregando informações de pagamentos...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 sm:p-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <span class="material-icons text-red-400 text-xl sm:text-2xl flex-shrink-0">error_outline</span>
+        <div class="flex-1">
+          <h3 class="text-red-300 font-semibold text-sm sm:text-base mb-1">Erro ao carregar dados</h3>
+          <p class="text-red-400/80 text-xs sm:text-sm">{{ error() }}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-300 text-sm font-medium transition-colors duration-200"
+        (click)="retry()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Success State -->
+  @if (painel() && !loading() && !error()) {
+    <!-- Cards de Resumo -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Card: Vendas Confirmadas -->
+      <div class="bg-gradient-to-br from-emerald-500/10 via-emerald-600/10 to-emerald-500/10 backdrop-blur-xl border border-emerald-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="material-icons text-emerald-400 text-2xl sm:text-3xl">trending_up</span>
+          <span class="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Vendas Confirmadas</span>
+        </div>
+        <p class="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-1">
+          {{ painel()!.resumo.valorVendasConfirmadas | currency:'BRL':'symbol':'1.2-2' }}
+        </p>
+        <p class="text-gray-500 text-xs sm:text-sm">Total de vendas já confirmadas</p>
+      </div>
+
+      <!-- Card: Já Recebido -->
+      <div class="bg-gradient-to-br from-amber-500/10 via-amber-600/10 to-amber-500/10 backdrop-blur-xl border border-amber-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="material-icons text-amber-400 text-2xl sm:text-3xl">account_balance_wallet</span>
+          <span class="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Já Recebido</span>
+        </div>
+        <p class="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-1">
+          {{ painel()!.resumo.valorJaRecebido | currency:'BRL':'symbol':'1.2-2' }}
+        </p>
+        <p class="text-gray-500 text-xs sm:text-sm">Valor já recebido</p>
+      </div>
+
+      <!-- Card: A Receber -->
+      <div class="bg-gradient-to-br from-orange-500/10 via-orange-600/10 to-orange-500/10 backdrop-blur-xl border border-orange-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg sm:col-span-2 lg:col-span-1">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="material-icons text-orange-400 text-2xl sm:text-3xl">schedule</span>
+          <span class="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">A Receber</span>
+        </div>
+        <p class="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-1">
+          {{ painel()!.resumo.valorAReceber | currency:'BRL':'symbol':'1.2-2' }}
+        </p>
+        <p class="text-gray-500 text-xs sm:text-sm">Valor ainda a receber</p>
+      </div>
+    </div>
+
+    <!-- Funil de Vendas -->
+    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
+      <div class="flex items-center gap-2 mb-4 sm:mb-6">
+        <span class="material-icons text-sky-400 text-xl sm:text-2xl">bar_chart</span>
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-white">Funil de Vendas</h2>
+      </div>
+
+      <div class="space-y-4 sm:space-y-6">
+        <!-- Total de Pedidos -->
+        <div class="pb-4 border-b border-white/10">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm sm:text-base font-semibold text-gray-300">Total de Pedidos</span>
+            <span class="text-lg sm:text-xl font-bold text-white">{{ painel()!.funilVendas.totalPedidos }}</span>
+          </div>
+        </div>
+
+        <!-- Confirmados -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-emerald-400 text-lg sm:text-xl">check_circle</span>
+              <span class="text-sm sm:text-base font-semibold text-gray-300">Confirmados</span>
+            </div>
+            <div class="text-right">
+              <span class="text-base sm:text-lg font-bold text-white">{{ painel()!.funilVendas.pedidosConfirmados }}</span>
+              <span class="text-xs sm:text-sm text-gray-400 ml-2">({{ calculatePercentage(painel()!.funilVendas.pedidosConfirmados, painel()!.funilVendas.totalPedidos) }}%)</span>
+            </div>
+          </div>
+          <div class="w-full bg-white/5 rounded-full h-3 sm:h-4 overflow-hidden">
+            <div 
+              class="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-500"
+              [style.width.%]="calculatePercentage(painel()!.funilVendas.pedidosConfirmados, painel()!.funilVendas.totalPedidos)"
+            ></div>
+          </div>
+          <p class="text-xs sm:text-sm text-gray-400">
+            Valor: {{ painel()!.funilVendas.valorConfirmado | currency:'BRL':'symbol':'1.2-2' }}
+          </p>
+        </div>
+
+        <!-- Em Andamento -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-amber-400 text-lg sm:text-xl">hourglass_empty</span>
+              <span class="text-sm sm:text-base font-semibold text-gray-300">Em Andamento</span>
+            </div>
+            <div class="text-right">
+              <span class="text-base sm:text-lg font-bold text-white">{{ painel()!.funilVendas.pedidosEmAndamento }}</span>
+              <span class="text-xs sm:text-sm text-gray-400 ml-2">({{ calculatePercentage(painel()!.funilVendas.pedidosEmAndamento, painel()!.funilVendas.totalPedidos) }}%)</span>
+            </div>
+          </div>
+          <div class="w-full bg-white/5 rounded-full h-3 sm:h-4 overflow-hidden">
+            <div 
+              class="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-500"
+              [style.width.%]="calculatePercentage(painel()!.funilVendas.pedidosEmAndamento, painel()!.funilVendas.totalPedidos)"
+            ></div>
+          </div>
+          <p class="text-xs sm:text-sm text-gray-400">
+            Valor: {{ painel()!.funilVendas.valorEmAndamento | currency:'BRL':'symbol':'1.2-2' }}
+          </p>
+        </div>
+
+        <!-- Cancelados -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-red-400 text-lg sm:text-xl">cancel</span>
+              <span class="text-sm sm:text-base font-semibold text-gray-300">Cancelados</span>
+            </div>
+            <div class="text-right">
+              <span class="text-base sm:text-lg font-bold text-white">{{ painel()!.funilVendas.pedidosCancelados }}</span>
+              <span class="text-xs sm:text-sm text-gray-400 ml-2">({{ calculatePercentage(painel()!.funilVendas.pedidosCancelados, painel()!.funilVendas.totalPedidos) }}%)</span>
+            </div>
+          </div>
+          <div class="w-full bg-white/5 rounded-full h-3 sm:h-4 overflow-hidden">
+            <div 
+              class="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-500"
+              [style.width.%]="calculatePercentage(painel()!.funilVendas.pedidosCancelados, painel()!.funilVendas.totalPedidos)"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Taxa de Conversão -->
+        <div class="pt-4 border-t border-white/10">
+          <div class="flex items-center justify-between">
+            <span class="text-sm sm:text-base font-semibold text-gray-300">Taxa de Conversão</span>
+            <span class="text-lg sm:text-xl font-bold text-sky-400">{{ painel()!.funilVendas.taxaConversao | number:'1.1-1' }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendas Recentes -->
+    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
+      <div class="flex items-center gap-2 mb-4 sm:mb-6">
+        <span class="material-icons text-sky-400 text-xl sm:text-2xl">receipt_long</span>
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-white">Vendas Recentes</h2>
+      </div>
+
+      @if (painel()!.vendasRecentes && painel()!.vendasRecentes.length > 0) {
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-white/10">
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Data</th>
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Livro</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Quantidade</th>
+                <th class="text-right py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (venda of painel()!.vendasRecentes; track $index) {
+                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors duration-200">
+                  <td class="py-3 px-4 text-sm text-gray-300">{{ formatDate(venda.dataPedido) }}</td>
+                  <td class="py-3 px-4 text-sm text-white">{{ truncateText(venda.tituloLivro, 40) }}</td>
+                  <td class="py-3 px-4 text-sm text-center text-gray-300">{{ venda.quantidade }}</td>
+                  <td class="py-3 px-4 text-sm text-right text-white font-semibold">{{ venda.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</td>
+                  <td class="py-3 px-4 text-center">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="[getStatusBgColor(venda.statusLegivel), getStatusColor(venda.statusLegivel)]">
+                      <span class="material-icons text-xs">{{ getStatusIcon(venda.statusLegivel) }}</span>
+                      {{ venda.statusLegivel }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="md:hidden space-y-3">
+          @for (venda of painel()!.vendasRecentes; track $index) {
+            <div class="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <h3 class="text-sm font-semibold text-white mb-1">{{ truncateText(venda.tituloLivro, 50) }}</h3>
+                  <p class="text-xs text-gray-400">{{ formatDate(venda.dataPedido) }}</p>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border" [ngClass]="[getStatusBgColor(venda.statusLegivel), getStatusColor(venda.statusLegivel)]">
+                  <span class="material-icons text-xs">{{ getStatusIcon(venda.statusLegivel) }}</span>
+                  {{ venda.statusLegivel }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <div>
+                  <p class="text-xs text-gray-400">Quantidade</p>
+                  <p class="text-sm font-semibold text-white">{{ venda.quantidade }}</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-gray-400">Valor Total</p>
+                  <p class="text-sm font-bold text-sky-400">{{ venda.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-8 sm:py-12">
+          <span class="material-icons text-gray-500 text-4xl sm:text-5xl mb-3">inventory_2</span>
+          <p class="text-gray-400 text-sm sm:text-base">Ainda não há vendas registradas</p>
+        </div>
+      }
+    </div>
+  }
+</div>

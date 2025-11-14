@@ -265,14 +265,52 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
 
     /**
      * Estabelece conexão com o banco de dados do e-commerce.
+     * Converte URL no formato postgres:// para jdbc:postgresql:// se necessário.
      */
     private Connection getEcommerceConnection(String dbUrl, String dbUsername, String dbPassword) {
         try {
-            return DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+            // Converter URL do formato postgres:// para jdbc:postgresql:// se necessário
+            String jdbcUrl = converterUrlParaJdbc(dbUrl);
+            return DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
         } catch (Exception e) {
             log.error("[PAGAMENTOS AUTOR] Erro ao conectar ao banco do e-commerce: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Converte URL do formato postgres:// para jdbc:postgresql://
+     * Exemplo: postgres://user:pass@host:5432/db -> jdbc:postgresql://host:5432/db
+     */
+    private String converterUrlParaJdbc(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return url;
+        }
+
+        // Se já está no formato JDBC, retornar como está
+        if (url.startsWith("jdbc:postgresql://")) {
+            return url;
+        }
+
+        // Se está no formato postgres://, converter para jdbc:postgresql://
+        if (url.startsWith("postgres://")) {
+            // Remover postgres://
+            String semPrefixo = url.substring("postgres://".length());
+            
+            // Encontrar @ para separar credenciais do resto da URL
+            int atIndex = semPrefixo.indexOf('@');
+            if (atIndex > 0) {
+                // Extrair apenas a parte após @ (host:port/database)
+                String hostPortDb = semPrefixo.substring(atIndex + 1);
+                return "jdbc:postgresql://" + hostPortDb;
+            } else {
+                // Se não tem @, assumir que já está sem credenciais
+                return "jdbc:postgresql://" + semPrefixo;
+            }
+        }
+
+        // Se não reconhecer o formato, retornar como está
+        return url;
     }
 }
 
