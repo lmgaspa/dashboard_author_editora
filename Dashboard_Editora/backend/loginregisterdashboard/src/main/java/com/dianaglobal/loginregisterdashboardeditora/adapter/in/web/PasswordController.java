@@ -35,6 +35,7 @@ public class PasswordController {
     private final PasswordSetEmailService passwordSetEmailService;
 
     // CHANGE PASSWORD (usuário autenticado)
+    // Permite mudar a senha livremente: se currentPassword for fornecido, valida; se não, permite mudar diretamente
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/change", consumes = "application/json", produces = "application/json")
     public ResponseEntity<MessageResponse> changePassword(
@@ -44,9 +45,12 @@ public class PasswordController {
         var user = userRepositoryPort.findByEmail(principal.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (!passwordEncoder.matches(body.currentPassword(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageResponse("Current password is incorrect"));
+        // Se currentPassword for fornecido, valida; se não, permite mudar livremente (usuário autenticado)
+        if (body.currentPassword() != null && !body.currentPassword().trim().isEmpty()) {
+            if (user.getPassword() != null && !passwordEncoder.matches(body.currentPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Current password is incorrect"));
+            }
         }
 
         user.setPassword(passwordEncoder.encode(body.newPassword()));

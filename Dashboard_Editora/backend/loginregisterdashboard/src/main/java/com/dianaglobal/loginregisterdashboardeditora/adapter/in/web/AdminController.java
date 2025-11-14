@@ -94,7 +94,7 @@ public class AdminController {
                             user.getEcommerceUrl(),
                             user.getEcommerceDbUrl(),
                             user.getEcommerceDbUsername(),
-                            null,  // Não retornar password por segurança
+                            user.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
                             user.getProfilePhotoUrl()
                     ))
                     .toList();
@@ -198,7 +198,7 @@ public class AdminController {
                     newUser.getEcommerceUrl(),
                     newUser.getEcommerceDbUrl(),
                     newUser.getEcommerceDbUsername(),
-                    null  // Não retornar password por segurança
+                    newUser.getEcommerceDbPassword()  // Retornar password persistido para admin visualizar
                     )
             );
 
@@ -230,7 +230,7 @@ public class AdminController {
                             admin.getEcommerceUrl(),
                             admin.getEcommerceDbUrl(),
                             admin.getEcommerceDbUsername(),
-                            null,  // Não retornar password por segurança
+                            admin.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
                             admin.getProfilePhotoUrl()
                     ))
                     .toList();
@@ -404,17 +404,55 @@ public class AdminController {
                 user.setEcommerceDbUsername(newDbUsername);
                 changed = true;
             }
+            // ecommerceDbPassword pode ser atualizado
+            // IMPORTANTE: Se vier string vazia, remove o password
+            // Se vier null no request, NÃO altera o password atual (mantém o que está no banco)
+            // Se vier um valor não vazio, atualiza com o novo password
             if (request.ecommerceDbPassword() != null) {
                 String newDbPassword = request.ecommerceDbPassword().trim().isEmpty() ? null : request.ecommerceDbPassword().trim();
-                user.setEcommerceDbPassword(newDbPassword);
-                changed = true;
+                // Só marca como changed se realmente mudou
+                if (!java.util.Objects.equals(user.getEcommerceDbPassword(), newDbPassword)) {
+                    user.setEcommerceDbPassword(newDbPassword);
+                    changed = true;
+                }
             }
+            // Se request.ecommerceDbPassword() for null, mantém o password atual do banco (não altera)
 
             // profile_photo_url pode ser atualizado (incluindo null para remover)
             if (request.profilePhotoUrl() != null) {
                 String newPhotoUrl = request.profilePhotoUrl().trim().isEmpty() ? null : request.profilePhotoUrl().trim();
                 user.setProfilePhotoUrl(newPhotoUrl);
                 changed = true;
+            }
+            
+            // password pode ser atualizado pelo admin (sem precisar da senha atual)
+            // Admin pode mudar a senha de qualquer usuário livremente
+            if (request.password() != null && !request.password().trim().isEmpty()) {
+                String newPassword = request.password().trim();
+                // Validar força da senha
+                if (newPassword.length() < 8) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new MessageResponse("Password must be at least 8 characters long"));
+                }
+                boolean hasUpper = newPassword.chars().anyMatch(Character::isUpperCase);
+                boolean hasLower = newPassword.chars().anyMatch(Character::isLowerCase);
+                boolean hasDigit = newPassword.chars().anyMatch(Character::isDigit);
+                if (!hasUpper) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new MessageResponse("Password must include at least 1 uppercase letter"));
+                }
+                if (!hasLower) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new MessageResponse("Password must include at least 1 lowercase letter"));
+                }
+                if (!hasDigit) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new MessageResponse("Password must include at least 1 digit"));
+                }
+                user.setPassword(passwordEncoder.encode(newPassword));
+                user.setPasswordSet(true);
+                changed = true;
+                log.info("[UPDATE USER] Admin changed password for user: {} ({})", user.getEmail(), user.getId());
             }
 
             if (changed) {
@@ -423,6 +461,11 @@ public class AdminController {
             }
 
             // Retornar usuário atualizado
+            // IMPORTANTE: Retornar o password persistido do banco para o admin poder visualizar/editar
+            // Se o password foi alterado no request, retornar o novo valor salvo
+            // Se não foi alterado, retornar o valor atual do banco
+            String passwordToReturn = user.getEcommerceDbPassword();
+            
             var updatedUser = new UserListResponse(
                     user.getId(),
                     user.getName(),
@@ -434,7 +477,7 @@ public class AdminController {
                     user.getEcommerceUrl(),
                     user.getEcommerceDbUrl(),
                     user.getEcommerceDbUsername(),
-                    null,  // Não retornar password por segurança
+                    passwordToReturn,  // Retornar password persistido para admin editar
                     user.getProfilePhotoUrl()
             );
 
@@ -468,7 +511,7 @@ public class AdminController {
                             user.getEcommerceUrl(),
                             user.getEcommerceDbUrl(),
                             user.getEcommerceDbUsername(),
-                            null,  // Não retornar password por segurança
+                            user.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
                             user.getProfilePhotoUrl()
                     ))
                     .toList();
@@ -718,7 +761,7 @@ public class AdminController {
             String ecommerceUrl,    // URL base do e-commerce do autor (pode ser null)
             String ecommerceDbUrl,  // JDBC URL do banco do e-commerce (pode ser null)
             String ecommerceDbUsername, // Username do banco (pode ser null)
-            String ecommerceDbPassword  // Password do banco (pode ser null - não retornar no response por segurança)
+            String ecommerceDbPassword  // Password do banco (persistido, retornado para admin visualizar)
     ) {}
 
     public record UserListResponse(
@@ -732,7 +775,7 @@ public class AdminController {
             String ecommerceUrl,    // URL base do e-commerce do autor (pode ser null)
             String ecommerceDbUrl,  // JDBC URL do banco (pode ser null)
             String ecommerceDbUsername, // Username do banco (pode ser null)
-            String ecommerceDbPassword,  // Password do banco (sempre null nos responses por segurança)
+            String ecommerceDbPassword,  // Password do banco (persistido, retornado para admin editar)
             String profilePhotoUrl  // URL da foto de perfil (pode ser null)
     ) {}
 
@@ -745,6 +788,7 @@ public class AdminController {
     public record UpdateUserRequest(
             String name,         // Opcional: atualizar nome
             String role,         // Opcional: atualizar role (USER ou ADMIN)
+            String password,     // Opcional: atualizar senha do usuário (admin pode mudar livremente, validação de força aplicada)
             String authorId,     // Opcional: atualizar author_id (pode ser null ou string vazia para remover)
             String ecommerceUrl, // Opcional: atualizar ecommerce_url (pode ser null ou string vazia para remover)
             String ecommerceDbUrl,     // Opcional: atualizar URL do banco

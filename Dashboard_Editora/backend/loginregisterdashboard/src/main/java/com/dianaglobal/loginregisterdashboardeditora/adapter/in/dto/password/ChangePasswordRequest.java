@@ -1,7 +1,7 @@
 package com.dianaglobal.loginregisterdashboardeditora.adapter.in.dto.password;
 
 public record ChangePasswordRequest(
-        String currentPassword,
+        String currentPassword,  // Opcional: se fornecido, valida; se não, permite mudar livremente (usuário autenticado)
         @jakarta.validation.constraints.Pattern(
                 regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$",
                 message = "Password must include at least 1 uppercase letter, 1 lowercase letter, and 1 digit and be at least 8 characters"
