@@ -20,6 +20,20 @@ public class User {
     
     @Builder.Default
     private Role role = Role.USER;   // Role padrão é USER
+    
+    // ID do autor no sistema externo (pode ser null)
+    private String authorId;
+    
+    // URL base do e-commerce do autor (cada autor tem seu próprio e-commerce)
+    private String ecommerceUrl;
+    
+    // Credenciais do banco de dados do e-commerce (cada autor tem seu próprio banco)
+    private String ecommerceDbUrl;      // JDBC URL do banco do e-commerce
+    private String ecommerceDbUsername; // Username do banco do e-commerce
+    private String ecommerceDbPassword; // Password do banco do e-commerce (será criptografado no futuro)
+    
+    // URL da foto de perfil do usuário (pode ser null)
+    private String profilePhotoUrl;
 }
 
 //

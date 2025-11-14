@@ -41,7 +41,8 @@ public class ProfileController {
                 user.getName(),
                 user.getEmail(),
                 provider,
-                user.isPasswordSet()
+                user.isPasswordSet(),
+                user.getProfilePhotoUrl()
         );
 
         return ResponseEntity.ok(profile);

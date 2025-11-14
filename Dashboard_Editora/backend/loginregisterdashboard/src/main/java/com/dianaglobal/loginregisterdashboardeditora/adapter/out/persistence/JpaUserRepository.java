@@ -71,4 +71,11 @@ public class JpaUserRepository implements UserRepositoryPort {
                 .map(UserEntity::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<User> findAllByAuthorId(String authorId) {
+        return repository.findByAuthorId(authorId).stream()
+                .map(UserEntity::toDomain)
+                .collect(Collectors.toList());
+    }
 }

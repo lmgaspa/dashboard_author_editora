@@ -20,4 +20,6 @@ public interface UserRepositoryPort {
     List<User> findAll();
     // NEW: listar usuários por role
     List<User> findAllByRole(Role role);
+    // NEW: listar usuários por author_id
+    List<User> findAllByAuthorId(String authorId);
 }

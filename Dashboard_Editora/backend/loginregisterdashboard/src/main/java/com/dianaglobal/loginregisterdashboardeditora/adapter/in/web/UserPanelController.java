@@ -79,7 +79,8 @@ public class UserPanelController {
                 user.getName(),
                 user.getEmail(),
                 provider,
-                user.isPasswordSet()
+                user.isPasswordSet(),
+                user.getProfilePhotoUrl()
         );
 
         return ResponseEntity.ok(profile);
@@ -108,6 +109,14 @@ public class UserPanelController {
                 user.setName(newName);
             }
 
+            // Atualizar foto de perfil se fornecida (pode ser null para remover)
+            if (request.profilePhotoUrl() != null) {
+                String newPhotoUrl = request.profilePhotoUrl().trim().isEmpty() ? null : request.profilePhotoUrl().trim();
+                log.info("[UPDATE PROFILE] Updating profile photo for user {}: {} -> {}", 
+                        user.getEmail(), user.getProfilePhotoUrl(), newPhotoUrl);
+                user.setProfilePhotoUrl(newPhotoUrl);
+            }
+
             // Salvar alterações
             userRepositoryPort.save(user);
 
@@ -124,7 +133,8 @@ public class UserPanelController {
                     user.getName(),
                     user.getEmail(),
                     provider,
-                    user.isPasswordSet()
+                    user.isPasswordSet(),
+                    user.getProfilePhotoUrl()
             );
 
             return ResponseEntity.ok(updatedProfile);
@@ -208,7 +218,8 @@ public class UserPanelController {
     public record MessageResponse(String message) {}
 
     public record UpdateProfileRequest(
-            String name  // Nome do usuário (opcional, mas se fornecido deve ser válido)
+            String name,  // Nome do usuário (opcional, mas se fornecido deve ser válido)
+            String profilePhotoUrl  // URL da foto de perfil (opcional, pode ser null ou string vazia para remover)
     ) {}
 }
 

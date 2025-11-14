@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface SpringUserRepository extends JpaRepository<UserEntity, String> {
     Optional<UserEntity> findByEmail(String email);
     List<UserEntity> findByRole(Role role);
+    List<UserEntity> findByAuthorId(String authorId);  // Buscar usuários por author_id
 }

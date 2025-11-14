@@ -71,6 +71,10 @@ application:
     password: ${ADMIN_PASSWORD}
     id: ${ADMIN_ID:admin-1}
 
+# NOTA: As credenciais do banco de dados do e-commerce são configuradas por usuário
+# através dos campos: ecommerce_db_url, ecommerce_db_username, ecommerce_db_password
+# na tabela users. Não são necessárias variáveis de ambiente globais.
+
 springdoc:
   api-docs:
     path: /api-docs

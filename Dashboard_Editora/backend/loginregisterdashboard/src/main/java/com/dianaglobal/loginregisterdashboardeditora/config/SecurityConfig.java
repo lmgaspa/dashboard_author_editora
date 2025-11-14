@@ -76,6 +76,9 @@ public class SecurityConfig {
                         
                         // Painel user - apenas USER ou ADMIN (agora em v1)
                         .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
+                        
+                        // Pagamentos do autor - apenas USER ou ADMIN (agora em v1)
+                        .requestMatchers("/api/v1/author/payments/**").hasAnyRole("USER", "ADMIN")
 
                         // tudo o resto precisa de JWT válido
                         .anyRequest().authenticated()
@@ -95,11 +98,12 @@ public class SecurityConfig {
         cfg.setAllowedOriginPatterns(List.of(
                 "https://www.dashboard-author-editora.vercel.app",
                 "https://dashboard-author-editora.vercel.app",
-                "http://localhost:4200" // dev local Angular
+                "http://localhost:4200", // dev local Angular
+                "http://127.0.0.1:4200"  // alternativa localhost
         ));
 
         // métodos liberados
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
 
         // headers que o front-end pode mandar
         cfg.setAllowedHeaders(List.of(
@@ -109,16 +113,22 @@ public class SecurityConfig {
                 "X-Requested-With",
                 "Origin",
                 "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
+                "Access-Control-Request-Headers",
+                "Cache-Control"
         ));
 
-        // permitir cookies (se necessário no futuro)
+        // permitir cookies e credenciais
         cfg.setAllowCredentials(true);
 
-        // headers expostos na resposta
-        cfg.setExposedHeaders(List.of());
+        // headers expostos na resposta (importante para o frontend acessar)
+        cfg.setExposedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
+        ));
 
-        // cache do preflight
+        // cache do preflight (1 hora)
         cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
