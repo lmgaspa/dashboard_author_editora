@@ -103,7 +103,13 @@ public class SecurityConfig {
                 "https://www.dashboard-author-editora.vercel.app",
                 "https://dashboard-author-editora.vercel.app",
                 "http://localhost:4200", // dev local Angular
-                "http://127.0.0.1:4200"  // alternativa localhost
+                "http://127.0.0.1:4200",  // alternativa localhost
+                "http://paineldavia.com.br",
+                "https://paineldavia.com.br",
+                "http://www.paineldavia.com.br",
+                "https://www.paineldavia.com.br",
+                "*://paineldavia.com.br",  // por cautela - qualquer protocolo
+                "*://*.paineldavia.com.br"  // por cautela - qualquer subdomínio
         ));
 
         // métodos liberados
