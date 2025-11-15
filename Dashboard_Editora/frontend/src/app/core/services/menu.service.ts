@@ -44,6 +44,12 @@ export class MenuService {
       roles: ['USER', 'ADMIN']
     },
     {
+      label: 'E-mails',
+      icon: 'email',
+      route: '/user/emails',
+      roles: ['USER', 'ADMIN']
+    },
+    {
       label: 'Meu Perfil',
       icon: 'person',
       route: '/user/profile',

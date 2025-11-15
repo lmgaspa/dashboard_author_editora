@@ -80,6 +80,9 @@ public class SecurityConfig {
                         // Pagamentos do autor - apenas USER ou ADMIN (agora em v1)
                         .requestMatchers("/api/v1/author/payments/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/v1/autor/pagamentos/**").hasAnyRole("USER", "ADMIN")
+                        
+                        // E-mails do autor - apenas USER ou ADMIN (agora em v1)
+                        .requestMatchers("/api/v1/autor/emails/**").hasAnyRole("USER", "ADMIN")
 
                         // tudo o resto precisa de JWT válido
                         .anyRequest().authenticated()

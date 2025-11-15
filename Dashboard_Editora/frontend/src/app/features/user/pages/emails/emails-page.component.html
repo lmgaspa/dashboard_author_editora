@@ -1,0 +1,214 @@
+<div class="w-full space-y-4 sm:space-y-6">
+  <!-- Título -->
+  <div>
+    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold relative mb-2">
+      <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">E-mails</span>
+      <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(8px);">E-mails</span>
+    </h1>
+    <p class="text-sm sm:text-base text-gray-400">Visualize e-mails de clientes e repasses enviados</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-12 sm:py-16 space-y-4">
+      <span class="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin"></span>
+      <p class="text-gray-400 text-sm sm:text-base">Carregando informações de e-mails...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 sm:p-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <span class="material-icons text-red-400 text-xl sm:text-2xl flex-shrink-0">error_outline</span>
+        <div class="flex-1">
+          <h3 class="text-red-300 font-semibold text-sm sm:text-base mb-1">Erro ao carregar dados</h3>
+          <p class="text-red-400/80 text-xs sm:text-sm">{{ error() }}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-300 text-sm font-medium transition-colors duration-200"
+        (click)="retry()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Success State -->
+  @if (painel() && !loading() && !error()) {
+    <!-- E-mails de Clientes -->
+    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
+      <div class="flex items-center gap-2 mb-4 sm:mb-6">
+        <span class="material-icons text-sky-400 text-xl sm:text-2xl">mail</span>
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-white">E-mails de Clientes</h2>
+      </div>
+
+      @if (!painel()!.emailsClientes || painel()!.emailsClientes.length === 0) {
+        <div class="text-center py-8 sm:py-12">
+          <span class="material-icons text-gray-500 text-4xl sm:text-5xl mb-3">mail_outline</span>
+          <p class="text-gray-400 text-sm sm:text-base">Nenhum e-mail de cliente encontrado</p>
+        </div>
+      } @else {
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-white/10">
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">E-mail</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Total de Pedidos</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Confirmados</th>
+                <th class="text-right py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor Total</th>
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Último Pedido</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (email of painel()!.emailsClientes; track $index) {
+                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors duration-200">
+                  <td class="py-3 px-4 text-sm text-white font-medium">{{ email.email }}</td>
+                  <td class="py-3 px-4 text-sm text-center text-gray-300">{{ email.totalPedidos }}</td>
+                  <td class="py-3 px-4 text-center">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/20 border-emerald-500/30 text-emerald-300">
+                      <span class="material-icons text-xs">check_circle</span>
+                      {{ email.totalPedidosConfirmados }}
+                      @if (email.totalPedidos > 0) {
+                        <span class="text-emerald-400/70">({{ calculateConfirmationRate(email.totalPedidos, email.totalPedidosConfirmados) }}%)</span>
+                      }
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-sm text-right text-white font-semibold">{{ email.valorTotalConfirmado | currency:'BRL':'symbol':'1.2-2' }}</td>
+                  <td class="py-3 px-4 text-sm text-gray-300">{{ formatDate(email.ultimoPedidoEm) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="md:hidden space-y-3">
+          @for (email of painel()!.emailsClientes; track $index) {
+            <div class="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
+              <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-white mb-1 break-words">{{ email.email }}</h3>
+                  <p class="text-xs text-gray-400">Último pedido: {{ formatDate(email.ultimoPedidoEm) }}</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <div>
+                  <p class="text-xs text-gray-400">Total de Pedidos</p>
+                  <p class="text-sm font-semibold text-white">{{ email.totalPedidos }}</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-xs text-gray-400">Confirmados</p>
+                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border bg-emerald-500/20 border-emerald-500/30 text-emerald-300">
+                    <span class="material-icons text-xs">check_circle</span>
+                    {{ email.totalPedidosConfirmados }}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-gray-400">Valor Total</p>
+                  <p class="text-sm font-bold text-sky-400">{{ email.valorTotalConfirmado | currency:'BRL':'symbol':'1.2-2' }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- E-mails de Repasse -->
+    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
+      <div class="flex items-center gap-2 mb-4 sm:mb-6">
+        <span class="material-icons text-sky-400 text-xl sm:text-2xl">send</span>
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-white">E-mails de Repasse</h2>
+      </div>
+
+      @if (!painel()!.emailsRepasse || painel()!.emailsRepasse.length === 0) {
+        <div class="text-center py-8 sm:py-12">
+          <span class="material-icons text-gray-500 text-4xl sm:text-5xl mb-3">send</span>
+          <p class="text-gray-400 text-sm sm:text-base">Nenhum e-mail de repasse encontrado</p>
+        </div>
+      } @else {
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-white/10">
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Tipo</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Enviado Em</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Pedido ID</th>
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Erro</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (repasse of painel()!.emailsRepasse; track $index) {
+                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors duration-200">
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="getTipoBadgeClass(repasse.tipoEmail)">
+                      {{ repasse.tipoEmail }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="getStatusBadgeClass(repasse.status)">
+                      <span class="material-icons text-xs">{{ getStatusIcon(repasse.status) }}</span>
+                      {{ repasse.status }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-sm text-gray-300">{{ formatDate(repasse.enviadoEm) }}</td>
+                  <td class="py-3 px-4 text-sm text-center text-gray-300">{{ repasse.pedidoId || '-' }}</td>
+                  <td class="py-3 px-4 text-sm">
+                    @if (repasse.mensagemErro) {
+                      <span class="text-red-400/80" [title]="repasse.mensagemErro">
+                        <span class="material-icons text-xs align-middle mr-1">error_outline</span>
+                        {{ repasse.mensagemErro.length > 50 ? (repasse.mensagemErro.substring(0, 50) + '...') : repasse.mensagemErro }}
+                      </span>
+                    } @else {
+                      <span class="text-gray-500">-</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="md:hidden space-y-3">
+          @for (repasse of painel()!.emailsRepasse; track $index) {
+            <div class="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border" [ngClass]="getTipoBadgeClass(repasse.tipoEmail)">
+                      {{ repasse.tipoEmail }}
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border" [ngClass]="getStatusBadgeClass(repasse.status)">
+                      <span class="material-icons text-xs">{{ getStatusIcon(repasse.status) }}</span>
+                      {{ repasse.status }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-gray-400">Enviado em: {{ formatDate(repasse.enviadoEm) }}</p>
+                  @if (repasse.pedidoId) {
+                    <p class="text-xs text-gray-400 mt-1">Pedido ID: {{ repasse.pedidoId }}</p>
+                  }
+                </div>
+              </div>
+              @if (repasse.mensagemErro) {
+                <div class="pt-2 border-t border-white/10">
+                  <p class="text-xs text-red-400/80 flex items-start gap-1">
+                    <span class="material-icons text-xs flex-shrink-0 mt-0.5">error_outline</span>
+                    <span>{{ repasse.mensagemErro }}</span>
+                  </p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
