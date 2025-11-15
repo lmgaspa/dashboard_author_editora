@@ -72,6 +72,10 @@ export const routes: Routes = [
           {
             path: 'emails',
             loadComponent: () => import('./features/user/pages/emails/emails-page.component').then(m => m.EmailsPageComponent)
+          },
+          {
+            path: 'metrics',
+            loadComponent: () => import('./features/user/pages/metrics/metrics-page.component').then(m => m.MetricsPageComponent)
           }
         ]
       }

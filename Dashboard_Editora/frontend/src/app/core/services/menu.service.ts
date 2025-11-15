@@ -50,6 +50,12 @@ export class MenuService {
       roles: ['USER', 'ADMIN']
     },
     {
+      label: 'Métricas',
+      icon: 'analytics',
+      route: '/user/metrics',
+      roles: ['USER', 'ADMIN']
+    },
+    {
       label: 'Meu Perfil',
       icon: 'person',
       route: '/user/profile',
