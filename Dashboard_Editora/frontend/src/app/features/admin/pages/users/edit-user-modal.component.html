@@ -226,6 +226,46 @@
         </div>
       }
 
+      <!-- Looker Studio URL Field (only if authorId is filled) -->
+      @if (hasAuthorId() && isUserRole()) {
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="lookerStudioUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
+              URL do Looker Studio
+            </label>
+            @if (form.get('lookerStudioUrl')?.value) {
+              <button
+                type="button"
+                class="text-xs text-red-400 hover:text-red-300 transition-colors"
+                (click)="removeField('lookerStudioUrl')"
+                [disabled]="loading()"
+              >
+                Remover
+              </button>
+            }
+          </div>
+          <div class="relative">
+            <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">analytics</span>
+            <input 
+              type="url" 
+              id="lookerStudioUrl" 
+              formControlName="lookerStudioUrl" 
+              placeholder="https://lookerstudio.google.com/embed/reporting/..."
+              class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+              [disabled]="loading()"
+            />
+          </div>
+          @if (form.get('lookerStudioUrl')?.invalid && form.get('lookerStudioUrl')?.touched) {
+            <p class="text-red-400 text-[10px] sm:text-xs">
+              URL inválida. Deve começar com https://lookerstudio.google.com/embed/
+            </p>
+          }
+          <small class="text-gray-500 text-[10px] sm:text-xs">
+            URL de embed do relatório Looker Studio para visualização de métricas. Obtenha esta URL ao compartilhar o relatório no Looker Studio.
+          </small>
+        </div>
+      }
+
       <!-- Optional Database Credentials Section -->
       @if (hasAuthorId() && isUserRole()) {
         <div class="space-y-4 sm:space-y-6 pt-4 sm:pt-6 border-t border-white/10">

@@ -22,6 +22,7 @@ export interface User {
   ecommerceDbUrl?: string;
   ecommerceDbUsername?: string;
   ecommerceDbPassword?: string | null;
+  lookerStudioUrl?: string | null;
 }
 
 export interface AuthResponse {
@@ -40,7 +41,7 @@ export interface ResetPasswordRequest {
 }
 
 export interface ChangePasswordRequest {
-  currentPassword: string;
+  currentPassword?: string; // Opcional - não é necessário para autores e admins
   newPassword: string;
 }
 
@@ -55,5 +56,6 @@ export interface ProfileResponse {
   authProvider: string;
   passwordSet: boolean;
   profilePhotoUrl?: string | null;
+  lookerStudioUrl?: string | null;
 }
 

@@ -39,7 +39,6 @@ export class ChangePasswordPageComponent {
   private readonly router = inject(Router);
 
   readonly form: FormGroup = this.fb.group({
-    currentPassword: [''], // Opcional - usuário pode mudar sem validar senha atual
     newPassword: ['', [Validators.required, passwordStrengthValidator]],
     confirmPassword: ['', [Validators.required]]
   }, { validators: this.passwordMatchValidator });
@@ -47,7 +46,6 @@ export class ChangePasswordPageComponent {
   readonly loading = signal<boolean>(false);
   readonly success = signal<boolean>(false);
   readonly error = signal<string | null>(null);
-  readonly showCurrentPassword = signal<boolean>(false);
   readonly showNewPassword = signal<boolean>(false);
   readonly showConfirmPassword = signal<boolean>(false);
 
@@ -58,10 +56,6 @@ export class ChangePasswordPageComponent {
       confirmPassword.setErrors({ passwordMismatch: true });
     }
     return null;
-  }
-
-  toggleCurrentPassword(): void {
-    this.showCurrentPassword.update(v => !v);
   }
 
   toggleNewPassword(): void {
@@ -78,15 +72,9 @@ export class ChangePasswordPageComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    // Construir payload - currentPassword é opcional
-    const payload: any = {
+    const payload = {
       newPassword: this.form.value.newPassword
     };
-    
-    // Só incluir currentPassword se foi preenchido
-    if (this.form.value.currentPassword && this.form.value.currentPassword.trim() !== '') {
-      payload.currentPassword = this.form.value.currentPassword;
-    }
 
     this.authService.changePassword(payload).subscribe({
       next: () => {

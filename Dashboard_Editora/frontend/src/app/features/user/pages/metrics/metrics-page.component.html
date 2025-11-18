@@ -1,28 +1,163 @@
 <div class="w-full space-y-4 sm:space-y-6">
-  <!-- Título -->
-  <div>
-    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold relative mb-2">
-      <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Métricas</span>
-      <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(8px);">Métricas</span>
-    </h1>
-    <p class="text-sm sm:text-base text-gray-400">Visualize suas métricas e análises detalhadas</p>
+  <!-- Header com título e botão de exportar -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl md:text-3xl font-bold relative mb-2">
+        <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Métricas</span>
+        <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(8px);">Métricas</span>
+      </h1>
+      <p class="text-sm sm:text-base text-gray-400">Visualize suas métricas e análises detalhadas</p>
+    </div>
+
+    <!-- Botão de Exportar (só aparece se tiver métricas) -->
+    @if (hasMetrics() && !loading()) {
+      <div class="relative" data-export-dropdown>
+        <button
+          type="button"
+          class="flex items-center gap-2 px-4 py-2.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 font-medium transition-all duration-200 text-sm sm:text-base"
+          (click)="toggleExportDropdown()"
+          [disabled]="exporting()"
+        >
+          <span class="material-icons text-lg">{{ exporting() ? 'hourglass_empty' : 'download' }}</span>
+          <span>{{ exporting() ? 'Exportando...' : 'Exportar Métricas' }}</span>
+        </button>
+
+        <!-- Dropdown de Exportação -->
+        @if (showExportDropdown()) {
+          <div class="absolute right-0 top-full mt-2 w-48 bg-[rgba(15,23,42,0.95)] backdrop-blur-xl border border-white/20 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] z-50 py-2">
+            <button
+              type="button"
+              class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors duration-200 text-sm"
+              (click)="exportMetrics('pdf')"
+              [disabled]="exporting()"
+            >
+              <span class="material-icons text-lg">picture_as_pdf</span>
+              <span>Exportar como PDF</span>
+            </button>
+            <div class="h-px bg-white/10 my-1"></div>
+            <button
+              type="button"
+              class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors duration-200 text-sm"
+              (click)="exportMetrics('csv')"
+              [disabled]="exporting()"
+            >
+              <span class="material-icons text-lg">table_chart</span>
+              <span>Exportar como CSV</span>
+            </button>
+          </div>
+        }
+      </div>
+    }
   </div>
+
+  <!-- Toast de Sucesso -->
+  @if (exportSuccess()) {
+    <div class="fixed top-4 right-4 z-[100] bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-4 shadow-lg animate-fade-in">
+      <div class="flex items-center gap-3">
+        <span class="material-icons text-emerald-400">check_circle</span>
+        <p class="text-emerald-300 text-sm font-medium">Arquivo exportado com sucesso!</p>
+      </div>
+    </div>
+  }
+
+  <!-- Toast de Erro -->
+  @if (exportError()) {
+    <div class="fixed top-4 right-4 z-[100] bg-red-500/20 border border-red-500/30 rounded-lg p-4 shadow-lg animate-fade-in">
+      <div class="flex items-center gap-3">
+        <span class="material-icons text-red-400">error</span>
+        <p class="text-red-300 text-sm font-medium">{{ exportError() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-12 sm:py-16 space-y-4">
+      <span class="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin"></span>
+      <p class="text-gray-400 text-sm sm:text-base">Carregando métricas...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 sm:p-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <span class="material-icons text-red-400 text-xl sm:text-2xl flex-shrink-0">error_outline</span>
+        <div class="flex-1">
+          <h3 class="text-red-300 font-semibold text-sm sm:text-base mb-1">Erro ao carregar métricas</h3>
+          <p class="text-red-400/80 text-xs sm:text-sm">{{ error() }}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-300 text-sm font-medium transition-colors duration-200"
+        (click)="retry()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Empty State (sem URL configurada) -->
+  @if (!loading() && !error() && !hasMetrics()) {
+    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 sm:p-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <span class="material-icons text-yellow-400 text-xl sm:text-2xl flex-shrink-0">info</span>
+        <div class="flex-1">
+          <h3 class="text-yellow-300 font-semibold text-sm sm:text-base mb-1">Métricas não configuradas</h3>
+          <p class="text-yellow-400/80 text-xs sm:text-sm">
+            @if (isAdmin()) {
+              Selecione um autor ou entre em contato com o administrador para configurar as métricas no Looker Studio.
+            } @else {
+              Entre em contato com o administrador para configurar suas métricas no Looker Studio.
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dropdown de Seleção de Autor (apenas para ADMIN) -->
+  @if (isAdmin() && !loading() && !error() && authors().length > 0) {
+    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 sm:p-6">
+      <label for="author-select" class="block text-sm font-semibold text-gray-200 mb-2">
+        Selecione o Autor
+      </label>
+      <select
+        id="author-select"
+        class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+        [value]="selectedAuthorId() || ''"
+        (change)="onAuthorChange($any($event.target).value || null)"
+      >
+        <option value="">-- Selecione um autor --</option>
+        @for (author of authors(); track author.id) {
+          <option [value]="author.authorId">{{ author.name }} (ID: {{ author.authorId }})</option>
+        }
+      </select>
+      @if (selectedAuthor() && !selectedAuthor()!.lookerStudioUrl) {
+        <p class="mt-2 text-yellow-400/80 text-xs sm:text-sm">
+          Este autor não possui URL do Looker Studio configurada.
+        </p>
+      }
+    </div>
+  }
 
   <!-- Iframe do Looker Studio -->
-  <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
-    <div class="w-full h-[450px] sm:h-[600px] md:h-[700px] lg:h-[800px] rounded-lg overflow-hidden">
-      <iframe
-        width="100%"
-        height="100%"
-        src="https://lookerstudio.google.com/embed/reporting/de7a1f43-4058-4d1e-b1e7-0d29f44f0712/page/aLcfF"
-        frameborder="0"
-        style="border:0"
-        allowfullscreen
-        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-        title="Métricas do Autor"
-        loading="lazy"
-      ></iframe>
+  @if (!loading() && !error() && hasMetrics()) {
+    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
+      <div class="w-full h-[450px] sm:h-[600px] md:h-[700px] lg:h-[800px] rounded-lg overflow-hidden">
+        <iframe
+          width="100%"
+          height="100%"
+          [src]="lookerStudioUrl()!"
+          frameborder="0"
+          style="border:0"
+          allowfullscreen
+          sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          title="Métricas do Autor"
+          loading="lazy"
+        ></iframe>
+      </div>
     </div>
-  </div>
+  }
 </div>
-

@@ -1,6 +1,8 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { PaymentService } from '@/app/core/services/payment.service';
+import { ExportService, ExportFormat } from '@/app/core/services/export.service';
+import { AuthService } from '@/app/core/services/auth.service';
 import { PainelPagamentosAutor, PagamentosAutorResumo, FunilVendas, VendaRecente } from '@/app/core/models/payment.model';
 
 @Component({
@@ -10,15 +12,40 @@ import { PainelPagamentosAutor, PagamentosAutorResumo, FunilVendas, VendaRecente
   templateUrl: './payments-page.component.html',
   styles: []
 })
-export class PaymentsPageComponent implements OnInit {
+export class PaymentsPageComponent implements OnInit, OnDestroy {
   private readonly paymentService = inject(PaymentService);
+  private readonly exportService = inject(ExportService);
+  private readonly authService = inject(AuthService);
 
   readonly painel = signal<PainelPagamentosAutor | null>(null);
   readonly loading = signal<boolean>(false);
   readonly error = signal<string | null>(null);
+  readonly showExportDropdown = signal<boolean>(false);
+  readonly exporting = signal<boolean>(false);
+  readonly exportError = signal<string | null>(null);
+  readonly exportSuccess = signal<boolean>(false);
+  private clickListener?: (e: Event) => void;
 
   ngOnInit(): void {
     this.loadPainel();
+    
+    // Listener para fechar dropdown ao clicar fora
+    this.clickListener = (e: Event) => {
+      if (this.showExportDropdown()) {
+        const target = e.target as HTMLElement;
+        const exportDropdown = target?.closest('[data-export-dropdown]');
+        if (!exportDropdown) {
+          this.showExportDropdown.set(false);
+        }
+      }
+    };
+    document.addEventListener('click', this.clickListener);
+  }
+
+  ngOnDestroy(): void {
+    if (this.clickListener) {
+      document.removeEventListener('click', this.clickListener);
+    }
   }
 
   loadPainel(): void {
@@ -120,6 +147,47 @@ export class PaymentsPageComponent implements OnInit {
   calculatePercentage(value: number, total: number): number {
     if (total === 0) return 0;
     return Math.round((value / total) * 100);
+  }
+
+  toggleExportDropdown(): void {
+    this.showExportDropdown.update(v => !v);
+  }
+
+  closeExportDropdown(): void {
+    this.showExportDropdown.set(false);
+  }
+
+  exportPayments(format: ExportFormat): void {
+    this.exporting.set(true);
+    this.exportError.set(null);
+    this.exportSuccess.set(false);
+    this.closeExportDropdown();
+
+    const authorId = this.authService.currentUser()?.authorId;
+
+    if (!authorId) {
+      this.exportError.set('Author ID não encontrado');
+      this.exporting.set(false);
+      return;
+    }
+
+    this.exportService.exportPayments({
+      format,
+      authorId
+    }).subscribe({
+      next: (blob) => {
+        const filename = this.exportService.generateFilename('pagamentos', format, authorId);
+        this.exportService.downloadBlob(blob, filename);
+        this.exportSuccess.set(true);
+        setTimeout(() => this.exportSuccess.set(false), 3000);
+        this.exporting.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao exportar pagamentos:', err);
+        this.exportError.set(err.error?.message || 'Erro ao exportar pagamentos. Tente novamente.');
+        this.exporting.set(false);
+      }
+    });
   }
 }
 

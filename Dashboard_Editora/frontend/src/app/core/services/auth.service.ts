@@ -134,6 +134,10 @@ export class AuthService {
           email: response.email,
           role: currentUser?.role || 'USER', // Manter o role atual ou default
           avatar: currentUser?.avatar,
+          profilePhotoUrl: response.profilePhotoUrl || null,
+          authorId: currentUser?.authorId,
+          ecommerceUrl: currentUser?.ecommerceUrl,
+          lookerStudioUrl: response.lookerStudioUrl || null,
           createdAt: currentUser?.createdAt
         };
         
@@ -166,6 +170,9 @@ export class AuthService {
           role: currentUser?.role || 'USER', // Manter o role atual ou default
           avatar: response.profilePhotoUrl || currentUser?.avatar, // Compatibilidade
           profilePhotoUrl: response.profilePhotoUrl || null,
+          authorId: currentUser?.authorId,
+          ecommerceUrl: currentUser?.ecommerceUrl,
+          lookerStudioUrl: response.lookerStudioUrl || currentUser?.lookerStudioUrl || null,
           createdAt: currentUser?.createdAt
         };
         
