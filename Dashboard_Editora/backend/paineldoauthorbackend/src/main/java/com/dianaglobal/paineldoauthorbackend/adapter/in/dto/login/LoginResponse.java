@@ -1,0 +1,15 @@
+package com.dianaglobal.paineldoauthorbackend.adapter.in.dto.login;
+
+public record LoginResponse(
+        String accessToken,
+        UserInfo user
+) {
+    public record UserInfo(
+            String id,
+            String name,
+            String email,
+            String role,
+            String authProvider,
+            boolean passwordSet
+    ) {}
+}

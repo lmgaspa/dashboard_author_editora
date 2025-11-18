@@ -1,0 +1,50 @@
+// src/main/java/com/dianaglobal/paineldoauthor/application/service/UserService.java
+package com.dianaglobal.paineldoauthorbackend.application.service;
+
+import com.dianaglobal.paineldoauthorbackend.application.event.UserConfirmedListener;
+import com.dianaglobal.paineldoauthorbackend.application.port.out.UserRepositoryPort;
+import com.dianaglobal.paineldoauthorbackend.domain.model.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepositoryPort userRepository;
+    private final UserConfirmedListener userConfirmedListener; // novo
+
+    /** Busca por e-mail normalizando (trim/lowercase). */
+    public Optional<User> findByEmail(String email) {
+        if (email == null) return Optional.empty();
+        String normalized = email.trim().toLowerCase();
+        return userRepository.findByEmail(normalized);
+    }
+
+    /** Persiste a entidade e retorna o próprio usuário. */
+    public User save(User user) {
+        userRepository.save(user);
+        return user;
+    }
+
+    /** Busca por e-mail ou lança IllegalArgumentException. */
+    public User getByEmailOrThrow(String email) {
+        return findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    /** Marca o e-mail como confirmado. */
+    public void markEmailConfirmed(String userId) {
+        User u = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (!u.isEmailConfirmed()) {
+            u.setEmailConfirmed(true);
+            userRepository.save(u);
+
+            // OCP: evento externo para lidar com efeitos colaterais
+            userConfirmedListener.onUserConfirmed(u, null);
+        }
+    }
+}
