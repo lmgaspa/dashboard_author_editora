@@ -101,10 +101,13 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
      */
     private double calcularValorVendasConfirmadas(Connection conn, long autorId) throws Exception {
         String sql = """
-            SELECT COALESCE(SUM(amount_net), 0) AS total_confirmado
-            FROM payment_payouts
-            WHERE author_id = ?
-              AND status = 'CONFIRMED'
+            SELECT COALESCE(SUM(pp.amount_net), 0) AS total_confirmado
+            FROM payment_payouts pp
+            JOIN orders o ON o.id = pp.order_id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN books b ON b.id::text = oi.book_id
+            WHERE b.author_id = ?
+              AND pp.status = 'CONFIRMED'
             """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -125,10 +128,13 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
      */
     private double calcularValorJaRecebido(Connection conn, long autorId) throws Exception {
         String sql = """
-            SELECT COALESCE(SUM(amount_net), 0) AS valor_recebido
-            FROM payment_payouts
-            WHERE author_id = ?
-              AND status = 'CONFIRMED'
+            SELECT COALESCE(SUM(pp.amount_net), 0) AS valor_recebido
+            FROM payment_payouts pp
+            JOIN orders o ON o.id = pp.order_id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN books b ON b.id::text = oi.book_id
+            WHERE b.author_id = ?
+              AND pp.status = 'CONFIRMED'
             """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -149,10 +155,13 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
      */
     private double calcularValorAReceber(Connection conn, long autorId) throws Exception {
         String sql = """
-            SELECT COALESCE(SUM(amount_net), 0) AS valor_a_receber
-            FROM payment_payouts
-            WHERE author_id = ?
-              AND status = 'SENT'
+            SELECT COALESCE(SUM(pp.amount_net), 0) AS valor_a_receber
+            FROM payment_payouts pp
+            JOIN orders o ON o.id = pp.order_id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN books b ON b.id::text = oi.book_id
+            WHERE b.author_id = ?
+              AND pp.status = 'SENT'
             """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -178,18 +187,18 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
         String sql = """
             SELECT 
                 pp.order_id AS pedido_id,
-                pp.paid_at AS data_pedido,
+                o.paid_at AS data_pedido,
                 COALESCE(b.title, 'N/A') AS titulo_livro,
                 COALESCE(oi.quantity, 1) AS quantidade,
                 pp.amount_net AS valor_total,
                 pp.status AS status
             FROM payment_payouts pp
-            LEFT JOIN orders o ON o.id = pp.order_id
-            LEFT JOIN order_items oi ON oi.order_id = o.id
-            LEFT JOIN books b ON b.id::text = oi.book_id AND b.author_id = pp.author_id
-            WHERE pp.author_id = ?
+            JOIN orders o ON o.id = pp.order_id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN books b ON b.id::text = oi.book_id
+            WHERE b.author_id = ?
               AND pp.status = 'CONFIRMED'
-            ORDER BY pp.paid_at DESC NULLS LAST, pp.id DESC
+            ORDER BY o.paid_at DESC NULLS LAST, pp.id DESC
             LIMIT 20
             """;
 
@@ -265,11 +274,14 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
         // Buscar valores reais usando payment_payouts.amount_net
         String sqlValores = """
             SELECT 
-                COALESCE(SUM(CASE WHEN status = 'CONFIRMED' THEN amount_net ELSE 0 END), 0) AS valor_confirmado,
-                COALESCE(SUM(CASE WHEN status = 'SENT' THEN amount_net ELSE 0 END), 0) AS valor_em_andamento,
-                COALESCE(SUM(amount_net), 0) AS valor_total
-            FROM payment_payouts
-            WHERE author_id = ?
+                COALESCE(SUM(CASE WHEN pp.status = 'CONFIRMED' THEN pp.amount_net ELSE 0 END), 0) AS valor_confirmado,
+                COALESCE(SUM(CASE WHEN pp.status = 'SENT' THEN pp.amount_net ELSE 0 END), 0) AS valor_em_andamento,
+                COALESCE(SUM(pp.amount_net), 0) AS valor_total
+            FROM payment_payouts pp
+            JOIN orders o ON o.id = pp.order_id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN books b ON b.id::text = oi.book_id
+            WHERE b.author_id = ?
             """;
 
         double valorTotal = 0.0;

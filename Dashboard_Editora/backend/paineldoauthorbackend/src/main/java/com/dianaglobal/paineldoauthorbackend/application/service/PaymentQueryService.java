@@ -103,20 +103,20 @@ public class PaymentQueryService {
                 SELECT 
                     pp.id as payment_id,
                     pp.order_id,
-                    pp.author_id,
+                    b.author_id,
                     COALESCE(b.title, 'N/A') as book_title,
                     COALESCE(b.id::text, '') as book_id,
                     pp.amount_net as amount,
                     pp.status,
-                    pp.paid_at,
+                    o.paid_at,
                     'PAYOUT' as provider,
                     NULL as external_id
                 FROM payment_payouts pp
-                LEFT JOIN orders o ON o.id = pp.order_id
-                LEFT JOIN order_items oi ON oi.order_id = o.id
-                LEFT JOIN books b ON b.id::text = oi.book_id AND b.author_id = pp.author_id
-                WHERE pp.author_id = ?
-                ORDER BY pp.paid_at DESC NULLS LAST, pp.id DESC
+                JOIN orders o ON o.id = pp.order_id
+                JOIN order_items oi ON oi.order_id = o.id
+                JOIN books b ON b.id::text = oi.book_id
+                WHERE b.author_id = ?
+                ORDER BY o.paid_at DESC NULLS LAST, pp.id DESC
                 LIMIT ?
                 """;
 
@@ -168,7 +168,12 @@ public class PaymentQueryService {
 
             // Buscar total geral (sem limite) - usando amount_net (valor real)
             try (var stmt = conn.prepareStatement(
-                    "SELECT COUNT(*), COALESCE(SUM(amount_net), 0) FROM payment_payouts WHERE author_id = ?")) {
+                    "SELECT COUNT(*), COALESCE(SUM(pp.amount_net), 0) " +
+                    "FROM payment_payouts pp " +
+                    "JOIN orders o ON o.id = pp.order_id " +
+                    "JOIN order_items oi ON oi.order_id = o.id " +
+                    "JOIN books b ON b.id::text = oi.book_id " +
+                    "WHERE b.author_id = ?")) {
                 stmt.setLong(1, authorId);
                 try (var rs = stmt.executeQuery()) {
                     if (rs.next()) {
@@ -180,8 +185,12 @@ public class PaymentQueryService {
 
             // Buscar totais recentes (últimos 30 dias) - usando amount_net (valor real)
             try (var stmt = conn.prepareStatement(
-                    "SELECT COUNT(*), COALESCE(SUM(amount_net), 0) FROM payment_payouts " +
-                    "WHERE author_id = ? AND paid_at >= NOW() - INTERVAL '30 days'")) {
+                    "SELECT COUNT(*), COALESCE(SUM(pp.amount_net), 0) " +
+                    "FROM payment_payouts pp " +
+                    "JOIN orders o ON o.id = pp.order_id " +
+                    "JOIN order_items oi ON oi.order_id = o.id " +
+                    "JOIN books b ON b.id::text = oi.book_id " +
+                    "WHERE b.author_id = ? AND o.paid_at >= NOW() - INTERVAL '30 days'")) {
                 stmt.setLong(1, authorId);
                 try (var rs = stmt.executeQuery()) {
                     if (rs.next()) {
@@ -228,20 +237,20 @@ public class PaymentQueryService {
                 SELECT 
                     pp.id as payment_id,
                     pp.order_id,
-                    pp.author_id,
+                    b.author_id,
                     COALESCE(b.title, 'N/A') as book_title,
                     COALESCE(b.id::text, '') as book_id,
                     pp.amount_net as amount,
                     pp.status,
-                    pp.paid_at,
+                    o.paid_at,
                     'PAYOUT' as provider,
                     NULL as external_id
                 FROM payment_payouts pp
-                LEFT JOIN orders o ON o.id = pp.order_id
-                LEFT JOIN order_items oi ON oi.order_id = o.id
-                LEFT JOIN books b ON b.id::text = oi.book_id AND b.author_id = pp.author_id
-                WHERE pp.author_id = ?
-                ORDER BY pp.paid_at DESC NULLS LAST, pp.id DESC
+                JOIN orders o ON o.id = pp.order_id
+                JOIN order_items oi ON oi.order_id = o.id
+                JOIN books b ON b.id::text = oi.book_id
+                WHERE b.author_id = ?
+                ORDER BY o.paid_at DESC NULLS LAST, pp.id DESC
                 LIMIT ? OFFSET ?
                 """;
 

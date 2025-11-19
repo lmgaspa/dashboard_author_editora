@@ -67,8 +67,18 @@ public class AuthorStatsService {
                      AND o.status = 'COMPLETED') as total_revenue,
                     
                     -- Pagamentos
-                    (SELECT COUNT(*) FROM payment_payouts WHERE author_id = a.id) as total_payouts,
-                    (SELECT COALESCE(SUM(amount), 0) FROM payment_payouts WHERE author_id = a.id) as total_paid,
+                    (SELECT COUNT(*) 
+                     FROM payment_payouts pp
+                     JOIN orders o ON o.id = pp.order_id
+                     JOIN order_items oi ON oi.order_id = o.id
+                     JOIN books b ON b.id::text = oi.book_id
+                     WHERE b.author_id = a.id) as total_payouts,
+                    (SELECT COALESCE(SUM(pp.amount), 0) 
+                     FROM payment_payouts pp
+                     JOIN orders o ON o.id = pp.order_id
+                     JOIN order_items oi ON oi.order_id = o.id
+                     JOIN books b ON b.id::text = oi.book_id
+                     WHERE b.author_id = a.id) as total_paid,
                     
                     -- Conta de pagamento
                     (SELECT COUNT(*) FROM payment_author_accounts WHERE author_id = a.id) as has_payment_account

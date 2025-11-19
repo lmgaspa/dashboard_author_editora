@@ -45,12 +45,12 @@ spring:
 logging:
   level:
     org.springframework.data.jpa: info
-    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
+    # org.hibernate.SQL: debug  # Comentado: logs SQL desabilitados para reduzir ruído nos logs
+    # org.hibernate.type.descriptor.sql.BasicBinder: trace  # Comentado: logs de parâmetros SQL desabilitados
 
 brand:
   name: "Dashboard Autor Editora VL"
-  frontend-url: "https://www.dashboard-author-editora.vercel.app"
+  frontend-url: "https://www.paineldavia.com.br"
   logo-url: "https://www.andescoresoftware.com.br" # troque aqui quando quiser
 
 application:
@@ -60,7 +60,7 @@ application:
     name: ${BRAND_NAME:Painel do Autor da Editora Via Litterarum}
     logo-url: "https://www.andescoresoftware.com.br/AndesCore.jpg"
   frontend:
-    base-url: ${FRONTEND_BASE_URL:https://www.dashboard-author-editora.vercel.app}
+    base-url: ${FRONTEND_BASE_URL:https://www.paineldavia.com.br}
   confirmation:
     minutes: 45            # expiração do token
     cooldown-seconds: 60   # intervalo mínimo entre reenvios

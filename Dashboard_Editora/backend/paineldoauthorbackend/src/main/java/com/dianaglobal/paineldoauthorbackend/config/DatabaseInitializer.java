@@ -41,6 +41,18 @@ public class DatabaseInitializer {
 
     private void createDatabaseIfNotExists() {
         try {
+            // Detectar se está rodando no Heroku
+            // Heroku já cria o banco automaticamente, não precisamos verificar
+            boolean isHeroku = System.getenv("DYNO") != null || 
+                             System.getenv("DATABASE_URL") != null ||
+                             (environment.getProperty("spring.datasource.url") != null && 
+                              environment.getProperty("spring.datasource.url").contains("amazonaws.com"));
+            
+            if (isHeroku) {
+                log.info("🚀 Detectado Heroku/Cloud - banco já existe, pulando verificação");
+                return;
+            }
+            
             // Resolve as variáveis de ambiente diretamente usando o Environment
             // O Spring Boot resolve automaticamente ${VAR_NAME} do YAML
             String datasourceUrl = environment.getProperty("spring.datasource.url", 
