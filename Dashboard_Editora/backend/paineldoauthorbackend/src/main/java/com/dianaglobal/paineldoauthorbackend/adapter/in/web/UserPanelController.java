@@ -80,7 +80,9 @@ public class UserPanelController {
                 user.getEmail(),
                 provider,
                 user.isPasswordSet(),
-                user.getProfilePhotoUrl()
+                user.getProfilePhotoUrl(),
+                user.getAuthorId(),
+                user.getEcommerceUrl()
         );
 
         return ResponseEntity.ok(profile);
@@ -134,7 +136,9 @@ public class UserPanelController {
                     user.getEmail(),
                     provider,
                     user.isPasswordSet(),
-                    user.getProfilePhotoUrl()
+                    user.getProfilePhotoUrl(),
+                    user.getAuthorId(),
+                    user.getEcommerceUrl()
             );
 
             return ResponseEntity.ok(updatedProfile);

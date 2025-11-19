@@ -5,7 +5,7 @@ Plataforma completa de gestão de autores, métricas, pagamentos e emails com au
 ## 🎯 O Que Faz
 
 Uma plataforma completa de **gestão de autores** que fornece:
-- 📊 **Dashboard de métricas** com integração Looker Studio
+- 📊 **Dashboard de métricas** e análises
 - 💰 **Gestão de pagamentos e repasses** por autor
 - 📧 **Sistema de emails** e notificações
 - 🎫 **Sistema de tickets** para suporte

@@ -1,5 +1,6 @@
 package com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 /**
@@ -14,6 +15,7 @@ public record ResumoEmailRepasseDTO(
         String tipoEmail,
         String status,
         Instant enviadoEm,
-        String mensagemErro
+        String mensagemErro,
+        BigDecimal valorRepassado
 ) {}
 

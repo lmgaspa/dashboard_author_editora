@@ -3,6 +3,7 @@ package com.dianaglobal.paineldoauthorbackend.domain.model;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -21,6 +22,7 @@ public class TicketMessage {
     private boolean isInternalNote;            // Nota interna (só admin vê)
     private Instant createdAt;                 // Data de criação
     private Instant readAt;                    // Quando foi lido pelo destinatário
+    private List<String> attachments;          // Array de URLs de arquivos (JSONB no banco)
 }
 
 

@@ -42,7 +42,9 @@ public class ProfileController {
                 user.getEmail(),
                 provider,
                 user.isPasswordSet(),
-                user.getProfilePhotoUrl()
+                user.getProfilePhotoUrl(),
+                user.getAuthorId(),
+                user.getEcommerceUrl()
         );
 
         return ResponseEntity.ok(profile);

@@ -6,5 +6,7 @@ public record ProfileResponseDTO(
         String email,
         String authProvider,   // new field
         boolean passwordSet,   // new field
-        String profilePhotoUrl // URL da foto de perfil (pode ser null)
+        String profilePhotoUrl, // URL da foto de perfil (pode ser null)
+        String authorId,       // ID do autor no e-commerce (pode ser null)
+        String ecommerceUrl   // URL do e-commerce (pode ser null)
 ) {}

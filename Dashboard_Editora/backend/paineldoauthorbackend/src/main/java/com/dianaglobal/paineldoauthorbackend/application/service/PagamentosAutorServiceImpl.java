@@ -19,7 +19,8 @@ import java.util.List;
 
 /**
  * Implementação do service de pagamentos do autor.
- * Busca dados diretamente de orders/order_items/books com status CONFIRMED.
+ * Busca dados de payment_payouts.amount_net para valores reais (após taxas e margens).
+ * Usa orders apenas para contagem de pedidos no funil de vendas.
  */
 @Slf4j
 @Service
@@ -50,14 +51,10 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
                 return null;
             }
 
-            // Calcular valor de vendas confirmadas
+            // Calcular valores reais usando payment_payouts.amount_net
             double valorVendasConfirmadas = calcularValorVendasConfirmadas(conn, autorId);
-
-            // Por enquanto, valorJaRecebido é 0.0 (placeholder para futuro)
-            double valorJaRecebido = 0.0;
-
-            // Calcular valor a receber
-            double valorAReceber = Math.max(0.0, valorVendasConfirmadas - valorJaRecebido);
+            double valorJaRecebido = calcularValorJaRecebido(conn, autorId);
+            double valorAReceber = calcularValorAReceber(conn, autorId);
 
             // Criar resumo
             PagamentosAutorResumoDTO resumo = new PagamentosAutorResumoDTO(
@@ -71,8 +68,8 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
             // Calcular funil de vendas (métricas simples e claras)
             FunilVendasDTO funilVendas = calcularFunilVendas(conn, autorId);
 
-            // Buscar vendas recentes (últimas 20 vendas confirmadas)
-            List<VendaRecenteDTO> vendasRecentes = buscarVendasRecentes(conn, autorId, 20);
+            // Buscar todas as vendas confirmadas (sem limite)
+            List<VendaRecenteDTO> vendasRecentes = buscarVendasRecentes(conn, autorId);
 
             return new PainelPagamentosAutorDTO(resumo, funilVendas, vendasRecentes);
 
@@ -100,17 +97,14 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
 
     /**
      * Calcula o valor total de vendas confirmadas do autor.
-     * Soma: order_items.quantity * order_items.price para livros do autor,
-     * apenas com orders.status = 'CONFIRMED'.
+     * Usa payment_payouts.amount_net com status = 'CONFIRMED' para valores reais (após taxas).
      */
     private double calcularValorVendasConfirmadas(Connection conn, long autorId) throws Exception {
         String sql = """
-            SELECT COALESCE(SUM(oi.quantity * oi.price), 0) AS total_confirmado
-            FROM order_items oi
-            JOIN books b ON b.id::text = oi.book_id
-            JOIN orders o ON o.id = oi.order_id
-            WHERE b.author_id = ?
-              AND o.status = 'CONFIRMED'
+            SELECT COALESCE(SUM(amount_net), 0) AS total_confirmado
+            FROM payment_payouts
+            WHERE author_id = ?
+              AND status = 'CONFIRMED'
             """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -126,32 +120,81 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
     }
 
     /**
-     * Busca as últimas vendas confirmadas do autor.
-     * Retorna as últimas N vendas ordenadas por data de criação do pedido (mais recente primeiro).
+     * Calcula o valor já recebido pelo autor (payouts confirmados).
+     * Usa payment_payouts.amount_net com status = 'CONFIRMED'.
      */
-    private List<VendaRecenteDTO> buscarVendasRecentes(Connection conn, long autorId, int limite) throws Exception {
-        List<VendaRecenteDTO> vendas = new ArrayList<>();
-
+    private double calcularValorJaRecebido(Connection conn, long autorId) throws Exception {
         String sql = """
-            SELECT 
-                o.id AS pedido_id,
-                o.created_at AS data_pedido,
-                b.title AS titulo_livro,
-                oi.quantity AS quantidade,
-                (oi.quantity * oi.price) AS valor_total,
-                o.status AS status
-            FROM orders o
-            JOIN order_items oi ON oi.order_id = o.id
-            JOIN books b ON b.id::text = oi.book_id
-            WHERE b.author_id = ?
-              AND o.status = 'CONFIRMED'
-            ORDER BY o.created_at DESC
-            LIMIT ?
+            SELECT COALESCE(SUM(amount_net), 0) AS valor_recebido
+            FROM payment_payouts
+            WHERE author_id = ?
+              AND status = 'CONFIRMED'
             """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, autorId);
-            stmt.setInt(2, limite);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    BigDecimal total = rs.getBigDecimal("valor_recebido");
+                    return total != null ? total.doubleValue() : 0.0;
+                }
+            }
+        }
+        return 0.0;
+    }
+
+    /**
+     * Calcula o valor a receber (payouts enviados mas não confirmados).
+     * Usa payment_payouts.amount_net com status = 'SENT'.
+     */
+    private double calcularValorAReceber(Connection conn, long autorId) throws Exception {
+        String sql = """
+            SELECT COALESCE(SUM(amount_net), 0) AS valor_a_receber
+            FROM payment_payouts
+            WHERE author_id = ?
+              AND status = 'SENT'
+            """;
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, autorId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    BigDecimal total = rs.getBigDecimal("valor_a_receber");
+                    return total != null ? total.doubleValue() : 0.0;
+                }
+            }
+        }
+        return 0.0;
+    }
+
+    /**
+     * Busca todas as vendas confirmadas do autor.
+     * Usa payment_payouts para obter valores reais (amount_net) e informações do pedido.
+     * Retorna todas as vendas ordenadas por data de pagamento (mais recente primeiro).
+     */
+    private List<VendaRecenteDTO> buscarVendasRecentes(Connection conn, long autorId) throws Exception {
+        List<VendaRecenteDTO> vendas = new ArrayList<>();
+
+        String sql = """
+            SELECT 
+                pp.order_id AS pedido_id,
+                pp.paid_at AS data_pedido,
+                COALESCE(b.title, 'N/A') AS titulo_livro,
+                COALESCE(oi.quantity, 1) AS quantidade,
+                pp.amount_net AS valor_total,
+                pp.status AS status
+            FROM payment_payouts pp
+            LEFT JOIN orders o ON o.id = pp.order_id
+            LEFT JOIN order_items oi ON oi.order_id = o.id
+            LEFT JOIN books b ON b.id::text = oi.book_id AND b.author_id = pp.author_id
+            WHERE pp.author_id = ?
+              AND pp.status = 'CONFIRMED'
+            ORDER BY pp.paid_at DESC NULLS LAST, pp.id DESC
+            LIMIT 20
+            """;
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, autorId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     OffsetDateTime dataPedido = rs.getTimestamp("data_pedido") != null
@@ -162,17 +205,20 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
                     BigDecimal valorTotal = rs.getBigDecimal("valor_total");
                     double valor = valorTotal != null ? valorTotal.doubleValue() : 0.0;
 
-                    String statusLegivel = mapearStatusLegivel(rs.getString("status"));
+                    String statusLegivel = mapearStatusPayout(rs.getString("status"));
 
-                    VendaRecenteDTO venda = new VendaRecenteDTO(
-                            rs.getLong("pedido_id"),
-                            dataPedido,
-                            rs.getString("titulo_livro"),
-                            rs.getInt("quantidade"),
-                            valor,
-                            statusLegivel
-                    );
-                    vendas.add(venda);
+                    Long pedidoId = rs.getObject("pedido_id", Long.class);
+                    if (pedidoId != null) {
+                        VendaRecenteDTO venda = new VendaRecenteDTO(
+                                pedidoId,
+                                dataPedido,
+                                rs.getString("titulo_livro"),
+                                rs.getInt("quantidade"),
+                                valor,
+                                statusLegivel
+                        );
+                        vendas.add(venda);
+                    }
                 }
             }
         }
@@ -183,18 +229,16 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
     /**
      * Calcula o funil de vendas do autor.
      * Métricas simples e fáceis de entender para um escritor leigo.
+     * Usa orders para contagem de pedidos e payment_payouts.amount_net para valores monetários reais.
      */
     private FunilVendasDTO calcularFunilVendas(Connection conn, long autorId) throws Exception {
-        // Buscar totais por status
-        String sql = """
+        // Buscar contagem de pedidos por status (usa orders)
+        String sqlPedidos = """
             SELECT 
                 COUNT(DISTINCT o.id) AS total_pedidos,
                 COUNT(DISTINCT CASE WHEN o.status = 'CONFIRMED' THEN o.id END) AS pedidos_confirmados,
-                COUNT(DISTINCT CASE WHEN o.status IN ('NEW', 'WAITING') THEN o.id END) AS pedidos_em_andamento,
-                COUNT(DISTINCT CASE WHEN o.status IN ('CANCELLED', 'CANCELED', 'EXPIRED') THEN o.id END) AS pedidos_cancelados,
-                COALESCE(SUM(CASE WHEN o.status = 'CONFIRMED' THEN oi.quantity * oi.price ELSE 0 END), 0) AS valor_confirmado,
-                COALESCE(SUM(CASE WHEN o.status IN ('NEW', 'WAITING') THEN oi.quantity * oi.price ELSE 0 END), 0) AS valor_em_andamento,
-                COALESCE(SUM(oi.quantity * oi.price), 0) AS valor_total
+                COUNT(DISTINCT CASE WHEN o.status IN ('NEW', 'WAITING', 'RESERVED') THEN o.id END) AS pedidos_em_andamento,
+                COUNT(DISTINCT CASE WHEN o.status IN ('CANCELLED', 'CANCELED', 'EXPIRED', 'RESERVA_EXPIRADA') THEN o.id END) AS pedidos_cancelados
             FROM orders o
             JOIN order_items oi ON oi.order_id = o.id
             JOIN books b ON b.id::text = oi.book_id
@@ -205,11 +249,8 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
         long pedidosConfirmados = 0;
         long pedidosEmAndamento = 0;
         long pedidosCancelados = 0;
-        double valorTotal = 0.0;
-        double valorConfirmado = 0.0;
-        double valorEmAndamento = 0.0;
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sqlPedidos)) {
             stmt.setLong(1, autorId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -217,7 +258,28 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
                     pedidosConfirmados = rs.getLong("pedidos_confirmados");
                     pedidosEmAndamento = rs.getLong("pedidos_em_andamento");
                     pedidosCancelados = rs.getLong("pedidos_cancelados");
-                    
+                }
+            }
+        }
+
+        // Buscar valores reais usando payment_payouts.amount_net
+        String sqlValores = """
+            SELECT 
+                COALESCE(SUM(CASE WHEN status = 'CONFIRMED' THEN amount_net ELSE 0 END), 0) AS valor_confirmado,
+                COALESCE(SUM(CASE WHEN status = 'SENT' THEN amount_net ELSE 0 END), 0) AS valor_em_andamento,
+                COALESCE(SUM(amount_net), 0) AS valor_total
+            FROM payment_payouts
+            WHERE author_id = ?
+            """;
+
+        double valorTotal = 0.0;
+        double valorConfirmado = 0.0;
+        double valorEmAndamento = 0.0;
+
+        try (PreparedStatement stmt = conn.prepareStatement(sqlValores)) {
+            stmt.setLong(1, autorId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
                     BigDecimal valorTotalBD = rs.getBigDecimal("valor_total");
                     BigDecimal valorConfirmadoBD = rs.getBigDecimal("valor_confirmado");
                     BigDecimal valorEmAndamentoBD = rs.getBigDecimal("valor_em_andamento");
@@ -248,17 +310,17 @@ public class PagamentosAutorServiceImpl implements PagamentosAutorService {
     }
 
     /**
-     * Mapeia o status técnico para texto legível em português.
+     * Mapeia o status de payout para texto legível em português.
      */
-    private String mapearStatusLegivel(String status) {
+    private String mapearStatusPayout(String status) {
         if (status == null) {
             return "Em andamento";
         }
         return switch (status.toUpperCase()) {
             case "CONFIRMED" -> "Pago";
-            case "NEW", "WAITING" -> "Em andamento";
+            case "SENT" -> "Enviado";
+            case "PENDING" -> "Pendente";
             case "CANCELLED", "CANCELED" -> "Cancelado";
-            case "EXPIRED" -> "Expirado";
             default -> "Em andamento";
         };
     }

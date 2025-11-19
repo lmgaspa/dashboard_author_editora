@@ -80,6 +80,7 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
               AND o.email IS NOT NULL
               AND o.email != ''
             GROUP BY o.email
+            HAVING COUNT(DISTINCT CASE WHEN o.status = 'CONFIRMED' THEN o.id END) > 0
             ORDER BY ultimo_pedido_em DESC
             """;
 
@@ -141,7 +142,14 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                 pe.email_type,
                 pe.status,
                 pe.sent_at,
-                pe.error_message
+                pe.error_message,
+                COALESCE((
+                    SELECT SUM(oi2.quantity * oi2.price)
+                    FROM order_items oi2
+                    JOIN books b2 ON b2.id::text = oi2.book_id
+                    WHERE oi2.order_id = pe.order_id
+                      AND b2.author_id = ?
+                ), 0) AS valor_repassado
             FROM payout_email pe
             JOIN orders o ON o.id = pe.order_id
             JOIN order_items oi ON oi.order_id = o.id
@@ -152,6 +160,7 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, autorId);
+            stmt.setLong(2, autorId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Long id = rs.getLong("id");
@@ -180,6 +189,11 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                         enviadoEm = sentAtTimestamp.toInstant();
                     }
 
+                    BigDecimal valorRepassado = rs.getBigDecimal("valor_repassado");
+                    if (valorRepassado == null) {
+                        valorRepassado = BigDecimal.ZERO;
+                    }
+
                     ResumoEmailRepasseDTO resumo = new ResumoEmailRepasseDTO(
                             id,
                             pedidoId,
@@ -188,7 +202,8 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                             tipoEmail,
                             status,
                             enviadoEm,
-                            mensagemErro
+                            mensagemErro,
+                            valorRepassado
                     );
                     emails.add(resumo);
                 }

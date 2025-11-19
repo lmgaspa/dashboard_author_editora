@@ -98,9 +98,7 @@ public class PaymentQueryService {
                 }
             }
 
-            // Buscar pagamentos via payment_webhook_events (Pix, etc)
-            // Assumindo que order_ref ou payload_json pode ter informações que relacionam com orders/books
-            // Por enquanto, vamos buscar de payment_payouts que é mais direto
+            // Buscar pagamentos via payment_payouts usando amount_net (valor real após taxas)
             String sql = """
                 SELECT 
                     pp.id as payment_id,
@@ -108,7 +106,7 @@ public class PaymentQueryService {
                     pp.author_id,
                     COALESCE(b.title, 'N/A') as book_title,
                     COALESCE(b.id::text, '') as book_id,
-                    pp.amount,
+                    pp.amount_net as amount,
                     pp.status,
                     pp.paid_at,
                     'PAYOUT' as provider,
@@ -168,9 +166,9 @@ public class PaymentQueryService {
                 }
             }
 
-            // Buscar total geral (sem limite)
+            // Buscar total geral (sem limite) - usando amount_net (valor real)
             try (var stmt = conn.prepareStatement(
-                    "SELECT COUNT(*), COALESCE(SUM(amount), 0) FROM payment_payouts WHERE author_id = ?")) {
+                    "SELECT COUNT(*), COALESCE(SUM(amount_net), 0) FROM payment_payouts WHERE author_id = ?")) {
                 stmt.setLong(1, authorId);
                 try (var rs = stmt.executeQuery()) {
                     if (rs.next()) {
@@ -180,9 +178,9 @@ public class PaymentQueryService {
                 }
             }
 
-            // Buscar totais recentes (últimos 30 dias)
+            // Buscar totais recentes (últimos 30 dias) - usando amount_net (valor real)
             try (var stmt = conn.prepareStatement(
-                    "SELECT COUNT(*), COALESCE(SUM(amount), 0) FROM payment_payouts " +
+                    "SELECT COUNT(*), COALESCE(SUM(amount_net), 0) FROM payment_payouts " +
                     "WHERE author_id = ? AND paid_at >= NOW() - INTERVAL '30 days'")) {
                 stmt.setLong(1, authorId);
                 try (var rs = stmt.executeQuery()) {
@@ -233,7 +231,7 @@ public class PaymentQueryService {
                     pp.author_id,
                     COALESCE(b.title, 'N/A') as book_title,
                     COALESCE(b.id::text, '') as book_id,
-                    pp.amount,
+                    pp.amount_net as amount,
                     pp.status,
                     pp.paid_at,
                     'PAYOUT' as provider,

@@ -1,10 +1,14 @@
 package com.dianaglobal.paineldoauthorbackend.adapter.out.persistence.entity;
 
 import com.dianaglobal.paineldoauthorbackend.domain.model.TicketMessage;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -18,6 +22,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TicketMessageEntity {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Id
     @Column(name = "id", columnDefinition = "UUID")
@@ -43,10 +49,24 @@ public class TicketMessageEntity {
     @Column(name = "read_at")
     private Instant readAt;
 
+    @Column(name = "attachments", columnDefinition = "jsonb")
+    private String attachmentsJson;  // Armazenado como JSONB, serializado/deserializado
+
     // ---------- Mapeamentos domínio <-> entidade ----------
 
     public static TicketMessageEntity fromDomain(TicketMessage d) {
         if (d == null) return null;
+        
+        String attachmentsJson = null;
+        if (d.getAttachments() != null && !d.getAttachments().isEmpty()) {
+            try {
+                attachmentsJson = objectMapper.writeValueAsString(d.getAttachments());
+            } catch (Exception e) {
+                // Log error if needed
+                attachmentsJson = null;
+            }
+        }
+        
         return TicketMessageEntity.builder()
                 .id(d.getId())
                 .ticketId(d.getTicketId())
@@ -55,11 +75,23 @@ public class TicketMessageEntity {
                 .isInternalNote(d.isInternalNote())
                 .createdAt(d.getCreatedAt() != null ? d.getCreatedAt() : Instant.now())
                 .readAt(d.getReadAt())
+                .attachmentsJson(attachmentsJson)
                 .build();
     }
 
     public static TicketMessage toDomain(TicketMessageEntity e) {
         if (e == null) return null;
+        
+        List<String> attachments = new ArrayList<>();
+        if (e.getAttachmentsJson() != null && !e.getAttachmentsJson().trim().isEmpty()) {
+            try {
+                attachments = objectMapper.readValue(e.getAttachmentsJson(), new TypeReference<List<String>>() {});
+            } catch (Exception ex) {
+                // Log error if needed
+                attachments = new ArrayList<>();
+            }
+        }
+        
         return TicketMessage.builder()
                 .id(e.getId())
                 .ticketId(e.getTicketId())
@@ -68,6 +100,7 @@ public class TicketMessageEntity {
                 .isInternalNote(e.isInternalNote())
                 .createdAt(e.getCreatedAt())
                 .readAt(e.getReadAt())
+                .attachments(attachments)
                 .build();
     }
 }
