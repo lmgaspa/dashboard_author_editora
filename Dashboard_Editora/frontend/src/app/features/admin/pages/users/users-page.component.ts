@@ -61,11 +61,22 @@ export class UsersPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     
-    this.http.get<UsersResponse>(`${this.API_URL}/api/v1/admin/users`).subscribe({
+    this.http.get<any>(`${this.API_URL}/api/v1/admin/users`).subscribe({
       next: (response) => {
         // Extrair o array de usuários da resposta
         const users = response?.users || [];
-        const sortedUsers = [...users].sort((a, b) => {
+        // Normalizar author_id para authorId (backend retorna snake_case, frontend usa camelCase)
+        const normalizedUsers = users.map((user: any) => ({
+          ...user,
+          authorId: user.author_id || user.authorId,
+          ecommerceUrl: user.ecommerce_url || user.ecommerceUrl,
+          ecommerceDbUrl: user.ecommerce_db_url || user.ecommerceDbUrl,
+          ecommerceDbUsername: user.ecommerce_db_username || user.ecommerceDbUsername,
+          ecommerceDbPassword: user.ecommerce_db_password || user.ecommerceDbPassword,
+          profilePhotoUrl: user.profile_photo_url || user.profilePhotoUrl,
+          lookerStudioUrl: user.looker_studio_url || user.lookerStudioUrl
+        }));
+        const sortedUsers = [...normalizedUsers].sort((a, b) => {
           if (a.role === 'ADMIN' && b.role !== 'ADMIN') return -1;
           if (a.role !== 'ADMIN' && b.role === 'ADMIN') return 1;
           return a.name.localeCompare(b.name);

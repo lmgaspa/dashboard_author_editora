@@ -122,24 +122,27 @@ export class AuthService {
   }
 
   getUserProfile(): Observable<User> {
-    return this.http.get<ProfileResponse>(`${this.API_URL}/api/v1/user/profile`).pipe(
-      map((response: ProfileResponse) => {
+    return this.http.get<any>(`${this.API_URL}/api/v1/user/profile`).pipe(
+      map((response: any) => {
         console.log('📦 ProfileResponse recebida (GET):', response);
         
         // Mapear ProfileResponse para User
+        // Backend pode retornar author_id (snake_case) ou authorId (camelCase)
         const currentUser = this._currentUser();
         const mappedUser: User = {
           id: response.id,
           name: response.name,
           email: response.email,
           role: currentUser?.role || 'USER', // Manter o role atual ou default
-          avatar: currentUser?.avatar,
-          profilePhotoUrl: response.profilePhotoUrl || null,
-          authorId: currentUser?.authorId,
-          ecommerceUrl: currentUser?.ecommerceUrl,
-          lookerStudioUrl: response.lookerStudioUrl || null,
+          avatar: response.profile_photo_url || response.profilePhotoUrl || currentUser?.avatar,
+          profilePhotoUrl: response.profile_photo_url || response.profilePhotoUrl || null,
+          authorId: response.author_id || response.authorId || currentUser?.authorId || null,
+          ecommerceUrl: response.ecommerce_url || response.ecommerceUrl || currentUser?.ecommerceUrl || null,
+          lookerStudioUrl: response.looker_studio_url || response.lookerStudioUrl || null,
           createdAt: currentUser?.createdAt
         };
+        
+        console.log('🔍 Author ID no perfil:', mappedUser.authorId);
         
         console.log('✅ User mapeado (GET):', mappedUser);
         return mappedUser;
@@ -156,25 +159,27 @@ export class AuthService {
   }
 
   updateProfile(data: { name?: string; profilePhotoUrl?: string }): Observable<User> {
-    return this.http.put<ProfileResponse>(`${this.API_URL}/api/v1/user/profile`, data).pipe(
-      map((response: ProfileResponse) => {
+    return this.http.put<any>(`${this.API_URL}/api/v1/user/profile`, data).pipe(
+      map((response: any) => {
         console.log('📦 ProfileResponse recebida:', response);
         
         // Mapear ProfileResponse para User
-        // O backend não retorna 'role' no ProfileResponse, então mantemos o role atual
+        // Backend pode retornar author_id (snake_case) ou authorId (camelCase)
         const currentUser = this._currentUser();
         const mappedUser: User = {
           id: response.id,
           name: response.name,
           email: response.email,
           role: currentUser?.role || 'USER', // Manter o role atual ou default
-          avatar: response.profilePhotoUrl || currentUser?.avatar, // Compatibilidade
-          profilePhotoUrl: response.profilePhotoUrl || null,
-          authorId: currentUser?.authorId,
-          ecommerceUrl: currentUser?.ecommerceUrl,
-          lookerStudioUrl: response.lookerStudioUrl || currentUser?.lookerStudioUrl || null,
+          avatar: response.profile_photo_url || response.profilePhotoUrl || currentUser?.avatar, // Compatibilidade
+          profilePhotoUrl: response.profile_photo_url || response.profilePhotoUrl || null,
+          authorId: response.author_id || response.authorId || currentUser?.authorId || null,
+          ecommerceUrl: response.ecommerce_url || response.ecommerceUrl || currentUser?.ecommerceUrl || null,
+          lookerStudioUrl: response.looker_studio_url || response.lookerStudioUrl || currentUser?.lookerStudioUrl || null,
           createdAt: currentUser?.createdAt
         };
+        
+        console.log('🔍 Author ID após atualização:', mappedUser.authorId);
         
         console.log('✅ User mapeado:', mappedUser);
         return mappedUser;
@@ -219,9 +224,15 @@ export class AuthService {
     }
     
     if (response.user) {
-      localStorage.setItem('currentUser', JSON.stringify(response.user));
-      this._currentUser.set(response.user);
-      console.log('✅ User salvo e atualizado:', response.user);
+      // Normalizar author_id para authorId (backend retorna snake_case, frontend usa camelCase)
+      const normalizedUser: User = {
+        ...response.user,
+        authorId: (response.user as any).author_id || response.user.authorId
+      };
+      
+      localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
+      this._currentUser.set(normalizedUser);
+      console.log('✅ User salvo e atualizado:', normalizedUser);
     } else {
       console.error('❌ User não encontrado na resposta');
     }

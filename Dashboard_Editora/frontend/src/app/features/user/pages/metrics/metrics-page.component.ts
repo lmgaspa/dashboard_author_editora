@@ -102,10 +102,16 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
   }
 
   loadAuthors(): void {
-    this.http.get<UsersResponse>(`${this.API_URL}/api/v1/admin/users`).subscribe({
+    this.http.get<any>(`${this.API_URL}/api/v1/admin/users`).subscribe({
       next: (response) => {
+        // Normalizar author_id para authorId (backend retorna snake_case, frontend usa camelCase)
+        const normalizedUsers = (response.users || []).map((u: any) => ({
+          ...u,
+          authorId: u.author_id || u.authorId,
+          lookerStudioUrl: u.looker_studio_url || u.lookerStudioUrl
+        }));
         // Filtrar apenas usuários com authorId
-        const authorsWithId = (response.users || []).filter(u => u.authorId);
+        const authorsWithId = normalizedUsers.filter((u: User) => u.authorId);
         this.authors.set(authorsWithId);
         
         // Se não houver autor selecionado, selecionar o primeiro

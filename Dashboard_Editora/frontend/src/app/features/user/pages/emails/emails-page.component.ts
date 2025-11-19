@@ -54,8 +54,12 @@ export class EmailsPageComponent implements OnInit, OnDestroy {
 
     this.emailService.getPainelEmails().subscribe({
       next: (data) => {
+        // Filtrar e-mails de clientes para mostrar apenas os que fizeram pagamento (têm pedidos confirmados)
         // Ordenar e-mails de clientes por último pedido (mais recente primeiro)
         if (data.emailsClientes) {
+          // Filtrar apenas emails de clientes que têm pelo menos 1 pedido confirmado
+          data.emailsClientes = data.emailsClientes.filter(email => email.totalPedidosConfirmados > 0);
+          
           data.emailsClientes.sort((a, b) => {
             const dateA = a.ultimoPedidoEm ? new Date(a.ultimoPedidoEm).getTime() : 0;
             const dateB = b.ultimoPedidoEm ? new Date(b.ultimoPedidoEm).getTime() : 0;

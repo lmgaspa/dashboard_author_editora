@@ -184,7 +184,7 @@
     <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
       <div class="flex items-center gap-2 mb-4 sm:mb-6">
         <span class="material-icons text-sky-400 text-xl sm:text-2xl">send</span>
-        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-white">E-mails de Repasse</h2>
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-white">E-mails de Repasse de PIX</h2>
       </div>
 
       @if (!painel()!.emailsRepasse || painel()!.emailsRepasse.length === 0) {
@@ -202,7 +202,7 @@
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Status</th>
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Enviado Em</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Pedido ID</th>
-                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Erro</th>
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor Repassado</th>
               </tr>
             </thead>
             <tbody>
@@ -222,14 +222,22 @@
                   <td class="py-3 px-4 text-sm text-gray-300">{{ formatDate(repasse.enviadoEm) }}</td>
                   <td class="py-3 px-4 text-sm text-center text-gray-300">{{ repasse.pedidoId || '-' }}</td>
                   <td class="py-3 px-4 text-sm">
-                    @if (repasse.mensagemErro) {
-                      <span class="text-red-400/80" [title]="repasse.mensagemErro">
-                        <span class="material-icons text-xs align-middle mr-1">error_outline</span>
-                        {{ repasse.mensagemErro.length > 50 ? (repasse.mensagemErro.substring(0, 50) + '...') : repasse.mensagemErro }}
-                      </span>
-                    } @else {
-                      <span class="text-gray-500">-</span>
-                    }
+                    <div class="space-y-1">
+                      @if (repasse.valorRepassado && repasse.valorRepassado > 0) {
+                        <div class="text-emerald-400 font-semibold">
+                          <span class="material-icons text-xs align-middle mr-1">attach_money</span>
+                          {{ repasse.valorRepassado | currency:'BRL':'symbol':'1.2-2' }}
+                        </div>
+                      } @else {
+                        <span class="text-gray-500">-</span>
+                      }
+                      @if (repasse.mensagemErro) {
+                        <div class="text-red-400/80 text-xs mt-1" [title]="repasse.mensagemErro">
+                          <span class="material-icons text-xs align-middle mr-1">error_outline</span>
+                          {{ repasse.mensagemErro.length > 50 ? (repasse.mensagemErro.substring(0, 50) + '...') : repasse.mensagemErro }}
+                        </div>
+                      }
+                    </div>
                   </td>
                 </tr>
               }
@@ -258,14 +266,22 @@
                   }
                 </div>
               </div>
-              @if (repasse.mensagemErro) {
-                <div class="pt-2 border-t border-white/10">
-                  <p class="text-xs text-red-400/80 flex items-start gap-1">
+              <div class="pt-2 border-t border-white/10 space-y-1">
+                @if (repasse.valorRepassado && repasse.valorRepassado > 0) {
+                  <p class="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                    <span class="material-icons text-xs">attach_money</span>
+                    <span>Valor Repassado: {{ repasse.valorRepassado | currency:'BRL':'symbol':'1.2-2' }}</span>
+                  </p>
+                } @else {
+                  <p class="text-xs text-gray-500">Valor Repassado: -</p>
+                }
+                @if (repasse.mensagemErro) {
+                  <p class="text-xs text-red-400/80 flex items-start gap-1 mt-1">
                     <span class="material-icons text-xs flex-shrink-0 mt-0.5">error_outline</span>
                     <span>{{ repasse.mensagemErro }}</span>
                   </p>
-                </div>
-              }
+                }
+              </div>
             </div>
           }
         </div>

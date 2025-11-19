@@ -76,6 +76,18 @@ export const routes: Routes = [
           {
             path: 'metrics',
             loadComponent: () => import('./features/user/pages/metrics/metrics-page.component').then(m => m.MetricsPageComponent)
+          },
+          {
+            path: 'tickets',
+            loadComponent: () => import('./features/user/pages/tickets/tickets-page.component').then(m => m.TicketsPageComponent)
+          },
+          {
+            path: 'tickets/:id',
+            loadComponent: () => import('./features/user/pages/tickets/ticket-detail-page.component').then(m => m.TicketDetailPageComponent)
+          },
+          {
+            path: 'charges',
+            loadComponent: () => import('./features/user/pages/charges/charges-page.component').then(m => m.ChargesPageComponent)
           }
         ]
       }
@@ -106,6 +118,10 @@ export const routes: Routes = [
           {
             path: 'admin-info',
             loadComponent: () => import('./features/admin/pages/admin-info/admin-info-page.component').then(m => m.AdminInfoPageComponent)
+          },
+          {
+            path: 'charges',
+            loadComponent: () => import('./features/admin/pages/charges/admin-charges-page.component').then(m => m.AdminChargesPageComponent)
           }
         ]
       }

@@ -48,11 +48,17 @@ export class AdminInfoPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     
-    this.http.get<UsersResponse>(`${this.API_URL}/api/v1/admin/admin-info`).subscribe({
+    this.http.get<any>(`${this.API_URL}/api/v1/admin/admin-info`).subscribe({
       next: (response) => {
         // Extrair o array de usuários da resposta
         const users = response?.users || [];
-        this.admins.set(users);
+        // Normalizar author_id para authorId (backend retorna snake_case, frontend usa camelCase)
+        const normalizedUsers = users.map((user: any) => ({
+          ...user,
+          authorId: user.author_id || user.authorId,
+          ecommerceUrl: user.ecommerce_url || user.ecommerceUrl
+        }));
+        this.admins.set(normalizedUsers);
         this.total.set(response?.total || 0);
         this.loading.set(false);
       },

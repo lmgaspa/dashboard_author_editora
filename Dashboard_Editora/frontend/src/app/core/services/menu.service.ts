@@ -56,6 +56,18 @@ export class MenuService {
       roles: ['USER', 'ADMIN']
     },
     {
+      label: 'Tickets',
+      icon: 'support_agent',
+      route: '/user/tickets',
+      roles: ['USER', 'ADMIN']
+    },
+    {
+      label: 'Cobranças',
+      icon: 'receipt_long',
+      route: '/user/charges',
+      roles: ['USER', 'ADMIN']
+    },
+    {
       label: 'Meu Perfil',
       icon: 'person',
       route: '/user/profile',
@@ -122,6 +134,12 @@ export class MenuService {
       label: 'Administradores',
       icon: 'admin_panel_settings',
       route: '/admin/admin-info',
+      roles: ['ADMIN']
+    },
+    {
+      label: 'Cobranças',
+      icon: 'receipt_long',
+      route: '/admin/charges',
       roles: ['ADMIN']
     },
     {

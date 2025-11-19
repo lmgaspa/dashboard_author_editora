@@ -1,0 +1,313 @@
+<div class="w-full space-y-4 sm:space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl md:text-3xl font-bold relative mb-2">
+        <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Cobranças Mensais</span>
+        <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(8px);">Cobranças Mensais</span>
+      </h1>
+      <p class="text-sm sm:text-base text-gray-400">Visualize suas cobranças mensais e códigos PIX para pagamento</p>
+    </div>
+  </div>
+
+  <!-- Estatísticas -->
+  @if (charges().length > 0 && !loading()) {
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 sm:p-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-icons text-yellow-400 text-lg sm:text-xl">schedule</span>
+          <p class="text-yellow-400/80 text-xs sm:text-sm font-medium">Pendentes</p>
+        </div>
+        <p class="text-yellow-300 text-lg sm:text-xl font-bold">{{ stats().pending }}</p>
+      </div>
+      <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 sm:p-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-icons text-red-400 text-lg sm:text-xl">warning</span>
+          <p class="text-red-400/80 text-xs sm:text-sm font-medium">Atrasadas</p>
+        </div>
+        <p class="text-red-300 text-lg sm:text-xl font-bold">{{ stats().overdue }}</p>
+      </div>
+      <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 sm:p-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-icons text-green-400 text-lg sm:text-xl">check_circle</span>
+          <p class="text-green-400/80 text-xs sm:text-sm font-medium">Pagas</p>
+        </div>
+        <p class="text-green-300 text-lg sm:text-xl font-bold">{{ stats().paid }}</p>
+      </div>
+      <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 sm:p-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-icons text-sky-400 text-lg sm:text-xl">attach_money</span>
+          <p class="text-sky-400/80 text-xs sm:text-sm font-medium">Total Pendente</p>
+        </div>
+        <p class="text-sky-300 text-sm sm:text-base font-bold">{{ formatCurrency(stats().totalPending) }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Filtros -->
+  @if (charges().length > 0 && !loading()) {
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      <div class="flex-1">
+        <input
+          type="text"
+          placeholder="Buscar por mês/ano (ex: Janeiro/2024)"
+          class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 transition-all duration-200 text-sm sm:text-base"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+        />
+      </div>
+      <select
+        class="px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 transition-all duration-200 text-sm sm:text-base"
+        [value]="statusFilter()"
+        (change)="statusFilter.set($any($event.target).value)"
+      >
+        <option value="ALL">Todos os status</option>
+        <option [value]="ChargeStatus.PENDING">Pendente</option>
+        <option [value]="ChargeStatus.PAID">Paga</option>
+        <option [value]="ChargeStatus.OVERDUE">Atrasada</option>
+        <option [value]="ChargeStatus.CANCELLED">Cancelada</option>
+      </select>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-12 sm:py-16 space-y-4">
+      <span class="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin"></span>
+      <p class="text-gray-400 text-sm sm:text-base">Carregando cobranças...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 sm:p-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <span class="material-icons text-red-400 text-xl sm:text-2xl flex-shrink-0">error_outline</span>
+        <div class="flex-1">
+          <h3 class="text-red-300 font-semibold text-sm sm:text-base mb-1">Erro ao carregar dados</h3>
+          <p class="text-red-400/80 text-xs sm:text-sm">{{ error() }}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-300 text-sm font-medium transition-colors duration-200"
+        (click)="loadCharges()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && !error() && filteredCharges().length === 0) {
+    <div class="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 text-center">
+      <span class="material-icons text-gray-500 text-4xl sm:text-5xl mb-4">receipt_long</span>
+      <h3 class="text-gray-300 font-semibold text-lg sm:text-xl mb-2">
+        @if (charges().length === 0) {
+          Nenhuma cobrança encontrada
+        } @else {
+          Nenhuma cobrança corresponde aos filtros
+        }
+      </h3>
+      <p class="text-gray-400 text-sm sm:text-base">
+        @if (charges().length === 0) {
+          Você ainda não possui cobranças cadastradas.
+        } @else {
+          Tente ajustar os filtros de busca.
+        }
+      </p>
+    </div>
+  }
+
+  <!-- Lista de Cobranças (Desktop) -->
+  @if (!loading() && !error() && filteredCharges().length > 0) {
+    <div class="hidden sm:block overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="border-b border-white/10">
+            <th class="text-left py-3 px-4 text-gray-400 font-medium text-sm">Mês/Ano</th>
+            <th class="text-left py-3 px-4 text-gray-400 font-medium text-sm">Valor</th>
+            <th class="text-left py-3 px-4 text-gray-400 font-medium text-sm">Vencimento</th>
+            <th class="text-left py-3 px-4 text-gray-400 font-medium text-sm">Status</th>
+            <th class="text-left py-3 px-4 text-gray-400 font-medium text-sm">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (charge of filteredCharges(); track charge.id) {
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors duration-200">
+              <td class="py-4 px-4">
+                <p class="text-gray-300 font-medium text-sm sm:text-base">{{ formatMonthYear(charge.chargeMonth, charge.chargeYear) }}</p>
+              </td>
+              <td class="py-4 px-4">
+                <p class="text-gray-300 font-semibold text-sm sm:text-base">{{ formatCurrency(charge.amount) }}</p>
+              </td>
+              <td class="py-4 px-4">
+                <p class="text-gray-300 text-sm sm:text-base">{{ formatDate(charge.dueDate) }}</p>
+                @if (charge.status === ChargeStatus.OVERDUE && charge.daysOverdue > 0) {
+                  <p class="text-red-400 text-xs mt-1">{{ charge.daysOverdue }} dia(s) de atraso</p>
+                }
+              </td>
+              <td class="py-4 px-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ getStatusColor(charge.status) }}">
+                  {{ getStatusText(charge.status) }}
+                </span>
+              </td>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  @if (charge.status === ChargeStatus.PENDING || charge.status === ChargeStatus.OVERDUE) {
+                    <button
+                      type="button"
+                      class="px-3 py-1.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 text-xs font-medium transition-colors duration-200"
+                      (click)="openPixModal(charge)"
+                    >
+                      Ver PIX
+                    </button>
+                  }
+                  @if (charge.hasOpenTicket) {
+                    <a
+                      [routerLink]="['/user/tickets']"
+                      class="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 text-xs font-medium transition-colors duration-200"
+                    >
+                      Ver Ticket
+                    </a>
+                  } @else {
+                    <button
+                      type="button"
+                      class="px-3 py-1.5 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg text-gray-300 text-xs font-medium transition-colors duration-200"
+                      (click)="createTicketForCharge(charge)"
+                    >
+                      Criar Ticket
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Lista de Cobranças (Mobile) -->
+  @if (!loading() && !error() && filteredCharges().length > 0) {
+    <div class="sm:hidden space-y-4">
+      @for (charge of filteredCharges(); track charge.id) {
+        <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-gray-300 font-semibold text-base">{{ formatMonthYear(charge.chargeMonth, charge.chargeYear) }}</p>
+              <p class="text-gray-400 text-sm mt-1">{{ formatDate(charge.dueDate) }}</p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ getStatusColor(charge.status) }}">
+              {{ getStatusText(charge.status) }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="text-gray-300 font-bold text-lg">{{ formatCurrency(charge.amount) }}</p>
+            @if (charge.status === ChargeStatus.OVERDUE && charge.daysOverdue > 0) {
+              <p class="text-red-400 text-xs">{{ charge.daysOverdue }} dia(s) de atraso</p>
+            }
+          </div>
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-white/10">
+            @if (charge.status === ChargeStatus.PENDING || charge.status === ChargeStatus.OVERDUE) {
+              <button
+                type="button"
+                class="flex-1 px-3 py-2 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 text-xs font-medium transition-colors duration-200"
+                (click)="openPixModal(charge)"
+              >
+                Ver PIX
+              </button>
+            }
+            @if (charge.hasOpenTicket) {
+              <a
+                [routerLink]="['/user/tickets']"
+                class="flex-1 px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 text-xs font-medium transition-colors duration-200 text-center"
+              >
+                Ver Ticket
+              </a>
+            } @else {
+              <button
+                type="button"
+                class="flex-1 px-3 py-2 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg text-gray-300 text-xs font-medium transition-colors duration-200"
+                (click)="createTicketForCharge(charge)"
+              >
+                Criar Ticket
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Modal de PIX -->
+  @if (showPixModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" (click)="closePixModal()">
+      <div class="bg-[rgba(15,23,42,0.95)] border border-white/20 rounded-xl shadow-xl max-w-md w-full p-6 space-y-4" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-gray-200">Código PIX</h3>
+          <button
+            type="button"
+            class="text-gray-400 hover:text-gray-200 transition-colors"
+            (click)="closePixModal()"
+          >
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        @if (loadingPix()) {
+          <div class="flex flex-col items-center justify-center py-8 space-y-4">
+            <span class="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin"></span>
+            <p class="text-gray-400 text-sm">Carregando código PIX...</p>
+          </div>
+        }
+
+        @if (pixError()) {
+          <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+            <p class="text-red-300 text-sm">{{ pixError() }}</p>
+          </div>
+        }
+
+        @if (pixCode() && !loadingPix() && !pixError()) {
+          <div class="space-y-4">
+            <div class="bg-white/5 border border-white/10 rounded-lg p-4 text-center">
+              <p class="text-gray-400 text-sm mb-2">Valor a pagar</p>
+              <p class="text-2xl font-bold text-sky-300">{{ formatCurrency(pixAmount()) }}</p>
+            </div>
+
+            <div class="bg-white/5 border border-white/10 rounded-lg p-4">
+              <p class="text-gray-400 text-xs mb-2">Código PIX</p>
+              <div class="flex items-center gap-2">
+                <code class="flex-1 text-xs text-gray-300 break-all font-mono">{{ pixCode() }}</code>
+                <button
+                  type="button"
+                  class="px-3 py-2 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 text-xs font-medium transition-colors duration-200"
+                  (click)="copyPixCode()"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            @if (selectedCharge()?.pixExpiresAt) {
+              <p class="text-gray-400 text-xs text-center">
+                Expira em: {{ formatDate(selectedCharge()!.pixExpiresAt!) }}
+              </p>
+            }
+
+            <div class="pt-4 border-t border-white/10">
+              <button
+                type="button"
+                class="w-full px-4 py-2.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 font-medium transition-colors duration-200"
+                (click)="createTicketForCharge(selectedCharge()!)"
+              >
+                Criar Ticket sobre esta Cobrança
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+

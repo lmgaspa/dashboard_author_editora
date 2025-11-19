@@ -18,6 +18,7 @@ export interface ResumoEmailRepasse {
   status: string; // 'SENT', 'FAILED'
   enviadoEm: string | null; // ISO 8601, UTC
   mensagemErro: string | null;
+  valorRepassado: number | null; // Valor repassado em caso de erro
 }
 
 export interface PainelEmailsAutor {

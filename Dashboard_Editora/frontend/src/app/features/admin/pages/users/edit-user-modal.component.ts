@@ -99,18 +99,30 @@ export class EditUserModalComponent implements OnInit {
   ngOnInit(): void {
     const userData = this.user();
     
+    // Normalizar author_id para authorId (backend pode retornar snake_case)
+    const normalizedUser = {
+      ...userData,
+      authorId: (userData as any).author_id || userData.authorId,
+      ecommerceUrl: (userData as any).ecommerce_url || userData.ecommerceUrl,
+      ecommerceDbUrl: (userData as any).ecommerce_db_url || userData.ecommerceDbUrl,
+      ecommerceDbUsername: (userData as any).ecommerce_db_username || userData.ecommerceDbUsername,
+      ecommerceDbPassword: (userData as any).ecommerce_db_password || userData.ecommerceDbPassword,
+      profilePhotoUrl: (userData as any).profile_photo_url || userData.profilePhotoUrl,
+      lookerStudioUrl: (userData as any).looker_studio_url || userData.lookerStudioUrl
+    };
+    
     // Preencher formulário com dados do usuário
     this.form.patchValue({
-      name: userData.name || '',
-      role: userData.role || 'USER',
-      authorId: userData.authorId || '',
-      ecommerceUrl: userData.ecommerceUrl || '',
-      ecommerceDbUrl: userData.ecommerceDbUrl || '',
-      ecommerceDbUsername: userData.ecommerceDbUsername || '',
-      ecommerceDbPassword: userData.ecommerceDbPassword || '', // Agora retorna do backend
+      name: normalizedUser.name || '',
+      role: normalizedUser.role || 'USER',
+      authorId: normalizedUser.authorId || '',
+      ecommerceUrl: normalizedUser.ecommerceUrl || '',
+      ecommerceDbUrl: normalizedUser.ecommerceDbUrl || '',
+      ecommerceDbUsername: normalizedUser.ecommerceDbUsername || '',
+      ecommerceDbPassword: normalizedUser.ecommerceDbPassword || '', // Agora retorna do backend
       password: '', // Sempre vazio - admin precisa preencher para mudar
-      profilePhotoUrl: userData.profilePhotoUrl || '',
-      lookerStudioUrl: userData.lookerStudioUrl || ''
+      profilePhotoUrl: normalizedUser.profilePhotoUrl || '',
+      lookerStudioUrl: normalizedUser.lookerStudioUrl || ''
     });
     
     // Configurar validação de senha do usuário
@@ -239,16 +251,19 @@ export class EditUserModalComponent implements OnInit {
 
     // Campos condicionais para USER
     if (formValue.role === 'USER') {
+      // Normalizar authorId do userData também
+      const currentAuthorId = (userData as any).author_id || userData.authorId;
       const authorId = formValue.authorId?.trim() || '';
       const ecommerceUrl = formValue.ecommerceUrl?.trim() || '';
       
       // Se authorId mudou ou foi removido
-      if (authorId !== (userData.authorId || '')) {
+      if (authorId !== (currentAuthorId || '')) {
         payload.authorId = authorId || null;
       }
       
       // Se ecommerceUrl mudou ou foi removido
-      if (ecommerceUrl !== (userData.ecommerceUrl || '')) {
+      const currentEcommerceUrl = (userData as any).ecommerce_url || userData.ecommerceUrl;
+      if (ecommerceUrl !== (currentEcommerceUrl || '')) {
         payload.ecommerceUrl = ecommerceUrl || null;
       }
 
@@ -272,14 +287,16 @@ export class EditUserModalComponent implements OnInit {
     }
 
     // Profile photo URL
+    const currentProfilePhotoUrl = (userData as any).profile_photo_url || userData.profilePhotoUrl;
     const profilePhotoUrl = formValue.profilePhotoUrl?.trim() || '';
-    if (profilePhotoUrl !== (userData.profilePhotoUrl || '')) {
+    if (profilePhotoUrl !== (currentProfilePhotoUrl || '')) {
       payload.profilePhotoUrl = profilePhotoUrl || null;
     }
 
     // Looker Studio URL (opcional, pode ser usado por USER ou ADMIN)
+    const currentLookerStudioUrl = (userData as any).looker_studio_url || userData.lookerStudioUrl;
     const lookerStudioUrl = formValue.lookerStudioUrl?.trim() || '';
-    if (lookerStudioUrl !== (userData.lookerStudioUrl || '')) {
+    if (lookerStudioUrl !== (currentLookerStudioUrl || '')) {
       payload.lookerStudioUrl = lookerStudioUrl || null;
     }
 
@@ -290,11 +307,22 @@ export class EditUserModalComponent implements OnInit {
 
     console.log('📤 Enviando payload para atualizar usuário:', JSON.stringify(payload, null, 2));
 
-    this.http.put<User>(`${this.API_URL}/api/v1/admin/users/${userData.id}`, payload).subscribe({
+    this.http.put<any>(`${this.API_URL}/api/v1/admin/users/${userData.id}`, payload).subscribe({
       next: (response) => {
         console.log('✅ Usuário atualizado com sucesso:', response);
+        // Normalizar author_id para authorId (backend retorna snake_case, frontend usa camelCase)
+        const normalizedResponse: User = {
+          ...response,
+          authorId: response.author_id || response.authorId,
+          ecommerceUrl: response.ecommerce_url || response.ecommerceUrl,
+          ecommerceDbUrl: response.ecommerce_db_url || response.ecommerceDbUrl,
+          ecommerceDbUsername: response.ecommerce_db_username || response.ecommerceDbUsername,
+          ecommerceDbPassword: response.ecommerce_db_password || response.ecommerceDbPassword,
+          profilePhotoUrl: response.profile_photo_url || response.profilePhotoUrl,
+          lookerStudioUrl: response.looker_studio_url || response.lookerStudioUrl
+        };
         this.loading.set(false);
-        this.onSuccess.emit(response);
+        this.onSuccess.emit(normalizedResponse);
       },
       error: (err) => {
         console.error('❌ Erro ao atualizar usuário:', err);
