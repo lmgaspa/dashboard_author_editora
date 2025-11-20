@@ -15,26 +15,26 @@ import { AuthService } from '@/app/core/services/auth.service';
           <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dashboard Administrativo</span>
           <span class="absolute inset-0 blur-xl opacity-60" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: blur(8px);">Dashboard Administrativo</span>
         </h1>
-        <p class="text-xs text-gray-400 mt-0.5">
-          <span class="text-white">{{ authService.currentUser()?.name }}</span>
+        <p class="text-sm sm:text-base text-gray-400 mt-1">
+          Bem-vindo, <span class="text-white">{{ authService.currentUser()?.name }}</span>!
         </p>
       </div>
 
       <!-- Quick Actions Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-w-2xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl mx-auto">
         <!-- Usuários Card -->
         <a [routerLink]="['/admin/users']" 
-           class="group relative bg-gradient-to-br from-sky-500/10 via-blue-600/10 to-sky-500/10 backdrop-blur-xl border border-sky-500/20 rounded-md p-2 shadow-sm hover:shadow-md hover:shadow-sky-500/20 transition-all duration-200 hover:border-sky-400/40 cursor-pointer overflow-hidden">
+           class="group relative bg-gradient-to-br from-sky-500/10 via-blue-600/10 to-sky-500/10 backdrop-blur-xl border border-sky-500/20 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md hover:shadow-sky-500/20 transition-all duration-200 hover:border-sky-400/40 cursor-pointer overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
           
           <div class="relative z-10">
-            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mb-1.5 shadow-sm shadow-sky-500/30 group-hover:scale-105 transition-transform duration-200">
-              <span class="material-icons text-base text-white">people</span>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mb-3 sm:mb-4 shadow-sm shadow-sky-500/30 group-hover:scale-105 transition-transform duration-200">
+              <span class="material-icons text-lg sm:text-xl text-white">people</span>
             </div>
-            <h3 class="text-xs font-bold text-white mb-0.5 group-hover:text-sky-300 transition-colors">
+            <h3 class="text-sm sm:text-base font-bold text-white mb-1 sm:mb-1.5 group-hover:text-sky-300 transition-colors">
               Usuários
             </h3>
-            <p class="text-[10px] text-gray-400 leading-tight">
+            <p class="text-xs sm:text-sm text-gray-400 leading-tight">
               Gerenciar
             </p>
           </div>
@@ -42,17 +42,17 @@ import { AuthService } from '@/app/core/services/auth.service';
 
         <!-- Administradores Card -->
         <a [routerLink]="['/admin/admin-info']" 
-           class="group relative bg-gradient-to-br from-purple-500/10 via-pink-600/10 to-purple-500/10 backdrop-blur-xl border border-purple-500/20 rounded-md p-2 shadow-sm hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200 hover:border-purple-400/40 cursor-pointer overflow-hidden">
+           class="group relative bg-gradient-to-br from-purple-500/10 via-pink-600/10 to-purple-500/10 backdrop-blur-xl border border-purple-500/20 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200 hover:border-purple-400/40 cursor-pointer overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
           
           <div class="relative z-10">
-            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-1.5 shadow-sm shadow-purple-500/30 group-hover:scale-105 transition-transform duration-200">
-              <span class="material-icons text-base text-white">admin_panel_settings</span>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-3 sm:mb-4 shadow-sm shadow-purple-500/30 group-hover:scale-105 transition-transform duration-200">
+              <span class="material-icons text-lg sm:text-xl text-white">admin_panel_settings</span>
             </div>
-            <h3 class="text-xs font-bold text-white mb-0.5 group-hover:text-purple-300 transition-colors">
+            <h3 class="text-sm sm:text-base font-bold text-white mb-1 sm:mb-1.5 group-hover:text-purple-300 transition-colors">
               Administradores
             </h3>
-            <p class="text-[10px] text-gray-400 leading-tight">
+            <p class="text-xs sm:text-sm text-gray-400 leading-tight">
               Ver lista
             </p>
           </div>

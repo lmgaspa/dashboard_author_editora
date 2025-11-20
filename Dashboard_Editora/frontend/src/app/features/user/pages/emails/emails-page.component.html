@@ -11,7 +11,7 @@
 
     <!-- Botão de Exportar (só aparece se tiver dados) -->
     @if (painel() && !loading()) {
-      <div class="relative" data-export-dropdown>
+      <div class="relative self-end sm:self-auto" data-export-dropdown>
         <button
           type="button"
           class="flex items-center gap-2 px-4 py-2.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 font-medium transition-all duration-200 text-sm sm:text-base"
@@ -121,7 +121,9 @@
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">E-mail</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Total de Pedidos</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Confirmados</th>
-                <th class="text-right py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor Total</th>
+                <th class="text-right py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor Repassado</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Pedidos com Cupom</th>
+                <th class="text-right py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Desconto</th>
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Último Pedido</th>
               </tr>
             </thead>
@@ -139,7 +141,25 @@
                       }
                     </span>
                   </td>
-                  <td class="py-3 px-4 text-sm text-right text-white font-semibold">{{ email.valorTotalConfirmado | currency:'BRL':'symbol':'1.2-2' }}</td>
+                  <td class="py-3 px-4 text-sm text-right text-white font-semibold">{{ email.valorRepassado | currency:'BRL':'symbol':'1.2-2' }}</td>
+                  <td class="py-3 px-4 text-center">
+                    @if ((email.cupom?.pedidosComCupom ?? 0) > 0) {
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30">
+                        {{ email.cupom?.pedidosComCupom ?? 0 }}
+                      </span>
+                    } @else {
+                      <span class="text-gray-500">0</span>
+                    }
+                  </td>
+                  <td class="py-3 px-4 text-sm text-right">
+                    @if ((email.cupom?.totalDesconto ?? 0) > 0) {
+                      <span class="text-blue-400 font-semibold">
+                        {{ email.cupom?.totalDesconto ?? 0 | currency:'BRL':'symbol':'1.2-2' }}
+                      </span>
+                    } @else {
+                      <span class="text-gray-500">R$ 0,00</span>
+                    }
+                  </td>
                   <td class="py-3 px-4 text-sm text-gray-300">{{ formatDate(email.ultimoPedidoEm) }}</td>
                 </tr>
               }
@@ -170,8 +190,30 @@
                   </span>
                 </div>
                 <div class="text-right">
-                  <p class="text-xs text-gray-400">Valor Total</p>
-                  <p class="text-sm font-bold text-sky-400">{{ email.valorTotalConfirmado | currency:'BRL':'symbol':'1.2-2' }}</p>
+                  <p class="text-xs text-gray-400">Valor Repassado</p>
+                  <p class="text-sm font-bold text-sky-400">{{ email.valorRepassado | currency:'BRL':'symbol':'1.2-2' }}</p>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-white/10 grid grid-cols-2 gap-2">
+                <div>
+                  <p class="text-xs text-gray-400">Pedidos com Cupom</p>
+                  @if ((email.cupom?.pedidosComCupom ?? 0) > 0) {
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30">
+                      {{ email.cupom?.pedidosComCupom ?? 0 }}
+                    </span>
+                  } @else {
+                    <span class="text-xs text-gray-500">0</span>
+                  }
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400">Total Desconto</p>
+                  @if ((email.cupom?.totalDesconto ?? 0) > 0) {
+                    <span class="text-xs text-blue-400 font-semibold">
+                      {{ email.cupom?.totalDesconto ?? 0 | currency:'BRL':'symbol':'1.2-2' }}
+                    </span>
+                  } @else {
+                    <span class="text-xs text-gray-500">R$ 0,00</span>
+                  }
                 </div>
               </div>
             </div>
@@ -203,6 +245,8 @@
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Enviado Em</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Pedido ID</th>
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor Repassado</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Cupom Utilizado</th>
+                <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Desconto</th>
               </tr>
             </thead>
             <tbody>
@@ -238,6 +282,24 @@
                         </div>
                       }
                     </div>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    @if (repasse.cupom?.teveCupom) {
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30">
+                        SIM
+                      </span>
+                    } @else {
+                      <span class="text-gray-500">NÃO</span>
+                    }
+                  </td>
+                  <td class="py-3 px-4 text-sm">
+                    @if (repasse.cupom?.teveCupom && (repasse.cupom?.valorDesconto ?? 0) > 0) {
+                      <span class="text-blue-400 font-semibold">
+                        {{ repasse.cupom?.valorDesconto ?? 0 | currency:'BRL':'symbol':'1.2-2' }}
+                      </span>
+                    } @else {
+                      <span class="text-gray-500">R$ 0,00</span>
+                    }
                   </td>
                 </tr>
               }
@@ -275,6 +337,26 @@
                 } @else {
                   <p class="text-xs text-gray-500">Valor Repassado: -</p>
                 }
+                <div class="flex items-center gap-2">
+                  <p class="text-xs text-gray-400">Cupom Utilizado:</p>
+                  @if (repasse.cupom?.teveCupom) {
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30">
+                      SIM
+                    </span>
+                  } @else {
+                    <span class="text-xs text-gray-500">NÃO</span>
+                  }
+                </div>
+                <div class="flex items-center gap-2">
+                  <p class="text-xs text-gray-400">Desconto:</p>
+                  @if (repasse.cupom?.teveCupom && (repasse.cupom?.valorDesconto ?? 0) > 0) {
+                    <span class="text-xs text-blue-400 font-semibold">
+                      {{ repasse.cupom?.valorDesconto ?? 0 | currency:'BRL':'symbol':'1.2-2' }}
+                    </span>
+                  } @else {
+                    <span class="text-xs text-gray-500">R$ 0,00</span>
+                  }
+                </div>
                 @if (repasse.mensagemErro) {
                   <p class="text-xs text-red-400/80 flex items-start gap-1 mt-1">
                     <span class="material-icons text-xs flex-shrink-0 mt-0.5">error_outline</span>

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.PainelEmailsAutorDTO;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.ResumoEmailClienteDTO;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.ResumoEmailRepasseDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.CouponInfoPayoutDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.CouponInfoClienteDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,12 +72,17 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                 o.email,
                 COUNT(DISTINCT o.id) AS total_pedidos,
                 COUNT(DISTINCT CASE WHEN o.status = 'CONFIRMED' THEN o.id END) AS total_pedidos_confirmados,
-                COALESCE(SUM(CASE WHEN o.status = 'CONFIRMED' THEN oi.quantity * oi.price ELSE 0 END), 0) AS valor_total_confirmado,
+                -- Usar amount_net do payment_payouts (valor real repassado após taxas)
+                COALESCE(SUM(CASE WHEN o.status = 'CONFIRMED' THEN pp.amount_net ELSE 0 END), 0) AS valor_repassado,
+                -- Informações de cupom agregadas
+                COUNT(DISTINCT CASE WHEN o.coupon_code IS NOT NULL AND o.status = 'CONFIRMED' THEN o.id END) AS pedidos_com_cupom,
+                COALESCE(SUM(CASE WHEN o.status = 'CONFIRMED' AND o.coupon_code IS NOT NULL THEN o.discount_amount ELSE 0 END), 0) AS total_desconto,
                 MIN(o.created_at) AS primeiro_pedido_em,
                 MAX(o.created_at) AS ultimo_pedido_em
             FROM orders o
             JOIN order_items oi ON oi.order_id = o.id
             JOIN books b ON b.id::text = oi.book_id
+            LEFT JOIN payment_payouts pp ON pp.order_id = o.id
             WHERE b.author_id = ?
               AND o.email IS NOT NULL
               AND o.email != ''
@@ -91,9 +98,11 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                     String email = rs.getString("email");
                     long totalPedidos = rs.getLong("total_pedidos");
                     long totalPedidosConfirmados = rs.getLong("total_pedidos_confirmados");
-                    BigDecimal valorTotalConfirmado = rs.getBigDecimal("valor_total_confirmado");
-                    if (valorTotalConfirmado == null) {
-                        valorTotalConfirmado = BigDecimal.ZERO;
+                    
+                    // Valor repassado (amount_net) ao invés de valor bruto
+                    BigDecimal valorRepassado = rs.getBigDecimal("valor_repassado");
+                    if (valorRepassado == null) {
+                        valorRepassado = BigDecimal.ZERO;
                     }
 
                     Instant primeiroPedidoEm = null;
@@ -109,13 +118,26 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                         ultimoPedidoEm = ultimoTimestamp.toInstant();
                     }
 
+                    // Informações de cupom agregadas
+                    long pedidosComCupom = rs.getLong("pedidos_com_cupom");
+                    BigDecimal totalDesconto = rs.getBigDecimal("total_desconto");
+                    if (totalDesconto == null) {
+                        totalDesconto = BigDecimal.ZERO;
+                    }
+                    
+                    CouponInfoClienteDTO cupom = new CouponInfoClienteDTO(
+                            pedidosComCupom,
+                            totalDesconto
+                    );
+
                     ResumoEmailClienteDTO resumo = new ResumoEmailClienteDTO(
                             email,
                             totalPedidos,
                             totalPedidosConfirmados,
-                            valorTotalConfirmado,
+                            valorRepassado,
                             primeiroPedidoEm,
-                            ultimoPedidoEm
+                            ultimoPedidoEm,
+                            cupom
                     );
                     emails.add(resumo);
                 }
@@ -143,15 +165,18 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                 pe.status,
                 pe.sent_at,
                 pe.error_message,
-                COALESCE((
-                    SELECT SUM(oi2.quantity * oi2.price)
-                    FROM order_items oi2
-                    JOIN books b2 ON b2.id::text = oi2.book_id
-                    WHERE oi2.order_id = pe.order_id
-                      AND b2.author_id = ?
-                ), 0) AS valor_repassado
+                -- Usar amount_net do payment_payouts (valor real repassado após taxas)
+                COALESCE(pp.amount_net, 0) AS valor_repassado,
+                -- Informações de cupom
+                CASE 
+                    WHEN o.coupon_code IS NOT NULL THEN true
+                    ELSE false
+                END as teve_cupom,
+                o.coupon_code as codigo_cupom,
+                COALESCE(o.discount_amount, 0) as valor_desconto
             FROM payout_email pe
             JOIN orders o ON o.id = pe.order_id
+            LEFT JOIN payment_payouts pp ON pp.id = pe.payout_id
             JOIN order_items oi ON oi.order_id = o.id
             JOIN books b ON b.id::text = oi.book_id
             WHERE b.author_id = ?
@@ -160,7 +185,6 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, autorId);
-            stmt.setLong(2, autorId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Long id = rs.getLong("id");
@@ -194,6 +218,23 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                         valorRepassado = BigDecimal.ZERO;
                     }
 
+                    // Mapear informações de cupom
+                    Boolean teveCupom = rs.getBoolean("teve_cupom");
+                    if (rs.wasNull()) {
+                        teveCupom = false;
+                    }
+                    String codigoCupom = rs.getString("codigo_cupom");
+                    BigDecimal valorDesconto = rs.getBigDecimal("valor_desconto");
+                    if (valorDesconto == null) {
+                        valorDesconto = BigDecimal.ZERO;
+                    }
+
+                    CouponInfoPayoutDTO cupom = new CouponInfoPayoutDTO(
+                            teveCupom,
+                            codigoCupom,
+                            valorDesconto
+                    );
+
                     ResumoEmailRepasseDTO resumo = new ResumoEmailRepasseDTO(
                             id,
                             pedidoId,
@@ -203,7 +244,8 @@ public class EmailsAutorServiceImpl implements EmailsAutorService {
                             status,
                             enviadoEm,
                             mensagemErro,
-                            valorRepassado
+                            valorRepassado,
+                            cupom
                     );
                     emails.add(resumo);
                 }

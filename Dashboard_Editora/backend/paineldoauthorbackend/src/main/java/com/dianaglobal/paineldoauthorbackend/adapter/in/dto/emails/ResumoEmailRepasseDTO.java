@@ -16,6 +16,7 @@ public record ResumoEmailRepasseDTO(
         String status,
         Instant enviadoEm,
         String mensagemErro,
-        BigDecimal valorRepassado
+        BigDecimal valorRepassado,
+        CouponInfoPayoutDTO cupom  // Informações de cupom do pedido
 ) {}
 

@@ -13,7 +13,14 @@ export class EmailService {
 
   /**
    * Obtém o painel de e-mails do autor logado
-   * O backend identifica o authorId automaticamente do token JWT
+   * 
+   * Nota sobre autenticação:
+   * - Dashboard (este sistema): Usa JWT para autenticação de usuários
+   * - E-commerce (sistema externo): Usa CORS-based authorization (sem JWT)
+   * 
+   * O backend identifica o authorId automaticamente do token JWT do usuário logado,
+   * garantindo isolamento multi-tenant (cada autor vê apenas seus próprios dados).
+   * 
    * @returns Observable com o painel de e-mails (clientes e repasse)
    */
   getPainelEmails(): Observable<PainelEmailsAutor> {

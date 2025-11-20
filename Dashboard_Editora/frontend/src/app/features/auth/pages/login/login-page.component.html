@@ -36,7 +36,7 @@
     </h1>
     
     @if (error()) {
-      <div class="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 mb-6 text-sm">
+      <div class="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 mb-6 text-base">
         <span class="material-icons text-xl">error_outline</span>
         <span>{{ error() }}</span>
       </div>
@@ -44,7 +44,7 @@
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
       <div class="flex flex-col gap-2">
-        <label for="email" class="text-sm font-semibold text-gray-200">E-mail</label>
+        <label for="email" class="text-base font-semibold text-gray-200">E-mail</label>
         <input
           type="email"
           id="email"
@@ -54,12 +54,12 @@
           [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
         />
         @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-          <span class="text-xs text-red-400">E-mail inválido</span>
+          <span class="text-sm text-red-400">E-mail inválido</span>
         }
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password" class="text-sm font-semibold text-gray-200">Senha</label>
+        <label for="password" class="text-base font-semibold text-gray-200">Senha</label>
         <div class="relative">
           <input
             [type]="showPassword() ? 'text' : 'password'"
@@ -70,7 +70,7 @@
             [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
           />
           <span
-            class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer text-lg transition-colors duration-200"
+            class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 cursor-pointer text-xl"
             (click)="togglePassword()"
             [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
             role="button"
@@ -78,12 +78,12 @@
           >{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
         </div>
         @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-          <span class="text-xs text-red-400">A senha deve ter 8 caracteres, uma letra maiúscula, uma minúscula e 1 número</span>
+          <span class="text-sm text-red-400">A senha deve ter 8 caracteres, uma letra maiúscula, uma minúscula e 1 número</span>
         }
       </div>
 
       <div class="flex justify-end">
-        <a [routerLink]="['/forgot-password']" class="text-sm text-blue-400 no-underline transition-colors duration-200 hover:text-blue-300 hover:underline">Esqueceu sua senha?</a>
+        <a [routerLink]="['/forgot-password']" class="text-base text-blue-400 no-underline transition-colors duration-200 hover:text-blue-300 hover:underline">Esqueceu sua senha?</a>
       </div>
 
       <button

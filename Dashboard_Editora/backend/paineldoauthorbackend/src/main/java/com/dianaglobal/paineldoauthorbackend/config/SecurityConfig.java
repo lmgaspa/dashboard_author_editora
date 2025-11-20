@@ -63,7 +63,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/logout").permitAll()
                         .requestMatchers("/api/v1/auth/forgot-password").permitAll()
+                        .requestMatchers("/api/v1/auth/password/forgot").permitAll()
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
+                        .requestMatchers("/api/v1/auth/password/reset").permitAll()
                         
                         // REGISTRO - APENAS ADMIN (endpoint movido para /api/v1/admin/users)
                         .requestMatchers("/api/v1/auth/register").hasRole("ADMIN")

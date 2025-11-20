@@ -130,14 +130,14 @@ public class SessionController {
     // ------------------------------------------------------------------------------------
     // ESQUECI MINHA SENHA / RESET DE SENHA POR TOKEN
     // ------------------------------------------------------------------------------------
-    @PostMapping(value = "/forgot-password", consumes = "application/json")
+    @PostMapping(value = {"/forgot-password", "/password/forgot"}, consumes = "application/json")
     public ResponseEntity<?> forgotPassword(@RequestBody @Valid ForgotPasswordRequest req) {
         // dispara e-mail com link /reset-password?token=...
         passwordResetService.requestReset(req.email(), frontendBaseUrl);
         return ResponseEntity.noContent().build(); // 204
     }
 
-    @PostMapping(value = "/reset-password", consumes = "application/json")
+    @PostMapping(value = {"/reset-password", "/password/reset"}, consumes = "application/json")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid ResetPasswordRequest req) {
         // valida token e troca a senha
         passwordResetService.resetPassword(req.token(), req.newPassword());

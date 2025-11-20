@@ -113,14 +113,16 @@ export class ChangePhotoModalComponent implements OnInit {
           return;
         }
 
-        // Por enquanto, vamos usar uma URL temporária base64 ou pedir para o usuário fazer upload manual
-        // Em produção, você precisaria de um serviço de storage (Firebase, S3, Cloudinary, etc.)
-        // Por enquanto, vamos converter para data URL (não recomendado para produção)
-        photoUrl = await this.convertFileToDataUrl(file);
-        
-        // TODO: Implementar upload para storage service
+        // Conversão para data URL (base64)
+        // Nota: Esta é uma solução temporária que funciona, mas para produção
+        // seria recomendado usar um serviço de storage (Firebase Storage, AWS S3, Cloudinary, etc.)
+        // para armazenar a imagem e obter uma URL pública.
+        // 
+        // A solução atual funciona porque o backend aceita data URLs (base64) no campo profilePhotoUrl.
+        // Se no futuro for necessário migrar para storage service, descomentar e implementar:
         // const publicUrl = await this.storageService.uploadProfilePhoto(file);
         // photoUrl = publicUrl;
+        photoUrl = await this.convertFileToDataUrl(file);
       } else {
         // URL input
         const url = this.form.get('photoUrl')?.value?.trim();

@@ -27,7 +27,10 @@ export class PaymentsPageComponent implements OnInit, OnDestroy {
   private clickListener?: (e: Event) => void;
 
   ngOnInit(): void {
-    this.loadPainel();
+    // Carregar perfil se authorId não estiver disponível
+    this.ensureAuthorId().then(() => {
+      this.loadPainel();
+    });
     
     // Listener para fechar dropdown ao clicar fora
     this.clickListener = (e: Event) => {
@@ -40,6 +43,32 @@ export class PaymentsPageComponent implements OnInit, OnDestroy {
       }
     };
     document.addEventListener('click', this.clickListener);
+  }
+
+  private ensureAuthorId(): Promise<void> {
+    return new Promise((resolve) => {
+      const currentUser = this.authService.currentUser();
+      
+      // Se já tem authorId, não precisa carregar perfil
+      if (currentUser?.authorId) {
+        resolve();
+        return;
+      }
+
+      // Carregar perfil para obter authorId
+      console.log('🔍 AuthorId não encontrado, carregando perfil...');
+      this.authService.getUserProfile().subscribe({
+        next: (user) => {
+          console.log('✅ Perfil carregado, authorId:', user.authorId);
+          resolve();
+        },
+        error: (err) => {
+          console.error('❌ Erro ao carregar perfil:', err);
+          // Continuar mesmo com erro (pode ser que o usuário não tenha authorId configurado)
+          resolve();
+        }
+      });
+    });
   }
 
   ngOnDestroy(): void {
@@ -163,14 +192,46 @@ export class PaymentsPageComponent implements OnInit, OnDestroy {
     this.exportSuccess.set(false);
     this.closeExportDropdown();
 
-    const authorId = this.authService.currentUser()?.authorId;
+    // Tentar obter authorId do usuário atual
+    let authorId = this.authService.currentUser()?.authorId;
 
+    // Se não tiver authorId, carregar perfil primeiro
     if (!authorId) {
-      this.exportError.set('Author ID não encontrado');
-      this.exporting.set(false);
+      console.log('🔍 AuthorId não encontrado, carregando perfil antes de exportar...');
+      this.authService.getUserProfile().subscribe({
+        next: (user) => {
+          console.log('📦 Perfil carregado:', user);
+          console.log('🔍 AuthorId no perfil:', user.authorId);
+          authorId = user.authorId;
+          if (!authorId) {
+            const currentEmail = this.authService.currentUser()?.email || 'N/A';
+            console.error('❌ Author ID não encontrado para o usuário:', currentEmail);
+            this.exportError.set(
+              `Author ID não configurado. Seu usuário (${currentEmail}) não possui um Author ID vinculado. ` +
+              `Entre em contato com o administrador para configurar o Author ID no seu perfil.`
+            );
+            this.exporting.set(false);
+            return;
+          }
+          this.performExport(format, authorId);
+        },
+        error: (err) => {
+          console.error('❌ Erro ao carregar perfil:', err);
+          const currentEmail = this.authService.currentUser()?.email || 'N/A';
+          this.exportError.set(
+            `Erro ao carregar perfil do usuário (${currentEmail}). ` +
+            `Verifique sua conexão e tente novamente. Se o problema persistir, entre em contato com o administrador.`
+          );
+          this.exporting.set(false);
+        }
+      });
       return;
     }
 
+    this.performExport(format, authorId);
+  }
+
+  private performExport(format: ExportFormat, authorId: string): void {
     this.exportService.exportPayments({
       format,
       authorId

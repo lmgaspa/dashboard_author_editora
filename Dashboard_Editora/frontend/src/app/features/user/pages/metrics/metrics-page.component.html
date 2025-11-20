@@ -11,64 +11,11 @@
 
     <!-- Botão de Exportar (só aparece se tiver métricas) -->
     @if (hasMetrics() && !loading()) {
-      <div class="relative" data-export-dropdown>
-        <button
-          type="button"
-          class="flex items-center gap-2 px-4 py-2.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 font-medium transition-all duration-200 text-sm sm:text-base"
-          (click)="toggleExportDropdown()"
-          [disabled]="exporting()"
-        >
-          <span class="material-icons text-lg">{{ exporting() ? 'hourglass_empty' : 'download' }}</span>
-          <span>{{ exporting() ? 'Exportando...' : 'Exportar Métricas' }}</span>
-        </button>
-
-        <!-- Dropdown de Exportação -->
-        @if (showExportDropdown()) {
-          <div class="absolute right-0 top-full mt-2 w-48 bg-[rgba(15,23,42,0.95)] backdrop-blur-xl border border-white/20 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] z-50 py-2">
-            <button
-              type="button"
-              class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors duration-200 text-sm"
-              (click)="exportMetrics('pdf')"
-              [disabled]="exporting()"
-            >
-              <span class="material-icons text-lg">picture_as_pdf</span>
-              <span>Exportar como PDF</span>
-            </button>
-            <div class="h-px bg-white/10 my-1"></div>
-            <button
-              type="button"
-              class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors duration-200 text-sm"
-              (click)="exportMetrics('csv')"
-              [disabled]="exporting()"
-            >
-              <span class="material-icons text-lg">table_chart</span>
-              <span>Exportar como CSV</span>
-            </button>
-          </div>
-        }
+      <div class="self-end sm:self-auto">
+        <app-export-buttons module="metricas" />
       </div>
     }
   </div>
-
-  <!-- Toast de Sucesso -->
-  @if (exportSuccess()) {
-    <div class="fixed top-4 right-4 z-[100] bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-4 shadow-lg animate-fade-in">
-      <div class="flex items-center gap-3">
-        <span class="material-icons text-emerald-400">check_circle</span>
-        <p class="text-emerald-300 text-sm font-medium">Arquivo exportado com sucesso!</p>
-      </div>
-    </div>
-  }
-
-  <!-- Toast de Erro -->
-  @if (exportError()) {
-    <div class="fixed top-4 right-4 z-[100] bg-red-500/20 border border-red-500/30 rounded-lg p-4 shadow-lg animate-fade-in">
-      <div class="flex items-center gap-3">
-        <span class="material-icons text-red-400">error</span>
-        <p class="text-red-300 text-sm font-medium">{{ exportError() }}</p>
-      </div>
-    </div>
-  }
 
   <!-- Loading State -->
   @if (loading()) {
@@ -142,21 +89,11 @@
     </div>
   }
 
-  <!-- Iframe do Looker Studio -->
-  @if (!loading() && !error() && hasMetrics()) {
+  <!-- Dashboard do Looker Studio usando o novo componente -->
+  @if (!loading() && !error() && hasMetrics() && dashboardAuthorId() !== null) {
     <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg">
       <div class="w-full h-[450px] sm:h-[600px] md:h-[700px] lg:h-[800px] rounded-lg overflow-hidden">
-        <iframe
-          width="100%"
-          height="100%"
-          [src]="lookerStudioUrl()!"
-          frameborder="0"
-          style="border:0"
-          allowfullscreen
-          sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-          title="Métricas do Autor"
-          loading="lazy"
-        ></iframe>
+        <app-author-metrics-dashboard [authorId]="dashboardAuthorId()!"></app-author-metrics-dashboard>
       </div>
     </div>
   }

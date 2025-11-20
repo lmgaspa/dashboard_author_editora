@@ -11,11 +11,12 @@ import {
   getStatusText,
   calculateDaysOverdue
 } from '@/app/core/utils/charge.utils';
+import { ExportButtonsComponent } from '@/app/core/components/export-buttons/export-buttons.component';
 
 @Component({
   selector: 'app-charges-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ExportButtonsComponent],
   templateUrl: './charges-page.component.html',
   styles: []
 })

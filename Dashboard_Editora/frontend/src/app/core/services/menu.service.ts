@@ -68,6 +68,18 @@ export class MenuService {
       roles: ['USER', 'ADMIN']
     },
     {
+      label: 'Entregas',
+      icon: 'local_shipping',
+      route: '/user/entregas',
+      roles: ['USER', 'ADMIN']
+    },
+    {
+      label: 'Pedidos Arquivados',
+      icon: 'archive',
+      route: '/user/pedidos-arquivados',
+      roles: ['USER', 'ADMIN']
+    },
+    {
       label: 'Meu Perfil',
       icon: 'person',
       route: '/user/profile',

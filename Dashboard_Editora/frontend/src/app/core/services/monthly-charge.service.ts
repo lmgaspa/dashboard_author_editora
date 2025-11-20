@@ -13,8 +13,16 @@ export class MonthlyChargeService {
   private readonly baseUrl = `${this.API_URL}/api/v1/cobrancas`;
 
   /**
-   * Autor: Listar suas cobranças
-   * O backend identifica o authorId automaticamente do token JWT
+   * Autor: Listar suas cobranças mensais
+   * 
+   * Nota sobre autenticação:
+   * - Dashboard (este sistema): Usa JWT para autenticação de usuários
+   * - E-commerce (sistema externo): Usa CORS-based authorization (sem JWT)
+   * 
+   * O backend identifica o authorId automaticamente do token JWT do usuário logado,
+   * garantindo isolamento multi-tenant (cada autor vê apenas suas próprias cobranças).
+   * 
+   * @returns Observable com lista de cobranças do autor logado
    */
   listarCobrancasAutor(): Observable<MonthlyChargeDTO[]> {
     return this.http.get<MonthlyChargeDTO[]>(this.baseUrl);
@@ -50,8 +58,9 @@ export class MonthlyChargeService {
    */
   listarTodasCobrancas(authorId?: string, status?: string): Observable<MonthlyChargeDTO[]> {
     let params = new HttpParams();
+    // Backend espera author_id (snake_case), não authorId (camelCase)
     if (authorId) {
-      params = params.set('authorId', authorId);
+      params = params.set('author_id', authorId);
     }
     if (status) {
       params = params.set('status', status);

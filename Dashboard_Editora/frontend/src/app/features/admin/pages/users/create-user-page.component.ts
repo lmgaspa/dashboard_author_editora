@@ -133,12 +133,13 @@ export class CreateUserPageComponent {
 
     // Adicionar campos de autor apenas se role for USER
     if (formValue.role === 'USER') {
-      // authorId e ecommerceUrl são obrigatórios para USER - sempre enviar se preenchidos
+      // Backend espera author_id (snake_case), não authorId (camelCase)
+      // author_id e ecommerce_url são obrigatórios para USER - sempre enviar se preenchidos
       if (formValue.authorId) {
-        payload.authorId = formValue.authorId;
+        payload.author_id = formValue.authorId;
       }
       if (formValue.ecommerceUrl) {
-        payload.ecommerceUrl = formValue.ecommerceUrl;
+        payload.ecommerce_url = formValue.ecommerceUrl;
       }
       
       // Campos opcionais de banco de dados - enviar apenas se preenchidos

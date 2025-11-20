@@ -21,13 +21,13 @@ public class PasswordResetController {
     @Value("${application.frontend.base-url}")
     private String frontendBaseUrl;
 
-    @PostMapping("/forgot-password")
+    @PostMapping({"/forgot-password", "/password/forgot"})
     public ResponseEntity<Void> forgot(@RequestBody @Valid ForgotPasswordRequest body) {
         service.requestReset(body.email(), frontendBaseUrl);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping({"/reset-password", "/password/reset"})
     public ResponseEntity<Void> reset(@RequestBody @Valid ResetPasswordRequest body) {
         service.resetPassword(body.token(), body.newPassword());
         return ResponseEntity.ok().build();

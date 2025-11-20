@@ -13,7 +13,7 @@ import { AuthService } from '@/app/core/services/auth.service';
           <span class="title-main">Dashboard do Usuário</span>
           <span class="title-glow">Dashboard do Usuário</span>
         </h1>
-        <p>Bem-vindo, {{ authService.currentUser()?.name }}!</p>
+        <p class="text-sm sm:text-base text-gray-400">Bem-vindo, {{ authService.currentUser()?.name }}!</p>
       </div>
       <div class="dashboard-content">
         <div class="card">
@@ -54,10 +54,6 @@ import { AuthService } from '@/app/core/services/auth.service';
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-    }
-    .header p {
-      color: #94a3b8;
-      font-size: 0.9rem;
     }
     .dashboard-content {
       display: grid;

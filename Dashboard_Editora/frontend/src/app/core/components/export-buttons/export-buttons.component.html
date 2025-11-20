@@ -1,0 +1,44 @@
+<div class="relative" data-export-dropdown>
+  <button
+    type="button"
+    class="flex items-center gap-2 px-4 py-2.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 font-medium transition-all duration-200 text-sm sm:text-base"
+    (click)="toggleExportDropdown()"
+    [disabled]="loading() !== null"
+  >
+    <span class="material-icons text-lg">{{ loading() ? 'hourglass_empty' : 'download' }}</span>
+    <span>{{ loading() ? 'Exportando...' : 'Exportar ' + moduleLabel }}</span>
+  </button>
+
+  <!-- Dropdown de Exportação -->
+  @if (showExportDropdown()) {
+    <div class="absolute right-0 top-full mt-2 w-48 bg-[rgba(15,23,42,0.95)] backdrop-blur-xl border border-white/20 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] z-50 py-2">
+      <button
+        type="button"
+        class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors duration-200 text-sm"
+        (click)="handleExport('pdf')"
+        [disabled]="loading() !== null"
+      >
+        <span class="material-icons text-lg">picture_as_pdf</span>
+        <span>Exportar como PDF</span>
+      </button>
+      <div class="h-px bg-white/10 my-1"></div>
+      <button
+        type="button"
+        class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors duration-200 text-sm"
+        (click)="handleExport('csv')"
+        [disabled]="loading() !== null"
+      >
+        <span class="material-icons text-lg">table_chart</span>
+        <span>Exportar como CSV</span>
+      </button>
+    </div>
+  }
+</div>
+
+@if (error()) {
+  <div class="mt-2 flex items-center gap-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-xs">
+    <span class="material-icons text-sm">error_outline</span>
+    <span>{{ error() }}</span>
+  </div>
+}
+

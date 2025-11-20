@@ -3,6 +3,7 @@ package com.dianaglobal.paineldoauthorbackend.adapter.in.web;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -97,7 +98,7 @@ public class AdminController {
                             user.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
                             user.getProfilePhotoUrl()
                     ))
-                    .toList();
+                    .collect(Collectors.toList());
             
             return ResponseEntity.ok(new UsersListResponse(
                     "Lista de usuários",
@@ -233,7 +234,7 @@ public class AdminController {
                             admin.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
                             admin.getProfilePhotoUrl()
                     ))
-                    .toList();
+                    .collect(Collectors.toList());
             
             return ResponseEntity.ok(new UsersListResponse(
                     "Lista de administradores",
@@ -514,7 +515,7 @@ public class AdminController {
                             user.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
                             user.getProfilePhotoUrl()
                     ))
-                    .toList();
+                    .collect(Collectors.toList());
             
             return ResponseEntity.ok(new UsersListResponse(
                     "Usuários encontrados para author_id: " + authorId,

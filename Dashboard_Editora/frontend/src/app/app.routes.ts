@@ -88,6 +88,14 @@ export const routes: Routes = [
           {
             path: 'charges',
             loadComponent: () => import('./features/user/pages/charges/charges-page.component').then(m => m.ChargesPageComponent)
+          },
+          {
+            path: 'entregas',
+            loadComponent: () => import('./features/user/pages/entregas/entregas-page.component').then(m => m.EntregasPageComponent)
+          },
+          {
+            path: 'pedidos-arquivados',
+            loadComponent: () => import('./features/user/pages/pedidos-arquivados/pedidos-arquivados-page.component').then(m => m.PedidosArquivadosPageComponent)
           }
         ]
       }

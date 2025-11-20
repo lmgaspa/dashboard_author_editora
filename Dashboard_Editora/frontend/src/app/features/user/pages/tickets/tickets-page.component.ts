@@ -5,11 +5,12 @@ import { TicketService } from '@/app/core/services/ticket.service';
 import { AuthService } from '@/app/core/services/auth.service';
 import { Ticket, TicketStatus, TicketCategory } from '@/app/core/models/ticket.model';
 import { CreateTicketModalComponent } from './create-ticket-modal.component';
+import { ExportButtonsComponent } from '@/app/core/components/export-buttons/export-buttons.component';
 
 @Component({
   selector: 'app-tickets-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, CreateTicketModalComponent],
+  imports: [CommonModule, RouterModule, CreateTicketModalComponent, ExportButtonsComponent],
   templateUrl: './tickets-page.component.html',
   styles: []
 })

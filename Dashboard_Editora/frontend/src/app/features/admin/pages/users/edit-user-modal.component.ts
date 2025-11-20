@@ -256,15 +256,16 @@ export class EditUserModalComponent implements OnInit {
       const authorId = formValue.authorId?.trim() || '';
       const ecommerceUrl = formValue.ecommerceUrl?.trim() || '';
       
+      // Backend espera author_id (snake_case), não authorId (camelCase)
       // Se authorId mudou ou foi removido
       if (authorId !== (currentAuthorId || '')) {
-        payload.authorId = authorId || null;
+        payload.author_id = authorId || null;
       }
       
       // Se ecommerceUrl mudou ou foi removido
       const currentEcommerceUrl = (userData as any).ecommerce_url || userData.ecommerceUrl;
       if (ecommerceUrl !== (currentEcommerceUrl || '')) {
-        payload.ecommerceUrl = ecommerceUrl || null;
+        payload.ecommerce_url = ecommerceUrl || null;
       }
 
       // Campos opcionais de banco de dados
@@ -280,9 +281,10 @@ export class EditUserModalComponent implements OnInit {
       }
     } else {
       // Se mudou para ADMIN, limpar campos de autor
+      // Backend espera author_id e ecommerce_url (snake_case)
       if (userData.role === 'USER') {
-        payload.authorId = null;
-        payload.ecommerceUrl = null;
+        payload.author_id = null;
+        payload.ecommerce_url = null;
       }
     }
 

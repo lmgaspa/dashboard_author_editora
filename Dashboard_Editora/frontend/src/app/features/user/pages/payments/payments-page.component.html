@@ -13,7 +13,7 @@
 
     <!-- Botão de Exportar (só aparece se tiver dados) -->
     @if (painel() && !loading()) {
-      <div class="relative" data-export-dropdown>
+      <div class="relative self-end sm:self-auto" data-export-dropdown>
         <button
           type="button"
           class="flex items-center gap-2 px-4 py-2.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 rounded-lg text-sky-300 font-medium transition-all duration-200 text-sm sm:text-base"
@@ -203,12 +203,12 @@
           </p>
         </div>
 
-        <!-- Cancelados -->
+        <!-- Desistências -->
         <div class="space-y-2">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <span class="material-icons text-red-400 text-lg sm:text-xl">cancel</span>
-              <span class="text-sm sm:text-base font-semibold text-gray-300">Cancelados</span>
+              <span class="text-sm sm:text-base font-semibold text-gray-300">Desistências</span>
             </div>
             <div class="text-right">
               <span class="text-base sm:text-lg font-bold text-white">{{ painel()!.funilVendas.pedidosCancelados }}</span>
@@ -252,7 +252,7 @@
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Data</th>
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Livro</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Quantidade</th>
-                <th class="text-right py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor</th>
+                <th class="text-right py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor Final</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
@@ -295,7 +295,7 @@
                   <p class="text-sm font-semibold text-white">{{ venda.quantidade }}</p>
                 </div>
                 <div class="text-right">
-                  <p class="text-xs text-gray-400">Valor Total</p>
+                  <p class="text-xs text-gray-400">Valor Final</p>
                   <p class="text-sm font-bold text-sky-400">{{ venda.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
                 </div>
               </div>

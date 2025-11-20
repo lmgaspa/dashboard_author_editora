@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@/environments/environment';
 
-export type ExportFormat = 'pdf' | 'csv';
+export type ExportFormat = 'pdf' | 'csv' | 'json';
 
 export interface ExportOptions {
   format: ExportFormat;
@@ -26,7 +26,7 @@ export class ExportService {
    */
   exportMetrics(options: ExportOptions): Observable<Blob> {
     const params = this.buildParams(options);
-    return this.http.get(`${this.API_URL}/api/v1/metrics/export`, {
+    return this.http.get(`${this.API_URL}/api/v1/metricas/export`, {
       params,
       responseType: 'blob'
     });
@@ -56,6 +56,7 @@ export class ExportService {
 
   /**
    * Constrói os parâmetros HTTP a partir das opções
+   * Nota: author_id não é passado como parâmetro, pois é obtido automaticamente do token JWT
    */
   private buildParams(options: ExportOptions): HttpParams {
     let params = new HttpParams();
@@ -63,9 +64,7 @@ export class ExportService {
     if (options.format) {
       params = params.set('format', options.format);
     }
-    if (options.authorId) {
-      params = params.set('authorId', options.authorId);
-    }
+    // author_id não é passado como parâmetro - vem do token JWT automaticamente
     if (options.startDate) {
       params = params.set('startDate', options.startDate);
     }
@@ -76,7 +75,7 @@ export class ExportService {
       params = params.set('status', options.status);
     }
 
-    // Adicionar outros parâmetros dinamicamente
+    // Adicionar outros parâmetros dinamicamente (exceto authorId)
     Object.keys(options).forEach(key => {
       if (!['format', 'authorId', 'startDate', 'endDate', 'status'].includes(key) && options[key] != null) {
         params = params.set(key, String(options[key]));
@@ -101,12 +100,57 @@ export class ExportService {
   }
 
   /**
+   * Exporta entregas do autor
+   */
+  exportEntregas(options: ExportOptions): Observable<Blob> {
+    const params = this.buildParams(options);
+    return this.http.get(`${this.API_URL}/api/v1/entregas/export`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Exporta pedidos arquivados (apenas ENTREGUE)
+   */
+  exportEntregasArquivadas(options: ExportOptions): Observable<Blob> {
+    const params = this.buildParams(options);
+    return this.http.get(`${this.API_URL}/api/v1/entregas/export/arquivados`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Exporta cobranças do autor
+   */
+  exportCobrancas(options: ExportOptions): Observable<Blob> {
+    const params = this.buildParams(options);
+    return this.http.get(`${this.API_URL}/api/v1/cobrancas/export`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Exporta tickets do autor
+   */
+  exportTickets(options: ExportOptions): Observable<Blob> {
+    const params = this.buildParams(options);
+    return this.http.get(`${this.API_URL}/api/v1/tickets/export`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  /**
    * Gera nome de arquivo com timestamp
    */
-  generateFilename(prefix: string, format: ExportFormat, authorId?: string): string {
+  generateFilename(prefix: string, format: ExportFormat, authorId?: string, suffix?: string): string {
     const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const authorSuffix = authorId ? `-${authorId}` : '';
-    return `${prefix}${authorSuffix}-${date}.${format}`;
+    const extraSuffix = suffix ? `-${suffix}` : '';
+    return `${prefix}${authorSuffix}${extraSuffix}-${date}.${format}`;
   }
 }
 

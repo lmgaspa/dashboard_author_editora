@@ -33,7 +33,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         path.equals("/api/v1/auth/register") ||
                         path.equals("/api/v1/auth/confirm-account") ||
                         path.equals("/api/v1/auth/forgot-password") ||
-                path.equals("/api/v1/auth/reset-password");
+                        path.equals("/api/v1/auth/password/forgot") ||
+                        path.equals("/api/v1/auth/reset-password") ||
+                        path.equals("/api/v1/auth/password/reset");
         // OBS: /api/v1/auth/profile NÃO entra aqui (é protegido)
     }
 

@@ -11,8 +11,9 @@ public record ResumoEmailClienteDTO(
         String email,
         long totalPedidos,
         long totalPedidosConfirmados,
-        BigDecimal valorTotalConfirmado,
+        BigDecimal valorRepassado,  // Valor real repassado (amount_net), não valor bruto
         Instant primeiroPedidoEm,
-        Instant ultimoPedidoEm
+        Instant ultimoPedidoEm,
+        CouponInfoClienteDTO cupom  // Informações agregadas de cupons
 ) {}
 

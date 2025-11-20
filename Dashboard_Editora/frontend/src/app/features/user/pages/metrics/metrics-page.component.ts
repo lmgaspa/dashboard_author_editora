@@ -1,11 +1,12 @@
 import { Component, signal, inject, OnInit, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '@/app/core/services/auth.service';
 import { ExportService, ExportFormat } from '@/app/core/services/export.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@/environments/environment';
 import { User } from '@/app/core/models/menu-item.model';
+import { ExportButtonsComponent } from '@/app/core/components/export-buttons/export-buttons.component';
+import { AuthorMetricsDashboardComponent } from '@/app/core/components/author-metrics-dashboard/author-metrics-dashboard.component';
 
 interface UsersResponse {
   message: string;
@@ -16,13 +17,12 @@ interface UsersResponse {
 @Component({
   selector: 'app-metrics-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ExportButtonsComponent, AuthorMetricsDashboardComponent],
   templateUrl: './metrics-page.component.html',
   styles: []
 })
 export class MetricsPageComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly exportService = inject(ExportService);
   private readonly http = inject(HttpClient);
   private readonly API_URL = environment.apiUrl;
@@ -30,12 +30,10 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
   // Estados
   readonly loading = signal<boolean>(true);
   readonly error = signal<string | null>(null);
-  readonly lookerStudioUrl = signal<SafeResourceUrl | null>(null);
-  readonly hasMetrics = computed(() => this.lookerStudioUrl() !== null);
   
   // Para ADMIN: seleção de autor
   readonly authors = signal<User[]>([]);
-  readonly selectedAuthorId = signal<string | null>(null);
+  readonly selectedAuthorId = signal<number | null>(null);
   readonly showExportDropdown = signal<boolean>(false);
   readonly exporting = signal<boolean>(false);
   readonly exportError = signal<string | null>(null);
@@ -45,10 +43,28 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
   // Computed
   readonly isAdmin = computed(() => this.authService.isAdmin());
   readonly currentUser = computed(() => this.authService.currentUser());
+  
+  // AuthorId para o componente de dashboard (número)
+  readonly dashboardAuthorId = computed(() => {
+    if (this.isAdmin()) {
+      return this.selectedAuthorId();
+    }
+    // Para USER, pegar do currentUser e converter para número
+    const authorId = this.currentUser()?.authorId;
+    if (!authorId) return null;
+    const numId = Number(authorId);
+    return isNaN(numId) ? null : numId;
+  });
+  
+  readonly hasMetrics = computed(() => this.dashboardAuthorId() !== null);
+  
   readonly selectedAuthor = computed(() => {
     const authorId = this.selectedAuthorId();
     if (!authorId) return null;
-    return this.authors().find(a => a.authorId === authorId);
+    return this.authors().find(a => {
+      const aId = Number(a.authorId);
+      return !isNaN(aId) && aId === authorId;
+    });
   });
 
   ngOnInit(): void {
@@ -80,23 +96,38 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
 
-    // Buscar perfil atualizado para pegar lookerStudioUrl
+    // Buscar perfil atualizado para garantir que temos o authorId
     this.authService.getUserProfile().subscribe({
       next: (user) => {
-        this.processLookerStudioUrl(user.lookerStudioUrl, user.authorId);
+        // Verificar se tem authorId válido
+        if (!user.authorId) {
+          this.error.set('Author ID não configurado. Entre em contato com o administrador.');
+          this.loading.set(false);
+          return;
+        }
+        
+        const authorIdNum = Number(user.authorId);
+        if (isNaN(authorIdNum)) {
+          this.error.set('Author ID inválido. Entre em contato com o administrador.');
+          this.loading.set(false);
+          return;
+        }
+        
         this.loading.set(false);
       },
       error: (err) => {
         console.error('Erro ao carregar perfil:', err);
         // Tentar usar dados do cache
         const cachedUser = this.currentUser();
-        if (cachedUser) {
-          this.processLookerStudioUrl(cachedUser.lookerStudioUrl, cachedUser.authorId);
-          this.loading.set(false);
-        } else {
-          this.error.set('Erro ao carregar configurações de métricas');
-          this.loading.set(false);
+        if (cachedUser?.authorId) {
+          const authorIdNum = Number(cachedUser.authorId);
+          if (!isNaN(authorIdNum)) {
+            this.loading.set(false);
+            return;
+          }
         }
+        this.error.set('Erro ao carregar configurações de métricas');
+        this.loading.set(false);
       }
     });
   }
@@ -110,14 +141,20 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
           authorId: u.author_id || u.authorId,
           lookerStudioUrl: u.looker_studio_url || u.lookerStudioUrl
         }));
-        // Filtrar apenas usuários com authorId
-        const authorsWithId = normalizedUsers.filter((u: User) => u.authorId);
+        // Filtrar apenas usuários com authorId válido (número)
+        const authorsWithId = normalizedUsers.filter((u: User) => {
+          if (!u.authorId) return false;
+          const numId = Number(u.authorId);
+          return !isNaN(numId);
+        });
         this.authors.set(authorsWithId);
         
         // Se não houver autor selecionado, selecionar o primeiro
         if (!this.selectedAuthorId() && authorsWithId.length > 0) {
-          this.selectedAuthorId.set(authorsWithId[0].authorId || null);
-          this.updateMetricsForAuthor(authorsWithId[0].authorId || null);
+          const firstAuthorId = Number(authorsWithId[0].authorId);
+          if (!isNaN(firstAuthorId)) {
+            this.selectedAuthorId.set(firstAuthorId);
+          }
         }
       },
       error: (err) => {
@@ -126,66 +163,19 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  onAuthorChange(authorId: string | null): void {
-    this.selectedAuthorId.set(authorId);
-    this.updateMetricsForAuthor(authorId);
-  }
-
-  private updateMetricsForAuthor(authorId: string | null): void {
-    if (!authorId) {
-      this.lookerStudioUrl.set(null);
+  onAuthorChange(authorIdStr: string | null): void {
+    if (!authorIdStr) {
+      this.selectedAuthorId.set(null);
       return;
     }
-
-    const author = this.authors().find(a => a.authorId === authorId);
-    if (!author || !author.lookerStudioUrl) {
-      this.lookerStudioUrl.set(null);
+    
+    const authorIdNum = Number(authorIdStr);
+    if (isNaN(authorIdNum)) {
+      console.error('AuthorId inválido:', authorIdStr);
       return;
     }
-
-    this.processLookerStudioUrl(author.lookerStudioUrl, authorId);
-  }
-
-  private processLookerStudioUrl(url: string | null | undefined, authorId?: string | null): void {
-    if (!url || url.trim() === '') {
-      this.lookerStudioUrl.set(null);
-      return;
-    }
-
-    // Validar URL
-    if (!this.isValidLookerStudioUrl(url)) {
-      this.error.set('URL do Looker Studio inválida');
-      this.lookerStudioUrl.set(null);
-      return;
-    }
-
-    // Se for USER e tiver authorId, adicionar parâmetro
-    let finalUrl = url.trim();
-    if (!this.isAdmin() && authorId) {
-      // Adicionar parâmetro author_id_param na URL
-      const urlObj = new URL(finalUrl);
-      urlObj.searchParams.set('params.author_id_param', authorId);
-      finalUrl = urlObj.toString();
-    } else if (this.isAdmin() && this.selectedAuthorId()) {
-      // Para ADMIN, usar o authorId selecionado
-      const urlObj = new URL(finalUrl);
-      urlObj.searchParams.set('params.author_id_param', this.selectedAuthorId()!);
-      finalUrl = urlObj.toString();
-    }
-
-    // Sanitizar URL para uso seguro no iframe
-    const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(finalUrl);
-    this.lookerStudioUrl.set(safeUrl);
-  }
-
-  private isValidLookerStudioUrl(url: string): boolean {
-    try {
-      const urlObj = new URL(url);
-      return urlObj.hostname === 'lookerstudio.google.com' 
-        || urlObj.hostname === 'datastudio.google.com';
-    } catch {
-      return false;
-    }
+    
+    this.selectedAuthorId.set(authorIdNum);
   }
 
   retry(): void {
@@ -206,7 +196,15 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
     this.exportSuccess.set(false);
     this.closeExportDropdown();
 
-    const authorId = this.isAdmin() ? this.selectedAuthorId() : this.currentUser()?.authorId;
+    // Obter authorId (número para admin, string do user para usuário normal)
+    let authorId: string | undefined;
+    
+    if (this.isAdmin()) {
+      const selectedId = this.selectedAuthorId();
+      authorId = selectedId ? String(selectedId) : undefined;
+    } else {
+      authorId = this.currentUser()?.authorId;
+    }
 
     if (!authorId) {
       this.exportError.set('Author ID não encontrado');
