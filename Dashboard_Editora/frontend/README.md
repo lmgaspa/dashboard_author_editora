@@ -1,131 +1,145 @@
-# Dashboard do Autor - Editora
+# Author Dashboard - Publishing House
 
-Dashboard web para gerenciamento de autores, pedidos, pagamentos, entregas e métricas desenvolvido em Angular.
+Web dashboard for managing authors, orders, payments, deliveries, and metrics developed in Angular.
 
-## 📋 Sobre o Projeto
+## 📋 About the Project
 
-Sistema completo de gestão para autores de uma editora, permitindo visualização de métricas, gerenciamento de pedidos, controle de entregas, acompanhamento de pagamentos e comunicação com clientes através de e-mails.
+Complete management system for publishing house authors, allowing visualization of metrics, order management, delivery control, payment tracking, and communication with customers via email.
 
-## 🚀 Tecnologias
+## 🚀 Technologies
 
 - **Angular** 20.3.0
 - **TypeScript** 5.9.2
 - **Tailwind CSS** 3.4.17
 - **RxJS** 7.8.0
-- **ECharts** 6.0.0 (gráficos e visualizações)
-- **Angular Signals** (gerenciamento de estado reativo)
+- **ECharts** 6.0.0 (charts and visualizations)
+- **Angular Signals** (reactive state management)
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
 src/
 ├── app/
-│   ├── core/                    # Funcionalidades core compartilhadas
-│   │   ├── components/          # Componentes reutilizáveis
-│   │   │   ├── author-metrics-dashboard/  # Dashboard Looker Studio
-│   │   │   └── export-buttons/            # Botões de exportação
-│   │   ├── guards/              # Guards de rota (auth, role)
-│   │   ├── interceptors/       # Interceptors HTTP (auth)
-│   │   ├── models/             # Interfaces e tipos TypeScript
-│   │   ├── services/           # Serviços compartilhados
-│   │   └── utils/              # Utilitários
-│   ├── features/               # Módulos de funcionalidades
-│   │   ├── admin/              # Funcionalidades administrativas
-│   │   ├── auth/               # Autenticação e autorização
-│   │   ├── dashboard/           # Dashboard com gráficos
-│   │   └── user/               # Funcionalidades do usuário
-│   └── layout/                 # Componentes de layout
+│   ├── core/                    # Shared core functionalities
+│   │   ├── components/          # Reusable components
+│   │   │   ├── author-metrics-dashboard/  # Looker Studio Dashboard
+│   │   │   └── export-buttons/            # Export buttons
+│   │   ├── guards/              # Route guards (auth, role)
+│   │   ├── interceptors/       # HTTP interceptors (auth)
+│   │   ├── models/             # TypeScript interfaces and types
+│   │   ├── services/           # Shared services
+│   │   └── utils/              # Utilities
+│   ├── features/               # Feature modules
+│   │   ├── admin/              # Administrative functionalities
+│   │   ├── auth/               # Authentication and authorization
+│   │   ├── dashboard/           # Dashboard with charts
+│   │   └── user/               # User functionalities
+│   └── layout/                 # Layout components
 │       ├── components/         # Sidebar, Topbar, Footer
 │       └── layouts/            # Layouts (admin, user, public)
-└── environments/               # Configurações de ambiente
+└── environments/               # Environment configurations
 ```
 
-## ✨ Funcionalidades Principais
+## ✨ Main Features
 
-### 🔐 Autenticação e Autorização
-- Login com JWT
-- Recuperação de senha
-- Confirmação de conta por e-mail
-- Guards de rota por role (USER, ADMIN)
-- Interceptor HTTP para adicionar token automaticamente
+### 🔐 Authentication and Authorization
 
-### 👤 Gestão de Usuários (Admin)
-- Criação e edição de usuários
-- Gerenciamento de roles e permissões
-- Visualização de lista de administradores
-- Configuração de `author_id` e URLs do Looker Studio
+- Login with JWT
+- Password recovery
+- Account confirmation via email
+- Route guards by role (USER, ADMIN)
+- HTTP Interceptor to automatically add tokens
 
-### 💰 Pagamentos
-- Visualização de resumo de pagamentos
-- Funil de vendas (Total, Confirmados, Desistências)
-- Lista de pedidos recentes com valores reais (após taxas)
-- Exportação em PDF/CSV
+### 👤 User Management (Admin)
 
-### 📧 E-mails
-- Visualização de e-mails de clientes
-- E-mails de repasse (PIX/Card)
-- Informações de cupons aplicados
-- Estatísticas de pedidos por cliente
-- Exportação em PDF/CSV
+- User creation and editing
+- Role and permission management
+- Administrator list visualization
+- Configuration of `author_id` and Looker Studio URLs
 
-### 📊 Métricas
-- Dashboard integrado com Looker Studio
-- Visualização de métricas por autor
-- Suporte multi-tenant (cada autor vê apenas suas métricas)
-- Seleção de autor para administradores
+### 💰 Payments
 
-### 🚚 Entregas
-- Lista de entregas ativas
-- Status de envio (AGUARDANDO, ENVIADO, RECUSADO, ENTREGUE)
-- Atualização de código de rastreamento
-- Modal para atualização de status
-- Filtro entre entregas ativas e arquivadas
+- Payment summary visualization
+- Sales funnel (Total, Confirmed, Cancelled)
+- Recent orders list with real values (after fees)
+- Export to PDF/CSV
 
-### 📦 Pedidos Arquivados
-- Visualização de pedidos com status ENTREGUE
-- Mesma interface de entregas, filtrada para arquivados
-- Exportação específica de pedidos arquivados
+### 📧 Emails
+
+- Customer email visualization
+- Transfer emails (PIX/Card)
+- Applied coupon information
+- Order statistics per customer
+- Export to PDF/CSV
+
+### 📊 Metrics
+
+- Integrated dashboard with Looker Studio
+- Metrics visualization per author
+- Multi-tenant support (each author sees only their own metrics)
+- Author selection for administrators
+
+### 🚚 Deliveries
+
+- Active deliveries list
+- Shipping status (WAITING, SENT, REFUSED, DELIVERED)
+- Tracking code update
+- Status update modal
+- Filter between active and archived deliveries
+
+### 📦 Archived Orders
+
+- Visualization of orders with DELIVERED status
+- Same interface as deliveries, filtered for archived items
+- Specific export for archived orders
 
 ### 🎫 Tickets
-- Criação de tickets de suporte
-- Visualização de tickets abertos e fechados
-- Detalhes de cada ticket
-- Exportação em PDF/CSV
 
-### 💳 Cobranças Mensais
-- Visualização de cobranças mensais
-- Códigos PIX para pagamento
-- Status de pagamento (PENDING, PAID, OVERDUE, CANCELLED)
-- Histórico de cobranças
-- Exportação em PDF/CSV
+- Support ticket creation
+- Open and closed tickets visualization
+- Ticket details
+- Export to PDF/CSV
+
+### 💳 Monthly Charges
+
+- Monthly charges visualization
+- PIX codes for payment
+- Payment status (PENDING, PAID, OVERDUE, CANCELLED)
+- Charge history
+- Export to PDF/CSV
 
 ### 📈 Dashboard
-- KPIs principais (Receita, Pedidos, Cancelados, Status de Entrega)
-- Mapa do Brasil com distribuição de vendas
-- Funil de vendas
-- Métricas de formas de pagamento
-- Produtos mais vendidos
 
-## 🔧 Configuração
+- Main KPIs (Revenue, Orders, Cancelled, Delivery Status)
+- Brazil map with sales distribution
+- Sales funnel
+- Payment method metrics
+- Best-selling products
 
-### Pré-requisitos
-- Node.js 18+ 
-- npm ou yarn
+## 🔧 Configuration
 
-### Instalação
+### Prerequisites
 
-1. Clone o repositório:
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd frontend
 ```
 
-2. Instale as dependências:
+2. Install dependencies:
+
 ```bash
 npm install
 ```
 
-3. Configure as variáveis de ambiente:
+3. Configure environment variables:
+
 ```typescript
 // src/environments/environment.ts
 export const environment = {
@@ -135,163 +149,178 @@ export const environment = {
 };
 ```
 
-4. Inicie o servidor de desenvolvimento:
+4. Start the development server:
+
 ```bash
 npm start
-# ou
+# or
 ng serve
 ```
 
-5. Acesse `http://localhost:4200`
+5. Access `http://localhost:4200`
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
 ### Multi-Tenancy
-O sistema implementa isolamento multi-tenant baseado em `author_id`:
-- Cada autor vê apenas seus próprios dados
-- O `author_id` é extraído automaticamente do token JWT
-- Não é necessário passar `author_id` como parâmetro nas requisições
-- Backend garante isolamento completo dos dados
 
-### Padrões de Design
-- **Open/Closed Principle (OCP)**: Componentes extensíveis sem modificação
-- **Single Responsibility**: Cada serviço/componente tem uma responsabilidade única
-- **Dependency Injection**: Uso extensivo de `inject()` do Angular
-- **Signals**: Estado reativo com Angular Signals
-- **Strategy Pattern**: Mapeamento de URLs do Looker Studio por `authorId`
+The system implements multi-tenant isolation based on `author_id`:
 
-### Serviços Principais
+- Each author sees only their own data
+- The `author_id` is automatically extracted from the JWT token
+- It is not necessary to pass `author_id` as a parameter in requests
+- Backend guarantees complete data isolation
+
+### Design Patterns
+
+- **Open/Closed Principle (OCP)**: Extensible components without modification
+- **Single Responsibility**: Each service/component has a single responsibility
+- **Dependency Injection**: Extensive use of Angular's `inject()`
+- **Signals**: Reactive state with Angular Signals
+- **Strategy Pattern**: Mapping Looker Studio URLs by `authorId`
+
+### Main Services
 
 #### AuthService
-- Gerenciamento de autenticação
-- Armazenamento de token JWT
-- Gerenciamento de perfil do usuário
-- Métodos de login, logout, recuperação de senha
+
+- Authentication management
+- JWT token storage
+- User profile management
+- Login, logout, password recovery methods
 
 #### EmailService
-- Busca de e-mails de clientes e repasse
-- Agregação de informações de cupons
-- Painel completo de e-mails
+
+- Customer and transfer email fetching
+- Coupon information aggregation
+- Complete email panel
 
 #### PaymentService
-- Resumo de pagamentos
-- Funil de vendas
-- Pedidos recentes
 
-#### EntregaService
-- Lista de entregas
-- Atualização de status de envio
-- Cache com `shareReplay`
+- Payment summary
+- Sales funnel
+- Recent orders
+
+#### DeliveryService (EntregaService)
+
+- Deliveries list
+- Shipping status update
+- Caching with `shareReplay`
 
 #### ExportService
-- Exportação em PDF/CSV
-- Suporte para múltiplos módulos (emails, entregas, cobranças, tickets, métricas)
-- Geração automática de nomes de arquivo
+
+- Export to PDF/CSV
+- Support for multiple modules (emails, deliveries, charges, tickets, metrics)
+- Automatic filename generation
 
 #### MonthlyChargeService
-- Gestão de cobranças mensais
-- Códigos PIX
-- Status de pagamento
+
+- Monthly charge management
+- PIX codes
+- Payment status
 
 #### TicketService
-- Criação e listagem de tickets
-- Detalhes de tickets
+
+- Ticket creation and listing
+- Ticket details
 
 ## 🎨 Design System
 
-### Tema
-- Design dark mode com gradientes
-- Cores principais: Sky Blue (#38bdf8, #2563eb)
-- Efeitos de blur e glassmorphism
-- Responsivo (mobile-first)
+### Theme
 
-### Componentes Reutilizáveis
-- **ExportButtonsComponent**: Botões de exportação com dropdown (PDF/CSV)
-- **AuthorMetricsDashboardComponent**: Embed do Looker Studio por autor
-- Cards, modais, tabelas padronizadas
+- Dark mode design with gradients
+- Main colors: Sky Blue (#38bdf8, #2563eb)
+- Blur and glassmorphism effects
+- Responsive (mobile-first)
 
-## 📤 Exportação
+### Reusable Components
 
-O sistema suporta exportação em múltiplos formatos:
-- **PDF**: Relatórios formatados
-- **CSV**: Dados tabulares
-- **JSON**: Dados estruturados (alguns endpoints)
+- **ExportButtonsComponent**: Export buttons with dropdown (PDF/CSV)
+- **AuthorMetricsDashboardComponent**: Looker Studio embed per author
+- Standardized Cards, Modals, Tables
 
-Módulos com exportação:
-- E-mails
-- Entregas (ativas e arquivadas)
-- Cobranças
+## 📤 Export
+
+The system supports export in multiple formats:
+
+- **PDF**: Formatted reports
+- **CSV**: Tabular data
+- **JSON**: Structured data (some endpoints)
+
+Modules with export:
+
+- Emails
+- Deliveries (active and archived)
+- Charges
 - Tickets
-- Métricas
+- Metrics
 
-## 🔒 Segurança
+## 🔒 Security
 
-- Autenticação JWT
-- Interceptor HTTP para adicionar token automaticamente
-- Guards de rota para proteger rotas autenticadas
-- Validação de roles (USER, ADMIN)
-- Sanitização de URLs para iframes (DomSanitizer)
-- Isolamento multi-tenant garantido pelo backend
+- JWT Authentication
+- HTTP Interceptor for automatically adding tokens
+- Route guards to protect authenticated routes
+- Role validation (USER, ADMIN)
+- URL sanitization for iframes (DomSanitizer)
+- Multi-tenant isolation guaranteed by the backend
 
-## 📱 Responsividade
+## 📱 Responsiveness
 
-- Design mobile-first
-- Breakpoints Tailwind (sm, md, lg, xl)
-- Tabelas responsivas (desktop) / Cards (mobile)
-- Modais adaptáveis
-- Navegação otimizada para mobile
+- Mobile-first design
+- Tailwind breakpoints (sm, md, lg, xl)
+- Responsive tables (desktop) / Cards (mobile)
+- Adaptive modals
+- Optimized mobile navigation
 
-## 🚀 Build para Produção
+## 🚀 Production Build
 
 ```bash
 ng build --configuration=production
 ```
 
-Os arquivos compilados estarão em `dist/dashboard-author-editora-frontend/browser/`
+Compiled files will be in `dist/dashboard-author-editora-frontend/browser/`
 
-## 🧪 Testes
+## 🧪 Tests
 
 ```bash
 ng test
 ```
 
-## 📝 Scripts Disponíveis
+## 📝 Available Scripts
 
-- `npm start` / `ng serve`: Servidor de desenvolvimento
-- `npm run build`: Build de produção
-- `npm test`: Executar testes
-- `ng generate component`: Gerar novo componente
+- `npm start` / `ng serve`: Development server
+- `npm run build`: Production build
+- `npm test`: Run tests
+- `ng generate component`: Generate new component
 
-## 🔗 API Backend
+## 🔗 Backend API
 
-**URL Base**: `https://dashboard-painel-autores-vl-26b242c59563.herokuapp.com`
+**Base URL**: `https://dashboard-painel-autores-vl-26b242c59563.herokuapp.com`
 
-### Endpoints Principais
+### Main Endpoints
 
-- `/api/v1/auth/*` - Autenticação
-- `/api/v1/author/*` - Endpoints do autor
-- `/api/v1/admin/*` - Endpoints administrativos
-- `/api/v1/entregas/*` - Entregas
-- `/api/v1/cobrancas/*` - Cobranças
+- `/api/v1/auth/*` - Authentication
+- `/api/v1/author/*` - Author endpoints
+- `/api/v1/admin/*` - Administrative endpoints
+- `/api/v1/entregas/*` - Deliveries
+- `/api/v1/cobrancas/*` - Charges
 - `/api/v1/tickets/*` - Tickets
-- `/api/v1/emails/*` - E-mails
-- `/api/v1/*/export` - Exportações
+- `/api/v1/emails/*` - Emails
+- `/api/v1/*/export` - Exports
 
-## 📚 Recursos Adicionais
+## 📚 Additional Resources
 
 - [Angular Documentation](https://angular.dev)
 - [Tailwind CSS](https://tailwindcss.com)
 - [ECharts](https://echarts.apache.org)
 - [RxJS](https://rxjs.dev)
 
-## 👥 Contribuição
+## 👥 Contribution
 
-Este é um projeto privado da editora. Para contribuições, entre em contato com a equipe de desenvolvimento.
+This is a private project for the publishing house. For contributions, please contact the development team.
 
-## 📄 Licença
+## 📄 License
 
-Proprietário - Todos os direitos reservados
+Owner - All rights reserved
 
 ---
 
-**Desenvolvido com ❤️ para a Editora**
+**Developed with ❤️ for the Publishing House**
