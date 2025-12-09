@@ -81,7 +81,7 @@
             [disabled]="loading()"
           >
             @for (cat of categories; track cat.value) {
-              <option [value]="cat.value">{{ cat.label }}</option>
+              <option [value]="cat.value" class="text-black">{{ cat.label }}</option>
             }
           </select>
         </div>

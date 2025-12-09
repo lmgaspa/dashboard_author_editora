@@ -1,6 +1,7 @@
 export enum TicketCategory {
   PAGAMENTO = 'PAGAMENTO',
   TECNICO = 'TECNICO',
+  ALTERACAO = 'ALTERACAO',
   DUVIDA = 'DUVIDA',
   OUTRO = 'OUTRO'
 }

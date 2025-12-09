@@ -111,6 +111,7 @@ export class TicketsPageComponent implements OnInit, OnDestroy {
     const categoryMap: Record<TicketCategory, string> = {
       [TicketCategory.PAGAMENTO]: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300',
       [TicketCategory.TECNICO]: 'bg-red-500/20 border-red-500/30 text-red-300',
+      [TicketCategory.ALTERACAO]: 'bg-red-500/20 border-red-500/30 text-red-300',
       [TicketCategory.DUVIDA]: 'bg-blue-500/20 border-blue-500/30 text-blue-300',
       [TicketCategory.OUTRO]: 'bg-gray-500/20 border-gray-500/30 text-gray-300'
     };
@@ -121,6 +122,7 @@ export class TicketsPageComponent implements OnInit, OnDestroy {
     const categoryMap: Record<TicketCategory, string> = {
       [TicketCategory.PAGAMENTO]: 'Pagamento',
       [TicketCategory.TECNICO]: 'Técnico',
+      [TicketCategory.ALTERACAO]: 'Alteração',
       [TicketCategory.DUVIDA]: 'Dúvida',
       [TicketCategory.OUTRO]: 'Outro'
     };

@@ -30,6 +30,7 @@ export class CreateTicketModalComponent {
   readonly categories = [
     { value: TicketCategory.PAGAMENTO, label: 'Pagamento' },
     { value: TicketCategory.TECNICO, label: 'Técnico' },
+    { value: TicketCategory.ALTERACAO, label: 'Alteração' },
     { value: TicketCategory.DUVIDA, label: 'Dúvida' },
     { value: TicketCategory.OUTRO, label: 'Outro' }
   ];

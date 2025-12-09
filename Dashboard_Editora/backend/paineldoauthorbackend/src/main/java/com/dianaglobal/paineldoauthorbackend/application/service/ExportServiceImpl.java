@@ -1,25 +1,5 @@
 package com.dianaglobal.paineldoauthorbackend.application.service;
 
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.cobrancas.MonthlyChargeDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.entregas.EntregaDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.entregas.ItemEntregaDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.PainelEmailsAutorDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.ResumoEmailClienteDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.ResumoEmailRepasseDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.pagamentos.PainelPagamentosAutorDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.pagamentos.VendaRecenteDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.MessageDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.TicketDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.web.AdminController.AuthorStatsResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.springframework.stereotype.Service;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +7,26 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.springframework.stereotype.Service;
+
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.cobrancas.MonthlyChargeDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.PainelEmailsAutorDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.ResumoEmailClienteDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.emails.ResumoEmailRepasseDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.entregas.EntregaDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.pagamentos.PainelPagamentosAutorDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.pagamentos.VendaRecenteDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.TicketDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.in.web.AdminController.AuthorStatsResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementação do serviço de exportação.
