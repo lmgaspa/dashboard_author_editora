@@ -1,10 +1,25 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" (click)="close()">
-  <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" (click)="$event.stopPropagation()">
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+  (click)="close()"
+>
+  <div
+    class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+    (click)="$event.stopPropagation()"
+  >
     <!-- Header -->
     <div class="flex items-center justify-between mb-4 sm:mb-6">
       <div>
         <h2 class="text-xl sm:text-2xl md:text-3xl font-black relative">
-          <span class="relative z-10" style="background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Editar Usuário</span>
+          <span
+            class="relative z-10"
+            style="
+              background: linear-gradient(to right, #38bdf8, #2563eb, #38bdf8);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+            "
+            >Editar Usuário</span
+          >
         </h2>
         <p class="text-gray-400 text-xs sm:text-sm mt-1">{{ user().email }}</p>
       </div>
@@ -19,13 +34,17 @@
 
     <!-- Error Alert -->
     @if (error()) {
-      <div class="mb-4 sm:mb-6 flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-red-500/10 border border-red-500/30 rounded-lg sm:rounded-xl backdrop-blur-sm">
-        <span class="material-icons text-red-400 flex-shrink-0 mt-0.5 text-lg sm:text-xl">error_outline</span>
-        <div>
-          <p class="text-red-300 font-semibold text-sm sm:text-base">Erro ao atualizar usuário</p>
-          <p class="text-red-400/80 text-xs sm:text-sm mt-1">{{ error() }}</p>
-        </div>
+    <div
+      class="mb-4 sm:mb-6 flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-red-500/10 border border-red-500/30 rounded-lg sm:rounded-xl backdrop-blur-sm"
+    >
+      <span class="material-icons text-red-400 flex-shrink-0 mt-0.5 text-lg sm:text-xl"
+        >error_outline</span
+      >
+      <div>
+        <p class="text-red-300 font-semibold text-sm sm:text-base">Erro ao atualizar usuário</p>
+        <p class="text-red-400/80 text-xs sm:text-sm mt-1">{{ error() }}</p>
       </div>
+    </div>
     }
 
     <!-- Form -->
@@ -36,11 +55,14 @@
           Nome Completo <span class="text-red-400">*</span>
         </label>
         <div class="relative">
-          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">person</span>
-          <input 
-            type="text" 
-            id="name" 
-            formControlName="name" 
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >person</span
+          >
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
             placeholder="Nome Completo do Usuário"
             class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
@@ -48,7 +70,7 @@
           />
         </div>
         @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="text-red-400 text-[10px] sm:text-xs">Nome é obrigatório</p>
+        <p class="text-red-400 text-[10px] sm:text-xs">Nome é obrigatório</p>
         }
       </div>
 
@@ -58,10 +80,13 @@
           E-mail
         </label>
         <div class="relative">
-          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">email</span>
-          <input 
-            type="email" 
-            id="email" 
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >email</span
+          >
+          <input
+            type="email"
+            id="email"
             [value]="user().email"
             readonly
             class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-gray-400 cursor-not-allowed text-sm sm:text-base"
@@ -76,17 +101,23 @@
           Perfil de Acesso <span class="text-red-400">*</span>
         </label>
         <div class="relative">
-          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">badge</span>
-          <select 
-            id="role" 
-            formControlName="role" 
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >badge</span
+          >
+          <select
+            id="role"
+            formControlName="role"
             class="w-full pl-10 sm:pl-12 pr-8 sm:pr-10 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 cursor-pointer appearance-none text-sm sm:text-base"
             [disabled]="loading()"
           >
             <option value="USER" class="bg-[#0f172a] text-white">Usuário</option>
             <option value="ADMIN" class="bg-[#0f172a] text-white">Administrador</option>
           </select>
-          <span class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 pointer-events-none text-lg sm:text-xl">expand_more</span>
+          <span
+            class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 pointer-events-none text-lg sm:text-xl"
+            >expand_more</span
+          >
         </div>
       </div>
 
@@ -106,12 +137,17 @@
           </button>
         </div>
         <div class="relative">
-          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">lock</span>
-          <input 
-            [type]="showUserPassword() ? 'text' : 'password'" 
-            id="password" 
-            formControlName="password" 
-            placeholder="{{ showUserPasswordChange() ? 'Digite a nova senha' : 'Deixe em branco para não alterar' }}"
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >lock</span
+          >
+          <input
+            [type]="showUserPassword() ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="{{
+              showUserPasswordChange() ? 'Digite a nova senha' : 'Deixe em branco para não alterar'
+            }}"
             class="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [class.border-red-500]="form.get('password')?.invalid && form.get('password')?.touched"
             [disabled]="loading() || !showUserPasswordChange()"
@@ -122,263 +158,290 @@
             [attr.aria-label]="showUserPassword() ? 'Ocultar senha' : 'Mostrar senha'"
             role="button"
             tabindex="0"
-          >{{ showUserPassword() ? 'visibility_off' : 'visibility' }}</span>
+            >{{ showUserPassword() ? 'visibility_off' : 'visibility' }}</span
+          >
         </div>
         @if (form.get('password')?.invalid && form.get('password')?.touched) {
-          <div class="text-red-400 text-[10px] sm:text-xs space-y-0.5">
-            @if (form.get('password')?.errors?.['required']) {
-              <p>Senha é obrigatória</p>
-            }
-            @if (form.get('password')?.errors?.['minLength']) {
-              <p>A senha deve ter pelo menos 8 caracteres</p>
-            }
-            @if (form.get('password')?.errors?.['noUppercase']) {
-              <p>A senha deve ter pelo menos 1 letra maiúscula</p>
-            }
-            @if (form.get('password')?.errors?.['noLowercase']) {
-              <p>A senha deve ter pelo menos 1 letra minúscula</p>
-            }
-            @if (form.get('password')?.errors?.['noNumber']) {
-              <p>A senha deve ter pelo menos 1 número</p>
-            }
-          </div>
+        <div class="text-red-400 text-[10px] sm:text-xs space-y-0.5">
+          @if (form.get('password')?.errors?.['required']) {
+          <p>Senha é obrigatória</p>
+          } @if (form.get('password')?.errors?.['minLength']) {
+          <p>A senha deve ter pelo menos 8 caracteres</p>
+          } @if (form.get('password')?.errors?.['noUppercase']) {
+          <p>A senha deve ter pelo menos 1 letra maiúscula</p>
+          } @if (form.get('password')?.errors?.['noLowercase']) {
+          <p>A senha deve ter pelo menos 1 letra minúscula</p>
+          } @if (form.get('password')?.errors?.['noNumber']) {
+          <p>A senha deve ter pelo menos 1 número</p>
+          }
+        </div>
         }
-        <small class="text-gray-500 text-[10px] sm:text-xs">Admin pode mudar a senha de qualquer usuário sem precisar da senha atual</small>
+        <small class="text-gray-500 text-[10px] sm:text-xs"
+          >Admin pode mudar a senha de qualquer usuário sem precisar da senha atual</small
+        >
       </div>
 
       <!-- Author ID Field (only for USER role) -->
       @if (isUserRole()) {
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label for="authorId" class="block text-xs sm:text-sm font-semibold text-gray-200">
-              Author ID <span class="text-red-400">*</span>
-            </label>
-            @if (form.get('authorId')?.value) {
-              <button
-                type="button"
-                class="text-xs text-red-400 hover:text-red-300 transition-colors"
-                (click)="removeField('authorId')"
-                [disabled]="loading()"
-              >
-                Remover
-              </button>
-            }
-          </div>
-          <div class="relative">
-            <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">fingerprint</span>
-            <input 
-              type="text" 
-              id="authorId" 
-              formControlName="authorId" 
-              placeholder="ID do autor (ex: 123)"
-              class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
-              [class.border-red-500]="form.get('authorId')?.invalid && form.get('authorId')?.touched"
-              [disabled]="loading()"
-            />
-          </div>
-          @if (form.get('authorId')?.invalid && form.get('authorId')?.touched) {
-            <p class="text-red-400 text-[10px] sm:text-xs">Author ID é obrigatório para usuários</p>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="authorId" class="block text-xs sm:text-sm font-semibold text-gray-200">
+            Author ID <span class="text-red-400">*</span>
+          </label>
+          @if (form.get('authorId')?.value) {
+          <button
+            type="button"
+            class="text-xs text-red-400 hover:text-red-300 transition-colors"
+            (click)="removeField('authorId')"
+            [disabled]="loading()"
+          >
+            Remover
+          </button>
           }
-          <small class="text-gray-500 text-[10px] sm:text-xs">ID único do autor no sistema de e-commerce</small>
         </div>
+        <div class="relative">
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >fingerprint</span
+          >
+          <input
+            type="text"
+            id="authorId"
+            formControlName="authorId"
+            placeholder="ID do autor (ex: 123)"
+            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+            [class.border-red-500]="form.get('authorId')?.invalid && form.get('authorId')?.touched"
+            [disabled]="loading()"
+          />
+        </div>
+        @if (form.get('authorId')?.invalid && form.get('authorId')?.touched) {
+        <p class="text-red-400 text-[10px] sm:text-xs">Author ID é obrigatório para usuários</p>
+        }
+        <small class="text-gray-500 text-[10px] sm:text-xs"
+          >ID único do autor no sistema de e-commerce</small
+        >
+      </div>
       }
 
       <!-- E-commerce URL Field (only if authorId is filled) -->
-      @if (hasAuthorId() && isUserRole()) {
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label for="ecommerceUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
-              URL do E-commerce <span class="text-red-400">*</span>
-            </label>
-            @if (form.get('ecommerceUrl')?.value) {
-              <button
-                type="button"
-                class="text-xs text-red-400 hover:text-red-300 transition-colors"
-                (click)="removeField('ecommerceUrl')"
-                [disabled]="loading()"
-              >
-                Remover
-              </button>
-            }
-          </div>
-          <div class="relative">
-            <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">link</span>
-            <input 
-              type="url" 
-              id="ecommerceUrl" 
-              formControlName="ecommerceUrl" 
-              placeholder="https://loja.autor.com"
-              class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
-              [class.border-red-500]="form.get('ecommerceUrl')?.invalid && form.get('ecommerceUrl')?.touched"
-              [disabled]="loading()"
-            />
-          </div>
-          @if (form.get('ecommerceUrl')?.invalid && form.get('ecommerceUrl')?.touched) {
-            <p class="text-red-400 text-[10px] sm:text-xs">
-              @if (form.get('ecommerceUrl')?.errors?.['required']) {
-                URL do e-commerce é obrigatória
-              } @else if (form.get('ecommerceUrl')?.errors?.['invalidUrl']) {
-                URL inválida. Use http:// ou https://
-              }
-            </p>
+      @if (isUserRole()) {
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="ecommerceUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
+            URL do E-commerce <span class="text-red-400">*</span>
+          </label>
+          @if (form.get('ecommerceUrl')?.value) {
+          <button
+            type="button"
+            class="text-xs text-red-400 hover:text-red-300 transition-colors"
+            (click)="removeField('ecommerceUrl')"
+            [disabled]="loading()"
+          >
+            Remover
+          </button>
           }
-          <small class="text-gray-500 text-[10px] sm:text-xs">URL da loja virtual do autor</small>
         </div>
+        <div class="relative">
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >link</span
+          >
+          <input
+            type="url"
+            id="ecommerceUrl"
+            formControlName="ecommerceUrl"
+            placeholder="https://loja.autor.com"
+            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+            [class.border-red-500]="
+              form.get('ecommerceUrl')?.invalid && form.get('ecommerceUrl')?.touched
+            "
+            [disabled]="loading()"
+          />
+        </div>
+        @if (form.get('ecommerceUrl')?.invalid && form.get('ecommerceUrl')?.touched) {
+        <p class="text-red-400 text-[10px] sm:text-xs">
+          @if (form.get('ecommerceUrl')?.errors?.['required']) { URL do e-commerce é obrigatória }
+          @else if (form.get('ecommerceUrl')?.errors?.['invalidUrl']) { URL inválida. Use http:// ou
+          https:// }
+        </p>
+        }
+        <small class="text-gray-500 text-[10px] sm:text-xs">URL da loja virtual do autor</small>
+      </div>
       }
 
       <!-- Looker Studio URL Field (only if authorId is filled) -->
-      @if (hasAuthorId() && isUserRole()) {
+      @if (isUserRole()) {
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="lookerStudioUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
+            URL do Looker Studio
+          </label>
+          @if (form.get('lookerStudioUrl')?.value) {
+          <button
+            type="button"
+            class="text-xs text-red-400 hover:text-red-300 transition-colors"
+            (click)="removeField('lookerStudioUrl')"
+            [disabled]="loading()"
+          >
+            Remover
+          </button>
+          }
+        </div>
+        <div class="relative">
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >analytics</span
+          >
+          <input
+            type="url"
+            id="lookerStudioUrl"
+            formControlName="lookerStudioUrl"
+            placeholder="https://lookerstudio.google.com/embed/reporting/..."
+            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+            [disabled]="loading()"
+          />
+        </div>
+        @if (form.get('lookerStudioUrl')?.invalid && form.get('lookerStudioUrl')?.touched) {
+        <p class="text-red-400 text-[10px] sm:text-xs">
+          URL inválida. Deve começar com https://lookerstudio.google.com/embed/
+        </p>
+        }
+        <small class="text-gray-500 text-[10px] sm:text-xs">
+          URL de embed do relatório Looker Studio para visualização de métricas. Obtenha esta URL ao
+          compartilhar o relatório no Looker Studio.
+        </small>
+      </div>
+      }
+
+      <!-- Optional Database Credentials Section -->
+      @if (isUserRole()) {
+      <div class="space-y-4 sm:space-y-6 pt-4 sm:pt-6 border-t border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="material-icons text-gray-400 text-lg sm:text-xl">storage</span>
+          <h3 class="text-sm sm:text-base font-semibold text-gray-200">
+            Credenciais do Banco de Dados (Opcional)
+          </h3>
+        </div>
+
+        <!-- Database URL -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <label for="lookerStudioUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
-              URL do Looker Studio
+            <label
+              for="ecommerceDbUrl"
+              class="block text-xs sm:text-sm font-semibold text-gray-200"
+            >
+              URL do Banco de Dados
             </label>
-            @if (form.get('lookerStudioUrl')?.value) {
-              <button
-                type="button"
-                class="text-xs text-red-400 hover:text-red-300 transition-colors"
-                (click)="removeField('lookerStudioUrl')"
-                [disabled]="loading()"
-              >
-                Remover
-              </button>
+            @if (form.get('ecommerceDbUrl')?.value) {
+            <button
+              type="button"
+              class="text-xs text-red-400 hover:text-red-300 transition-colors"
+              (click)="removeField('ecommerceDbUrl')"
+              [disabled]="loading()"
+            >
+              Remover
+            </button>
             }
           </div>
           <div class="relative">
-            <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">analytics</span>
-            <input 
-              type="url" 
-              id="lookerStudioUrl" 
-              formControlName="lookerStudioUrl" 
-              placeholder="https://lookerstudio.google.com/embed/reporting/..."
+            <span
+              class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+              >dns</span
+            >
+            <input
+              type="text"
+              id="ecommerceDbUrl"
+              formControlName="ecommerceDbUrl"
+              placeholder="jdbc:postgresql://host:5432/database"
               class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
               [disabled]="loading()"
             />
           </div>
-          @if (form.get('lookerStudioUrl')?.invalid && form.get('lookerStudioUrl')?.touched) {
-            <p class="text-red-400 text-[10px] sm:text-xs">
-              URL inválida. Deve começar com https://lookerstudio.google.com/embed/
-            </p>
-          }
+        </div>
+
+        <!-- Database Username -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label
+              for="ecommerceDbUsername"
+              class="block text-xs sm:text-sm font-semibold text-gray-200"
+            >
+              Username do Banco
+            </label>
+            @if (form.get('ecommerceDbUsername')?.value) {
+            <button
+              type="button"
+              class="text-xs text-red-400 hover:text-red-300 transition-colors"
+              (click)="removeField('ecommerceDbUsername')"
+              [disabled]="loading()"
+            >
+              Remover
+            </button>
+            }
+          </div>
+          <div class="relative">
+            <span
+              class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+              >person</span
+            >
+            <input
+              type="text"
+              id="ecommerceDbUsername"
+              formControlName="ecommerceDbUsername"
+              placeholder="Username do banco"
+              class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
+              [disabled]="loading()"
+            />
+          </div>
+        </div>
+
+        <!-- Database Password -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label
+              for="ecommerceDbPassword"
+              class="block text-xs sm:text-sm font-semibold text-gray-200"
+            >
+              Password do Banco
+            </label>
+            <button
+              type="button"
+              class="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+              (click)="togglePasswordChange()"
+              [disabled]="loading()"
+            >
+              {{ showPasswordChange() ? 'Cancelar alteração' : 'Alterar senha' }}
+            </button>
+          </div>
+          <div class="relative">
+            <span
+              class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+              >lock</span
+            >
+            <input [type]="showDbPassword() ? 'text' : 'password'" id="ecommerceDbPassword"
+            formControlName="ecommerceDbPassword" placeholder="{{
+              showPasswordChange() ? 'Digite a nova senha' : 'Clique em Alterar senha para editar'
+            }}" class="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3.5 bg-white/5 border
+            border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500
+            focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20
+            transition-all duration-200 text-sm sm:text-base"
+            [class.bg-white/10]="!showPasswordChange()" [class.opacity-60]="!showPasswordChange()"
+            [disabled]="loading() || !showPasswordChange()" [readonly]="!showPasswordChange()" />
+            <span
+              class="material-icons absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer text-lg sm:text-xl transition-colors duration-200"
+              (click)="toggleDbPassword()"
+              [attr.aria-label]="showDbPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+              role="button"
+              tabindex="0"
+              >{{ showDbPassword() ? 'visibility_off' : 'visibility' }}</span
+            >
+          </div>
           <small class="text-gray-500 text-[10px] sm:text-xs">
-            URL de embed do relatório Looker Studio para visualização de métricas. Obtenha esta URL ao compartilhar o relatório no Looker Studio.
+            @if (showPasswordChange()) { Deixe em branco para não alterar a senha atual } @else {
+            Clique em "Alterar senha" para editar a senha do banco de dados }
           </small>
         </div>
-      }
-
-      <!-- Optional Database Credentials Section -->
-      @if (hasAuthorId() && isUserRole()) {
-        <div class="space-y-4 sm:space-y-6 pt-4 sm:pt-6 border-t border-white/10">
-          <div class="flex items-center gap-2">
-            <span class="material-icons text-gray-400 text-lg sm:text-xl">storage</span>
-            <h3 class="text-sm sm:text-base font-semibold text-gray-200">Credenciais do Banco de Dados (Opcional)</h3>
-          </div>
-
-          <!-- Database URL -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label for="ecommerceDbUrl" class="block text-xs sm:text-sm font-semibold text-gray-200">
-                URL do Banco de Dados
-              </label>
-              @if (form.get('ecommerceDbUrl')?.value) {
-                <button
-                  type="button"
-                  class="text-xs text-red-400 hover:text-red-300 transition-colors"
-                  (click)="removeField('ecommerceDbUrl')"
-                  [disabled]="loading()"
-                >
-                  Remover
-                </button>
-              }
-            </div>
-            <div class="relative">
-              <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">dns</span>
-              <input 
-                type="text" 
-                id="ecommerceDbUrl" 
-                formControlName="ecommerceDbUrl" 
-                placeholder="jdbc:postgresql://host:5432/database"
-                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
-                [disabled]="loading()"
-              />
-            </div>
-          </div>
-
-          <!-- Database Username -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label for="ecommerceDbUsername" class="block text-xs sm:text-sm font-semibold text-gray-200">
-                Username do Banco
-              </label>
-              @if (form.get('ecommerceDbUsername')?.value) {
-                <button
-                  type="button"
-                  class="text-xs text-red-400 hover:text-red-300 transition-colors"
-                  (click)="removeField('ecommerceDbUsername')"
-                  [disabled]="loading()"
-                >
-                  Remover
-                </button>
-              }
-            </div>
-            <div class="relative">
-              <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">person</span>
-              <input 
-                type="text" 
-                id="ecommerceDbUsername" 
-                formControlName="ecommerceDbUsername" 
-                placeholder="Username do banco"
-                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
-                [disabled]="loading()"
-              />
-            </div>
-          </div>
-
-          <!-- Database Password -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label for="ecommerceDbPassword" class="block text-xs sm:text-sm font-semibold text-gray-200">
-                Password do Banco
-              </label>
-              <button
-                type="button"
-                class="text-xs text-sky-400 hover:text-sky-300 transition-colors"
-                (click)="togglePasswordChange()"
-                [disabled]="loading()"
-              >
-                {{ showPasswordChange() ? 'Cancelar alteração' : 'Alterar senha' }}
-              </button>
-            </div>
-            <div class="relative">
-              <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">lock</span>
-              <input 
-                [type]="showDbPassword() ? 'text' : 'password'" 
-                id="ecommerceDbPassword" 
-                formControlName="ecommerceDbPassword" 
-                placeholder="{{ showPasswordChange() ? 'Digite a nova senha' : 'Clique em Alterar senha para editar' }}"
-                class="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
-                [class.bg-white/10]="!showPasswordChange()"
-                [class.opacity-60]="!showPasswordChange()"
-                [disabled]="loading() || !showPasswordChange()"
-                [readonly]="!showPasswordChange()"
-              />
-              <span
-                class="material-icons absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer text-lg sm:text-xl transition-colors duration-200"
-                (click)="toggleDbPassword()"
-                [attr.aria-label]="showDbPassword() ? 'Ocultar senha' : 'Mostrar senha'"
-                role="button"
-                tabindex="0"
-              >{{ showDbPassword() ? 'visibility_off' : 'visibility' }}</span>
-            </div>
-            <small class="text-gray-500 text-[10px] sm:text-xs">
-              @if (showPasswordChange()) {
-                Deixe em branco para não alterar a senha atual
-              } @else {
-                Clique em "Alterar senha" para editar a senha do banco de dados
-              }
-            </small>
-          </div>
-        </div>
+      </div>
       }
 
       <!-- Profile Photo URL -->
@@ -388,55 +451,63 @@
             URL da Foto de Perfil
           </label>
           @if (form.get('profilePhotoUrl')?.value) {
-            <button
-              type="button"
-              class="text-xs text-red-400 hover:text-red-300 transition-colors"
-              (click)="removeField('profilePhotoUrl')"
-              [disabled]="loading()"
-            >
-              Remover
-            </button>
+          <button
+            type="button"
+            class="text-xs text-red-400 hover:text-red-300 transition-colors"
+            (click)="removeField('profilePhotoUrl')"
+            [disabled]="loading()"
+          >
+            Remover
+          </button>
           }
         </div>
         <div class="relative">
-          <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl">image</span>
-          <input 
-            type="url" 
-            id="profilePhotoUrl" 
-            formControlName="profilePhotoUrl" 
+          <span
+            class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg sm:text-xl"
+            >image</span
+          >
+          <input
+            type="url"
+            id="profilePhotoUrl"
+            formControlName="profilePhotoUrl"
             placeholder="https://exemplo.com/foto.jpg"
             class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-200 text-sm sm:text-base"
             [disabled]="loading()"
           />
         </div>
-        <small class="text-gray-500 text-[10px] sm:text-xs">URL da imagem de perfil do usuário</small>
+        <small class="text-gray-500 text-[10px] sm:text-xs"
+          >URL da imagem de perfil do usuário</small
+        >
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end pt-4 sm:pt-6 border-t border-white/10">
-        <button 
-          type="button" 
+      <div
+        class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end pt-4 sm:pt-6 border-t border-white/10"
+      >
+        <button
+          type="button"
           class="px-4 sm:px-6 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-200 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
           (click)="close()"
           [disabled]="loading()"
         >
           Cancelar
         </button>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="px-4 sm:px-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
           [disabled]="form.invalid || loading()"
         >
           @if (loading()) {
-            <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            <span>Salvando...</span>
+          <span
+            class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+          ></span>
+          <span>Salvando...</span>
           } @else {
-            <span class="material-icons text-lg">save</span>
-            <span>Salvar Alterações</span>
+          <span class="material-icons text-lg">save</span>
+          <span>Salvar Alterações</span>
           }
         </button>
       </div>
     </form>
   </div>
 </div>
-
