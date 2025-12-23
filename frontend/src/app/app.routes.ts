@@ -94,6 +94,10 @@ export const routes: Routes = [
             loadComponent: () => import('./features/user/pages/entregas/entregas-page.component').then(m => m.EntregasPageComponent)
           },
           {
+            path: 'analytics',
+            loadComponent: () => import('./features/user/pages/analytics/analytics-dashboard.component').then(m => m.AnalyticsDashboardComponent)
+          },
+          {
             path: 'pedidos-arquivados',
             loadComponent: () => import('./features/user/pages/pedidos-arquivados/pedidos-arquivados-page.component').then(m => m.PedidosArquivadosPageComponent)
           }
