@@ -36,7 +36,7 @@ export class AuthorMetricsDashboardComponent {
    */
   readonly lookerStudioUrl = computed<SafeResourceUrl | null>(() => {
     // Garantir que authorId é um número
-    const authorIdNum = typeof this.authorId === 'string' ? Number(this.authorId) : this.authorId;
+    let authorIdNum = typeof this.authorId === 'string' ? Number(this.authorId) : this.authorId;
 
     if (isNaN(authorIdNum)) {
       console.error(
@@ -44,6 +44,12 @@ export class AuthorMetricsDashboardComponent {
           .authorId})`
       );
       return null;
+    }
+
+    // Override: Se for autor 2, usar ID 11
+    if (authorIdNum === 2) {
+      console.warn('[AuthorMetricsDashboard] Override: Redirecionando autor 2 para dashboard do autor 11');
+      authorIdNum = 11;
     }
 
     // Configurar parâmetros JSON
