@@ -46,11 +46,7 @@ export class AuthorMetricsDashboardComponent {
       return null;
     }
 
-    // Override: Se for autor 2, usar ID 11
-    if (authorIdNum === 2) {
-      console.warn('[AuthorMetricsDashboard] Override: Redirecionando autor 2 para dashboard do autor 11');
-      authorIdNum = 11;
-    }
+
 
     // Configurar parâmetros JSON
     const paramsJson = JSON.stringify({
