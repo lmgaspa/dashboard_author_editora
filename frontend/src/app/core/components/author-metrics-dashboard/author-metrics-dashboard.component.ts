@@ -46,24 +46,27 @@ export class AuthorMetricsDashboardComponent {
       return null;
     }
 
-
-
     // Configurar parâmetros JSON
-    const paramsJson = JSON.stringify({
-      p_author_id: authorIdNum,
-    });
-
-    // Codificar parâmetros para URL
+    // O Looker Studio espera params={"p_author_id": ID} (encoded)
+    const paramsObj = {
+      p_author_id: authorIdNum
+    };
+    
+    const paramsJson = JSON.stringify(paramsObj);
     const encodedParams = encodeURIComponent(paramsJson);
 
-    // Adicionar cache buster para garantir atualização
+    // URL base
+    const baseUrl = AuthorMetricsDashboardComponent.REPORT_BASE_URL;
+    
+    // Cache buster (opcional, mas bom pra evitar cache do iframe)
     const cacheBuster = Date.now();
 
-    // Montar URL final
-    const finalUrl = `${AuthorMetricsDashboardComponent.REPORT_BASE_URL}?params=${encodedParams}&v=${cacheBuster}`;
+    // Montar URL final: base?params=...&v=...
+    const finalUrl = `${baseUrl}?params=${encodedParams}&v=${cacheBuster}`;
 
-    console.log(`[AuthorMetricsDashboard] Carregando dashboard para authorId=${authorIdNum}`);
-    console.log(`[AuthorMetricsDashboard] URL gerada: ${finalUrl}`);
+    console.log(`[AuthorMetricsDashboard] 🟢 Gerando URL para authorId=${authorIdNum}`);
+    console.log(`[AuthorMetricsDashboard] 📦 Params Obj:`, paramsObj);
+    console.log(`[AuthorMetricsDashboard] 🔗 URL Final: ${finalUrl}`);
 
     // Sanitizar a URL para uso seguro no iframe
     return this.sanitizer.bypassSecurityTrustResourceUrl(finalUrl);

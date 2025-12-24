@@ -128,11 +128,27 @@ export class MetricsPageComponent implements OnInit, OnDestroy {
         });
         this.authors.set(authorsWithId);
         
-        // Se não houver autor selecionado, selecionar o primeiro
+        // Se não houver autor selecionado, tentar selecionar o próprio usuário se ele estiver na lista
         if (!this.selectedAuthorId() && authorsWithId.length > 0) {
-          const firstAuthorId = Number(authorsWithId[0].authorId);
-          if (!isNaN(firstAuthorId)) {
-            this.selectedAuthorId.set(firstAuthorId);
+          // Tentar encontrar o próprio admin na lista de autores
+          const currentUser = this.currentUser();
+          let targetAuthorId: number | null = null;
+          
+          if (currentUser?.authorId) {
+            const myId = Number(currentUser.authorId);
+            const exists = authorsWithId.some((a: User) => Number(a.authorId) === myId);
+            if (exists) {
+              targetAuthorId = myId;
+            }
+          }
+          
+          // Fallback para o primeiro da lista
+          if (!targetAuthorId) {
+            targetAuthorId = Number(authorsWithId[0].authorId);
+          }
+          
+          if (targetAuthorId && !isNaN(targetAuthorId)) {
+            this.selectedAuthorId.set(targetAuthorId);
           }
         }
       },
