@@ -74,10 +74,6 @@ export const routes: Routes = [
             loadComponent: () => import('./features/user/pages/emails/emails-page.component').then(m => m.EmailsPageComponent)
           },
           {
-            path: 'metrics',
-            loadComponent: () => import('./features/user/pages/metrics/metrics-page.component').then(m => m.MetricsPageComponent)
-          },
-          {
             path: 'tickets',
             loadComponent: () => import('./features/user/pages/tickets/tickets-page.component').then(m => m.TicketsPageComponent)
           },
@@ -92,10 +88,6 @@ export const routes: Routes = [
           {
             path: 'entregas',
             loadComponent: () => import('./features/user/pages/entregas/entregas-page.component').then(m => m.EntregasPageComponent)
-          },
-          {
-            path: 'analytics',
-            loadComponent: () => import('./features/user/pages/analytics/analytics-dashboard.component').then(m => m.AnalyticsDashboardComponent)
           },
           {
             path: 'pedidos-arquivados',

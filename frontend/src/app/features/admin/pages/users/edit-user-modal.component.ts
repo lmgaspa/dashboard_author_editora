@@ -17,7 +17,6 @@ interface User {
   ecommerceDbUsername?: string | null;
   ecommerceDbPassword?: string | null;
   profilePhotoUrl?: string | null;
-  lookerStudioUrl?: string | null;
 }
 
 // Validador customizado para URL
@@ -78,8 +77,7 @@ export class EditUserModalComponent implements OnInit {
     ecommerceDbUsername: [''],
     ecommerceDbPassword: [''],
     password: [''], // Campo para admin mudar senha do usuário
-    profilePhotoUrl: [''],
-    lookerStudioUrl: [''] // URL do Looker Studio para métricas
+    profilePhotoUrl: ['']
   });
 
   readonly loading = signal<boolean>(false);
@@ -107,8 +105,7 @@ export class EditUserModalComponent implements OnInit {
       ecommerceDbUrl: (userData as any).ecommerce_db_url || userData.ecommerceDbUrl,
       ecommerceDbUsername: (userData as any).ecommerce_db_username || userData.ecommerceDbUsername,
       ecommerceDbPassword: (userData as any).ecommerce_db_password || userData.ecommerceDbPassword,
-      profilePhotoUrl: (userData as any).profile_photo_url || userData.profilePhotoUrl,
-      lookerStudioUrl: (userData as any).looker_studio_url || userData.lookerStudioUrl
+      profilePhotoUrl: (userData as any).profile_photo_url || userData.profilePhotoUrl
     };
     
     // Preencher formulário com dados do usuário
@@ -121,8 +118,7 @@ export class EditUserModalComponent implements OnInit {
       ecommerceDbUsername: normalizedUser.ecommerceDbUsername || '',
       ecommerceDbPassword: normalizedUser.ecommerceDbPassword || '', // Agora retorna do backend
       password: '', // Sempre vazio - admin precisa preencher para mudar
-      profilePhotoUrl: normalizedUser.profilePhotoUrl || '',
-      lookerStudioUrl: normalizedUser.lookerStudioUrl || ''
+      profilePhotoUrl: normalizedUser.profilePhotoUrl || ''
     });
     
     // Configurar validação de senha do usuário
@@ -295,12 +291,7 @@ export class EditUserModalComponent implements OnInit {
       payload.profilePhotoUrl = profilePhotoUrl || null;
     }
 
-    // Looker Studio URL (opcional, pode ser usado por USER ou ADMIN)
-    const currentLookerStudioUrl = (userData as any).looker_studio_url || userData.lookerStudioUrl;
-    const lookerStudioUrl = formValue.lookerStudioUrl?.trim() || '';
-    if (lookerStudioUrl !== (currentLookerStudioUrl || '')) {
-      payload.lookerStudioUrl = lookerStudioUrl || null;
-    }
+
 
     // Password do usuário (admin pode mudar senha de qualquer usuário)
     if (this.showUserPasswordChange() && formValue.password?.trim()) {
@@ -320,8 +311,7 @@ export class EditUserModalComponent implements OnInit {
           ecommerceDbUrl: response.ecommerce_db_url || response.ecommerceDbUrl,
           ecommerceDbUsername: response.ecommerce_db_username || response.ecommerceDbUsername,
           ecommerceDbPassword: response.ecommerce_db_password || response.ecommerceDbPassword,
-          profilePhotoUrl: response.profile_photo_url || response.profilePhotoUrl,
-          lookerStudioUrl: response.looker_studio_url || response.lookerStudioUrl
+          profilePhotoUrl: response.profile_photo_url || response.profilePhotoUrl
         };
         this.loading.set(false);
         this.onSuccess.emit(normalizedResponse);

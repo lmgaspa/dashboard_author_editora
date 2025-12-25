@@ -1,122 +1,167 @@
 <!-- Main Content - Background muda de cores progressivamente -->
-<div class="w-full relative overflow-hidden bg-transition"
-     [ngClass]="{
-       'bg-weak': colorIntensity() === 'weak',
-       'bg-medium': colorIntensity() === 'medium',
-       'bg-strong': colorIntensity() === 'strong'
-     }">
-  
+<div
+  class="w-full relative overflow-hidden bg-transition"
+  [ngClass]="{
+    'bg-weak': colorIntensity() === 'weak',
+    'bg-medium': colorIntensity() === 'medium',
+    'bg-strong': colorIntensity() === 'strong'
+  }"
+>
   <!-- Animated Background Orbs - Azul Marinho para Azul Celeste para Branco (3 segundos) -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <!-- Orb 1 - Top Left -->
-    <div class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
-         style="width: 500px; height: 500px; top: -250px; left: -250px; animation-delay: 0s;"></div>
-    
+    <div
+      class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
+      style="width: 500px; height: 500px; top: -250px; left: -250px; animation-delay: 0s"
+    ></div>
+
     <!-- Orb 2 - Center Right -->
-    <div class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
-         style="width: 450px; height: 450px; top: 50%; right: 25%; transform: translateY(-50%); animation-delay: -5s;"></div>
-    
+    <div
+      class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
+      style="
+        width: 450px;
+        height: 450px;
+        top: 50%;
+        right: 25%;
+        transform: translateY(-50%);
+        animation-delay: -5s;
+      "
+    ></div>
+
     <!-- Orb 3 - Bottom Right -->
-    <div class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
-         style="width: 480px; height: 480px; bottom: -240px; right: -240px; animation-delay: -10s;"></div>
+    <div
+      class="absolute rounded-full bg-gradient-radial blur-[120px] animate-float animate-color-transition"
+      style="width: 480px; height: 480px; bottom: -240px; right: -240px; animation-delay: -10s"
+    ></div>
   </div>
 
   <!-- Grid Pattern Overlay - Intensidade Progressiva (Mais Visível) -->
-  <div class="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out"
-       [ngClass]="{
-         'opacity-[0.03]': colorIntensity() === 'weak',
-         'opacity-[0.05]': colorIntensity() === 'medium',
-         'opacity-[0.08]': colorIntensity() === 'strong'
-       }"
-       style="background-image: linear-gradient(rgba(125, 211, 252, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(125, 211, 252, 0.2) 1px, transparent 1px); background-size: 50px 50px;"></div>
+  <div
+    class="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out"
+    [ngClass]="{
+      'opacity-[0.03]': colorIntensity() === 'weak',
+      'opacity-[0.05]': colorIntensity() === 'medium',
+      'opacity-[0.08]': colorIntensity() === 'strong'
+    }"
+    style="
+      background-image: linear-gradient(rgba(125, 211, 252, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.2) 1px, transparent 1px);
+      background-size: 50px 50px;
+    "
+  ></div>
 
   <!-- Main Content Container - Centralizado -->
   <div class="relative z-10 flex justify-center px-4 sm:px-6 lg:px-8 pt-16 pb-4">
     <div class="w-full max-w-6xl mx-auto flex flex-col items-center">
       <div class="flex flex-col items-center text-center space-y-6 animate-fade-in">
-        
         <!-- Logo/Brand -->
         <div class="flex justify-center">
           <div class="relative">
-            <div class="absolute inset-0 bg-gradient-to-r from-sky-400 via-sky-300 to-sky-400 rounded-2xl blur-xl opacity-50 animate-pulse"></div>
-            <div class="relative bg-gradient-to-br from-sky-400/20 via-sky-300/20 to-sky-400/20 backdrop-blur-xl border border-white/10 rounded-2xl p-3">
-              <img src="/logo_viaeditora.webp" alt="Via Editora" class="w-48 h-20 sm:w-64 sm:h-24 md:w-80 md:h-28 object-contain">
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-sky-400 via-sky-300 to-sky-400 rounded-2xl blur-xl opacity-50 animate-pulse"
+            ></div>
+            <div
+              class="relative bg-gradient-to-br from-sky-400/20 via-sky-300/20 to-sky-400/20 backdrop-blur-xl border border-white/10 rounded-2xl p-3"
+            >
+              <img
+                src="/logo_viaeditora.webp"
+                alt="Via Editora"
+                class="w-48 h-20 sm:w-64 sm:h-24 md:w-80 md:h-28 object-contain"
+              />
             </div>
           </div>
         </div>
 
         <!-- Title - Gradiente com Várias Cores -->
         <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
-          <span class="block title-gradient-1 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(125,211,252,0.5)]">
+          <span
+            class="block title-gradient-1 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(125,211,252,0.5)]"
+          >
             Painel do Autor da Editora
           </span>
-          <span class="block title-gradient-2 bg-clip-text text-transparent mt-1 drop-shadow-[0_0_20px_rgba(125,211,252,0.5)]">
+          <span
+            class="block title-gradient-2 bg-clip-text text-transparent mt-1 drop-shadow-[0_0_20px_rgba(125,211,252,0.5)]"
+          >
             Via Litterarum
           </span>
         </h1>
 
         <!-- Subtitle -->
         <p class="text-base sm:text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto">
-          Sistema de Painel dos escritores da Editora Via Litterarum para análise de dados analíticos, e demais funções relacionadas aos e-commerces.
+          Sistema de Painel dos escritores da Editora Via Litterarum para análise de dados
+          analíticos, e demais funções relacionadas aos e-commerces.
         </p>
 
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center pt-1">
-          <a [routerLink]="['/login']" 
-             class="group relative px-6 py-3 bg-gradient-to-r from-sky-400 via-sky-300 to-sky-400 rounded-xl text-white font-semibold text-base overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(125,211,252,0.6)] hover:shadow-[0_0_50px_rgba(125,211,252,0.8)]">
+          <a
+            [routerLink]="['/login']"
+            class="group relative px-6 py-3 bg-gradient-to-r from-sky-400 via-sky-300 to-sky-400 rounded-xl text-white font-semibold text-base overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(125,211,252,0.6)] hover:shadow-[0_0_50px_rgba(125,211,252,0.8)]"
+          >
             <span class="relative z-10 flex items-center justify-center gap-2">
               Entrar no sistema
-              <span class="material-icons text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              <span class="material-icons text-lg group-hover:translate-x-1 transition-transform"
+                >arrow_forward</span
+              >
             </span>
-            <div class="absolute inset-0 bg-gradient-to-r from-sky-300 via-sky-200 to-sky-300 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-sky-300 via-sky-200 to-sky-300 opacity-0 group-hover:opacity-100 transition-opacity"
+            ></div>
           </a>
-          
-          <a [routerLink]="['/login']" 
-             class="px-6 py-3 bg-white/5 backdrop-blur-xl border-2 border-white/20 rounded-xl text-white font-semibold text-base transition-all duration-300 hover:bg-white/10 hover:border-white/40 hover:scale-105">
+
+          <a
+            [routerLink]="['/login']"
+            class="px-6 py-3 bg-white/5 backdrop-blur-xl border-2 border-white/20 rounded-xl text-white font-semibold text-base transition-all duration-300 hover:bg-white/10 hover:border-white/40 hover:scale-105"
+          >
             Saiba mais
           </a>
         </div>
 
         <!-- Analytics Section - PC: Row, Mobile: Coluna -->
         <div class="w-full mt-12">
-          <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 lg:gap-12">
-            
-            <!-- Analytics Card -->
-            <div class="group relative w-full md:w-auto flex flex-col items-center text-center space-y-3 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-sky-400/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(125,211,252,0.4)]">
-              <div class="absolute -inset-1 bg-gradient-to-r from-sky-400 via-cyan-400 to-teal-400 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-400/40 to-cyan-400/40 border-2 border-sky-300/50 flex items-center justify-center shadow-[0_0_20px_rgba(125,211,252,0.5)]">
-                <span class="material-icons text-4xl text-sky-200">analytics</span>
-              </div>
-              <div class="space-y-2">
-                <h3 class="text-xl font-bold text-white">Análises</h3>
-                <p class="text-gray-300 text-sm max-w-xs">Dados em tempo real para acompanhar o desempenho das suas publicações e vendas</p>
-              </div>
-            </div>
-            
+          <div
+            class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 lg:gap-12"
+          >
             <!-- Dashboard Card -->
-            <div class="group relative w-full md:w-auto flex flex-col items-center text-center space-y-3 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-sky-400/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(125,211,252,0.4)]">
-              <div class="absolute -inset-1 bg-gradient-to-r from-teal-400 via-cyan-400 to-sky-400 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400/40 to-cyan-400/40 border-2 border-teal-300/50 flex items-center justify-center shadow-[0_0_20px_rgba(125,211,252,0.5)]">
+            <div
+              class="group relative w-full md:w-auto flex flex-col items-center text-center space-y-3 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-sky-400/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(125,211,252,0.4)]"
+            >
+              <div
+                class="absolute -inset-1 bg-gradient-to-r from-teal-400 via-cyan-400 to-sky-400 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"
+              ></div>
+              <div
+                class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400/40 to-cyan-400/40 border-2 border-teal-300/50 flex items-center justify-center shadow-[0_0_20px_rgba(125,211,252,0.5)]"
+              >
                 <span class="material-icons text-4xl text-teal-200">dashboard</span>
               </div>
               <div class="space-y-2">
                 <h3 class="text-xl font-bold text-white">Painel</h3>
-                <p class="text-gray-300 text-sm max-w-xs">Visão completa e intuitiva de todas as métricas importantes do seu negócio</p>
+                <p class="text-gray-300 text-sm max-w-xs">
+                  Visão completa e intuitiva de todas as métricas importantes do seu negócio
+                </p>
               </div>
             </div>
-            
+
             <!-- Seguro Card -->
-            <div class="group relative w-full md:w-auto flex flex-col items-center text-center space-y-3 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-sky-400/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(125,211,252,0.4)]">
-              <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 via-sky-400 to-cyan-400 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/40 to-sky-400/40 border-2 border-blue-400/50 flex items-center justify-center shadow-[0_0_20px_rgba(125,211,252,0.5)]">
+            <div
+              class="group relative w-full md:w-auto flex flex-col items-center text-center space-y-3 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-sky-400/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(125,211,252,0.4)]"
+            >
+              <div
+                class="absolute -inset-1 bg-gradient-to-r from-blue-600 via-sky-400 to-cyan-400 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"
+              ></div>
+              <div
+                class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/40 to-sky-400/40 border-2 border-blue-400/50 flex items-center justify-center shadow-[0_0_20px_rgba(125,211,252,0.5)]"
+              >
                 <span class="material-icons text-4xl text-blue-200">security</span>
               </div>
               <div class="space-y-2">
                 <h3 class="text-xl font-bold text-white">Seguro</h3>
-                <p class="text-gray-300 text-sm max-w-xs">Proteção total dos seus dados com criptografia avançada e segurança de nível empresarial</p>
+                <p class="text-gray-300 text-sm max-w-xs">
+                  Proteção total dos seus dados com criptografia avançada e segurança de nível
+                  empresarial
+                </p>
               </div>
             </div>
-            
           </div>
         </div>
       </div>
