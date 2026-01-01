@@ -20,29 +20,39 @@ import java.util.UUID;
 public class MonthlyChargeServiceImpl implements MonthlyChargeService {
 
     private final MonthlyChargeRepositoryPort chargeRepository;
+    private final com.dianaglobal.paineldoauthorbackend.adapter.out.efi.EfiPayService efiPayService;
 
     @Override
     @Transactional
     public MonthlyCharge createCharge(MonthlyCharge charge) {
         // Verificar se já existe cobrança para o mesmo mês/ano/autor
         Optional<MonthlyCharge> existing = chargeRepository.findByAuthorIdAndMonthAndYear(
-                charge.getAuthorId(), 
-                charge.getChargeMonth(), 
-                charge.getChargeYear()
-        );
-        
+                charge.getAuthorId(),
+                charge.getChargeMonth(),
+                charge.getChargeYear());
+
         if (existing.isPresent()) {
             throw new IllegalArgumentException(
-                    String.format("Já existe cobrança para autor %s no mês %d/%d", 
-                            charge.getAuthorId(), charge.getChargeMonth(), charge.getChargeYear())
-            );
+                    String.format("Já existe cobrança para autor %s no mês %d/%d",
+                            charge.getAuthorId(), charge.getChargeMonth(), charge.getChargeYear()));
         }
-        
-        // Gerar PIX code
-        if (charge.getPixCode() == null || charge.getPixCode().isEmpty()) {
-            charge.setPixCode(generatePixCode(charge));
+
+        // Gerar PIX via EFI
+        try {
+            if (charge.getAmount() != null && charge.getAmount().signum() > 0) {
+                efiPayService.generatePixCharge(charge);
+            }
+        } catch (Exception e) {
+            log.error("[CHARGE SERVICE] Erro ao gerar PIX para cobrança: {}", e.getMessage());
+            // Não impede a criação, mas loga erro. Pode-se decidir falhar aqui se PIX for
+            // obrigatório.
+            // Para garantir robustez, talvez queiramos persistir sem PIX e tentar depois
+            // via job,
+            // mas o requisito do usuário implica que o PIX deve estar disponível.
+            // Vamos lançar exceção para garantir que o admin saiba que falhou.
+            throw new RuntimeException("Falha ao gerar cobrança PIX: " + e.getMessage(), e);
         }
-        
+
         // Definir timestamps
         if (charge.getCreatedAt() == null) {
             charge.setCreatedAt(Instant.now());
@@ -50,16 +60,16 @@ public class MonthlyChargeServiceImpl implements MonthlyChargeService {
         if (charge.getUpdatedAt() == null) {
             charge.setUpdatedAt(Instant.now());
         }
-        
+
         // Status padrão
         if (charge.getStatus() == null) {
             charge.setStatus(ChargeStatus.PENDING);
         }
-        
+
         chargeRepository.save(charge);
-        log.info("[CHARGE SERVICE] Cobrança criada: {} - Autor: {} - Valor: R$ {}", 
-                charge.getId(), charge.getAuthorId(), charge.getAmount());
-        
+        log.info("[CHARGE SERVICE] Cobrança criada: {} - Autor: {} - Valor: R$ {} - TxID: {}",
+                charge.getId(), charge.getAuthorId(), charge.getAmount(), charge.getTxid());
+
         return charge;
     }
 
@@ -83,7 +93,7 @@ public class MonthlyChargeServiceImpl implements MonthlyChargeService {
     public MonthlyCharge confirmPayment(UUID chargeId, String adminUserId, String notes) {
         MonthlyCharge charge = chargeRepository.findById(chargeId)
                 .orElseThrow(() -> new IllegalArgumentException("Cobrança não encontrada: " + chargeId));
-        
+
         charge.setStatus(ChargeStatus.PAID);
         charge.setPaidAt(Instant.now());
         charge.setConfirmedByUserId(adminUserId);
@@ -92,10 +102,10 @@ public class MonthlyChargeServiceImpl implements MonthlyChargeService {
         if (notes != null && !notes.trim().isEmpty()) {
             charge.setNotes(notes);
         }
-        
+
         chargeRepository.save(charge);
         log.info("[CHARGE SERVICE] Pagamento confirmado para cobrança {} por {}", chargeId, adminUserId);
-        
+
         return charge;
     }
 
@@ -110,28 +120,20 @@ public class MonthlyChargeServiceImpl implements MonthlyChargeService {
     public void markAsOverdue(UUID chargeId) {
         MonthlyCharge charge = chargeRepository.findById(chargeId)
                 .orElseThrow(() -> new IllegalArgumentException("Cobrança não encontrada: " + chargeId));
-        
+
         charge.setStatus(ChargeStatus.OVERDUE);
         charge.setUpdatedAt(Instant.now());
-        
+
         chargeRepository.save(charge);
         log.info("[CHARGE SERVICE] Cobrança {} marcada como atrasada", chargeId);
     }
 
     @Override
     public String generatePixCode(MonthlyCharge charge) {
-        // TODO: Integrar com gerador de PIX real (ex: API do banco)
-        // Por enquanto, retorna um código mock
-        return String.format("00020126580014BR.GOV.BCB.PIX0136%s5204000053039865802BR5913PAINEL%20VIA6008BRASILIA62070503***6304%s",
-                charge.getAuthorId(),
-                generateChecksum(charge));
-    }
-    
-    private String generateChecksum(MonthlyCharge charge) {
-        // Checksum simples (deve ser substituído por algoritmo real)
-        return String.format("%04d", (charge.getId().hashCode() % 10000));
+        // Redundante se usarmos o createCharge, mas mantido para compatibilidade se
+        // chamado isoladamente
+        // (ex: re-gerar pix)
+        efiPayService.generatePixCharge(charge);
+        return charge.getPixCode();
     }
 }
-
-
-

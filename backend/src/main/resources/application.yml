@@ -1,6 +1,3 @@
-server:
-  port: ${PORT:8080}
-
 spring:
   application:
     name: ${APPLICATION_NAME}
@@ -62,14 +59,23 @@ application:
   frontend:
     base-url: ${FRONTEND_BASE_URL:https://www.paineldavia.com.br}
   confirmation:
-    minutes: 45            # expiração do token
-    cooldown-seconds: 60   # intervalo mínimo entre reenvios
-    max-per-day: 5         # teto diário por dia
+    minutes: 45 # expiração do token
+    cooldown-seconds: 60 # intervalo mínimo entre reenvios
+    max-per-day: 5 # teto diário por dia
   admin:
     username: ${ADMIN_USERNAME}
     email: ${ADMIN_EMAIL}
     password: ${ADMIN_PASSWORD}
     id: ${ADMIN_ID:admin-1}
+
+efi:
+  pix:
+    client-id: ${EFI_CLIENT_ID}
+    client-secret: ${EFI_CLIENT_SECRET}
+    chave: ${EFI_PIX_KEY}
+    cert-path: classpath:pro-ecommerce.p12
+    cert-password: "" # preencha se houver senha
+    sandbox: false
 
 # NOTA: As credenciais do banco de dados do e-commerce são configuradas por usuário
 # através dos campos: ecommerce_db_url, ecommerce_db_username, ecommerce_db_password

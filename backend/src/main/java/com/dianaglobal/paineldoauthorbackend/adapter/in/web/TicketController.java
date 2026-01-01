@@ -51,11 +51,10 @@ public class TicketController {
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> listarTicketsAutor(
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             Optional<Long> authorIdOpt = currentAuthorService.getCurrentAuthorId();
-            
+
             if (authorIdOpt.isEmpty()) {
                 if (currentAuthorService.isCurrentUserAdmin()) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -64,16 +63,16 @@ public class TicketController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new MessageResponse("Usuário não possui author_id configurado"));
             }
-            
+
             String authorId = authorIdOpt.get().toString();
             List<Ticket> tickets = ticketService.findAllByAuthorId(authorId);
-            
+
             List<TicketDTO> dtos = tickets.stream()
                     .map(this::toDTO)
                     .collect(Collectors.toList());
-            
+
             return ResponseEntity.ok(dtos);
-            
+
         } catch (Exception e) {
             log.error("[TICKETS] Erro ao listar tickets: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -89,17 +88,16 @@ public class TicketController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> obterTicket(
             @PathVariable UUID ticketId,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             Optional<Ticket> ticketOpt = ticketService.findById(ticketId);
             if (ticketOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new MessageResponse("Ticket não encontrado"));
             }
-            
+
             Ticket ticket = ticketOpt.get();
-            
+
             // Verificar se autor tem acesso
             Optional<Long> authorIdOpt = currentAuthorService.getCurrentAuthorId();
             if (authorIdOpt.isEmpty() || !ticket.getAuthorId().equals(authorIdOpt.get().toString())) {
@@ -108,10 +106,10 @@ public class TicketController {
                             .body(new MessageResponse("Acesso negado"));
                 }
             }
-            
+
             TicketDTO dto = toDTO(ticket);
             return ResponseEntity.ok(dto);
-            
+
         } catch (Exception e) {
             log.error("[TICKETS] Erro ao obter ticket: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -127,22 +125,21 @@ public class TicketController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> criarTicket(
             @RequestBody @Valid CreateTicketRequest request,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-            
+
             Optional<Long> authorIdOpt = currentAuthorService.getCurrentAuthorId();
             if (authorIdOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new MessageResponse("Usuário não possui author_id configurado"));
             }
-            
+
             TicketCategory category = request.category() != null && !request.category().trim().isEmpty()
                     ? TicketCategory.valueOf(request.category().toUpperCase())
                     : TicketCategory.OUTRO;
-            
+
             Ticket ticket = Ticket.builder()
                     .id(UUID.randomUUID())
                     .title(request.title())
@@ -153,12 +150,12 @@ public class TicketController {
                     .status(TicketStatus.OPEN)
                     .relatedChargeId(request.relatedChargeId())
                     .build();
-            
+
             ticket = ticketService.createTicket(ticket);
-            
+
             TicketDTO dto = toDTO(ticket);
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-            
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse(e.getMessage()));
@@ -178,19 +175,18 @@ public class TicketController {
     public ResponseEntity<?> adicionarMensagem(
             @PathVariable UUID ticketId,
             @RequestBody @Valid CreateMessageRequest request,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-            
+
             // Verificar se é admin para usar nota interna
             boolean isAdmin = currentAuthorService.isCurrentUserAdmin();
             if (request.isInternalNote() && !isAdmin) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new MessageResponse("Apenas admins podem criar notas internas"));
             }
-            
+
             TicketMessage message = TicketMessage.builder()
                     .id(UUID.randomUUID())
                     .ticketId(ticketId)
@@ -198,9 +194,9 @@ public class TicketController {
                     .message(request.message())
                     .isInternalNote(request.isInternalNote() && isAdmin)
                     .build();
-            
+
             message = ticketService.addMessage(ticketId, message);
-            
+
             // Atualizar status do ticket
             Optional<Ticket> ticketOpt = ticketService.findById(ticketId);
             if (ticketOpt.isPresent()) {
@@ -211,10 +207,10 @@ public class TicketController {
                     ticketService.updateStatus(ticketId, TicketStatus.WAITING_ADMIN, user.getId());
                 }
             }
-            
+
             MessageDTO dto = toMessageDTO(message, user.getName());
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-            
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse(e.getMessage()));
@@ -233,17 +229,16 @@ public class TicketController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> marcarComoResolvido(
             @PathVariable UUID ticketId,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             User user = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-            
+
             Ticket ticket = ticketService.updateStatus(ticketId, TicketStatus.RESOLVED, user.getId());
-            
+
             TicketDTO dto = toDTO(ticket);
             return ResponseEntity.ok(dto);
-            
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse(e.getMessage()));
@@ -264,7 +259,7 @@ public class TicketController {
                     return toMessageDTO(msg, senderName);
                 })
                 .collect(Collectors.toList());
-        
+
         return new TicketDTO(
                 ticket.getId(),
                 ticket.getTicketNumber(),
@@ -274,8 +269,7 @@ public class TicketController {
                 ticket.getStatus().name(),
                 OffsetDateTime.ofInstant(ticket.getCreatedAt(), java.time.ZoneOffset.UTC),
                 OffsetDateTime.ofInstant(ticket.getUpdatedAt(), java.time.ZoneOffset.UTC),
-                messages
-        );
+                messages);
     }
 
     private MessageDTO toMessageDTO(TicketMessage message, String senderName) {
@@ -286,10 +280,30 @@ public class TicketController {
                 message.getMessage(),
                 message.isInternalNote(),
                 OffsetDateTime.ofInstant(message.getCreatedAt(), java.time.ZoneOffset.UTC),
-                message.getReadAt() != null ? OffsetDateTime.ofInstant(message.getReadAt(), java.time.ZoneOffset.UTC) : null
-        );
+                message.getReadAt() != null ? OffsetDateTime.ofInstant(message.getReadAt(), java.time.ZoneOffset.UTC)
+                        : null);
     }
 
-    public record MessageResponse(String message) {}
-}
+    /**
+     * GET /api/v1/tickets/admin
+     * Lista TODOS os tickets (Admin).
+     */
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> listarTodosTicketsAdmin() {
+        try {
+            List<Ticket> tickets = ticketService.findAll();
+            List<TicketDTO> dtos = tickets.stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            log.error("[TICKETS] Erro ao listar tickets admin: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Erro ao listar tickets: " + e.getMessage()));
+        }
+    }
 
+    public record MessageResponse(String message) {
+    }
+}

@@ -20,6 +20,13 @@ export class TicketService {
   }
 
   /**
+   * Lista TODOS os tickets (Admin)
+   */
+  listarTodosTicketsAdmin(): Observable<Ticket[]> {
+    return this.http.get<Ticket[]>(`${this.API_URL}/api/v1/tickets/admin`);
+  }
+
+  /**
    * Obtém detalhes de um ticket específico
    */
   obterTicket(ticketId: string): Observable<Ticket> {

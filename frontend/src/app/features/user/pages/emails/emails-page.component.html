@@ -242,6 +242,7 @@
               <tr class="border-b border-white/10">
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Tipo</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Comprovante</th>
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Enviado Em</th>
                 <th class="text-center py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Pedido ID</th>
                 <th class="text-left py-3 px-4 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Valor Repassado</th>
@@ -254,14 +255,21 @@
                 <tr class="border-b border-white/5 hover:bg-white/5 transition-colors duration-200">
                   <td class="py-3 px-4">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="getTipoBadgeClass(repasse.tipoEmail)">
-                      {{ repasse.tipoEmail }}
+                      {{ getTipoLabel(repasse.tipoEmail) }}
                     </span>
                   </td>
                   <td class="py-3 px-4 text-center">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="getStatusBadgeClass(repasse.status)">
                       <span class="material-icons text-xs">{{ getStatusIcon(repasse.status) }}</span>
-                      {{ repasse.status }}
+                      {{ getStatusLabel(repasse.status) }}
                     </span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    @if (hasComprovante(repasse)) {
+                      <span class="text-emerald-400 font-bold text-xs">Sim</span>
+                    } @else {
+                      <span class="text-gray-500 text-xs">Não</span>
+                    }
                   </td>
                   <td class="py-3 px-4 text-sm text-gray-300">{{ formatDate(repasse.enviadoEm) }}</td>
                   <td class="py-3 px-4 text-sm text-center text-gray-300">{{ repasse.pedidoId || '-' }}</td>

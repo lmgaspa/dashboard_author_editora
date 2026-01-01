@@ -126,6 +126,10 @@ export const routes: Routes = [
           {
             path: 'charges',
             loadComponent: () => import('./features/admin/pages/charges/admin-charges-page.component').then(m => m.AdminChargesPageComponent)
+          },
+          {
+            path: 'tickets',
+            loadComponent: () => import('./features/admin/pages/tickets/admin-tickets-page.component').then(m => m.AdminTicketsPageComponent)
           }
         ]
       }

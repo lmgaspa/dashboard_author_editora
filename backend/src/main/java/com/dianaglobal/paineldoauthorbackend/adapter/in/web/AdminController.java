@@ -55,7 +55,10 @@ public class AdminController {
     private final com.dianaglobal.paineldoauthorbackend.application.event.UserConfirmedListener userConfirmedListener;
     private final DeleteAccountEmailService deleteAccountEmailService;
     private final AuthorStatsService authorStatsService;
-    
+    private final com.dianaglobal.paineldoauthorbackend.application.service.EmailsAutorService emailsAutorService;
+
+    // ... existing imports/fields ...
+
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getDashboard(@AuthenticationPrincipal UserDetails userDetails) {
@@ -71,10 +74,58 @@ public class AdminController {
                 "Painel Administrativo",
                 admin.getName(),
                 admin.getEmail(),
-                "Bem-vindo ao painel de administração"
-        );
+                "Bem-vindo ao painel de administração");
 
         return ResponseEntity.ok(dashboard);
+    }
+
+    @GetMapping("/users/author/{authorId}/payment-history")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getPaymentHistory(@PathVariable String authorId) {
+        try {
+            // Buscar usuário por author_id para obter credenciais do banco
+            var users = userRepositoryPort.findAllByAuthorId(authorId);
+            if (users.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new MessageResponse("Nenhum usuário encontrado para este author_id."));
+            }
+
+            // Usar o primeiro usuário encontrado para obter credenciais
+            // Assumimos que todos os usuários do mesmo autor compartilham o mesmo banco
+            User user = users.get(0);
+
+            if (user.getEcommerceDbUrl() == null || user.getEcommerceDbUrl().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new MessageResponse(
+                                "Usuário não possui credenciais do banco do e-commerce configuradas"));
+            }
+
+            long authorIdLong;
+            try {
+                authorIdLong = Long.parseLong(authorId);
+            } catch (NumberFormatException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new MessageResponse("author_id inválido: " + authorId));
+            }
+
+            var painel = emailsAutorService.montarPainelEmailsAutor(
+                    authorIdLong,
+                    user.getEcommerceDbUrl(),
+                    user.getEcommerceDbUsername(),
+                    user.getEcommerceDbPassword());
+
+            if (painel == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new MessageResponse("Sem dados de e-mail ou erro ao conectar."));
+            }
+
+            return ResponseEntity.ok(painel.emailsRepasse());
+
+        } catch (Exception e) {
+            log.error("[ADMIN PAYMENT HISTORY] Error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Erro ao buscar histórico: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/users")
@@ -82,7 +133,7 @@ public class AdminController {
     public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
         try {
             var users = userRepositoryPort.findAll();
-            
+
             List<UserListResponse> userList = users.stream()
                     .map(user -> new UserListResponse(
                             user.getId(),
@@ -95,16 +146,14 @@ public class AdminController {
                             user.getEcommerceUrl(),
                             user.getEcommerceDbUrl(),
                             user.getEcommerceDbUsername(),
-                            user.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
-                            user.getProfilePhotoUrl()
-                    ))
+                            user.getEcommerceDbPassword(), // Retornar password persistido para admin editar
+                            user.getProfilePhotoUrl()))
                     .collect(Collectors.toList());
-            
+
             return ResponseEntity.ok(new UsersListResponse(
                     "Lista de usuários",
                     userList.size(),
-                    userList
-            ));
+                    userList));
         } catch (Exception e) {
             log.error("Erro ao listar usuários: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -117,8 +166,7 @@ public class AdminController {
     @Transactional
     public ResponseEntity<?> createUser(
             @RequestBody @Valid CreateUserRequest request,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             final String normalizedEmail = request.email().trim().toLowerCase();
 
@@ -137,7 +185,8 @@ public class AdminController {
             newUser.setEmail(normalizedEmail);
             newUser.setPassword(passwordEncoder.encode(request.password()));
             newUser.setPasswordSet(true); // Admin define senha, então passwordSet = true
-            // Usuários criados por admin são sempre confirmados (não há mais fluxo de confirmação)
+            // Usuários criados por admin são sempre confirmados (não há mais fluxo de
+            // confirmação)
             boolean emailConfirmed = request.emailConfirmed() == null || Boolean.TRUE.equals(request.emailConfirmed());
             newUser.setEmailConfirmed(emailConfirmed);
             newUser.setAuthProvider("LOCAL");
@@ -152,17 +201,17 @@ public class AdminController {
                 }
             }
             newUser.setRole(userRole);
-            
+
             // Admin pode definir author_id (opcional)
             if (request.authorId() != null && !request.authorId().trim().isEmpty()) {
                 newUser.setAuthorId(request.authorId().trim());
             }
-            
+
             // Admin pode definir ecommerce_url (opcional - URL base do e-commerce do autor)
             if (request.ecommerceUrl() != null && !request.ecommerceUrl().trim().isEmpty()) {
                 newUser.setEcommerceUrl(request.ecommerceUrl().trim());
             }
-            
+
             // Admin pode definir credenciais do banco do e-commerce (opcional)
             if (request.ecommerceDbUrl() != null && !request.ecommerceDbUrl().trim().isEmpty()) {
                 newUser.setEcommerceDbUrl(request.ecommerceDbUrl().trim());
@@ -176,14 +225,16 @@ public class AdminController {
 
             userRepositoryPort.save(newUser);
 
-            // Sempre enviar welcome email quando admin cria usuário (independente de emailConfirmed)
-            log.info("[ADMIN CREATE USER] Sending welcome email to {} (name: {}, emailConfirmed: {})", 
+            // Sempre enviar welcome email quando admin cria usuário (independente de
+            // emailConfirmed)
+            log.info("[ADMIN CREATE USER] Sending welcome email to {} (name: {}, emailConfirmed: {})",
                     normalizedEmail, newUser.getName(), newUser.isEmailConfirmed());
             try {
                 userConfirmedListener.onUserConfirmed(newUser, request.password());
                 log.info("[ADMIN CREATE USER] ✅ Welcome email successfully sent to {}", normalizedEmail);
             } catch (Exception e) {
-                log.error("[ADMIN CREATE USER] ❌ Failed to send welcome email to {}: {}", normalizedEmail, e.getMessage(), e);
+                log.error("[ADMIN CREATE USER] ❌ Failed to send welcome email to {}: {}", normalizedEmail,
+                        e.getMessage(), e);
                 // Não falhar a criação do usuário se o email falhar, apenas logar o erro
             }
 
@@ -193,15 +244,14 @@ public class AdminController {
                             newUser.getId(),
                             newUser.getName(),
                             newUser.getEmail(),
-                    newUser.getRole().name(),
-                    newUser.isEmailConfirmed(),
-                    newUser.getAuthorId(),
-                    newUser.getEcommerceUrl(),
-                    newUser.getEcommerceDbUrl(),
-                    newUser.getEcommerceDbUsername(),
-                    newUser.getEcommerceDbPassword()  // Retornar password persistido para admin visualizar
-                    )
-            );
+                            newUser.getRole().name(),
+                            newUser.isEmailConfirmed(),
+                            newUser.getAuthorId(),
+                            newUser.getEcommerceUrl(),
+                            newUser.getEcommerceDbUrl(),
+                            newUser.getEcommerceDbUsername(),
+                            newUser.getEcommerceDbPassword() // Retornar password persistido para admin visualizar
+                    ));
 
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -218,7 +268,7 @@ public class AdminController {
         try {
             // Buscar todos os admins usando o repositório
             var admins = userRepositoryPort.findAllByRole(Role.ADMIN);
-            
+
             List<UserListResponse> adminList = admins.stream()
                     .map(admin -> new UserListResponse(
                             admin.getId(),
@@ -231,16 +281,14 @@ public class AdminController {
                             admin.getEcommerceUrl(),
                             admin.getEcommerceDbUrl(),
                             admin.getEcommerceDbUsername(),
-                            admin.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
-                            admin.getProfilePhotoUrl()
-                    ))
+                            admin.getEcommerceDbPassword(), // Retornar password persistido para admin editar
+                            admin.getProfilePhotoUrl()))
                     .collect(Collectors.toList());
-            
+
             return ResponseEntity.ok(new UsersListResponse(
                     "Lista de administradores",
                     adminList.size(),
-                    adminList
-            ));
+                    adminList));
         } catch (Exception e) {
             log.error("Erro ao listar administradores: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -254,36 +302,31 @@ public class AdminController {
         try {
             // Verificar tabelas
             List<Map<String, Object>> tables = jdbcTemplate.queryForList(
-                "SELECT table_name, table_type " +
-                "FROM information_schema.tables " +
-                "WHERE table_schema = 'public' " +
-                "ORDER BY table_name"
-            );
+                    "SELECT table_name, table_type " +
+                            "FROM information_schema.tables " +
+                            "WHERE table_schema = 'public' " +
+                            "ORDER BY table_name");
 
             // Contar registros nas tabelas principais
             Long usersCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM users", Long.class
-            );
+                    "SELECT COUNT(*) FROM users", Long.class);
             Long adminCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM users WHERE role = 'ADMIN'", Long.class
-            );
+                    "SELECT COUNT(*) FROM users WHERE role = 'ADMIN'", Long.class);
 
             // Verificar versão do Flyway
             List<Map<String, Object>> flywayVersions = jdbcTemplate.queryForList(
-                "SELECT version, description, installed_on, success " +
-                "FROM flyway_schema_history " +
-                "ORDER BY installed_rank DESC " +
-                "LIMIT 5"
-            );
+                    "SELECT version, description, installed_on, success " +
+                            "FROM flyway_schema_history " +
+                            "ORDER BY installed_rank DESC " +
+                            "LIMIT 5");
 
             DatabaseStatusResponse status = new DatabaseStatusResponse(
-                "Banco de dados conectado com sucesso",
-                tables.size(),
-                tables,
-                usersCount,
-                adminCount,
-                flywayVersions
-            );
+                    "Banco de dados conectado com sucesso",
+                    tables.size(),
+                    tables,
+                    usersCount,
+                    adminCount,
+                    flywayVersions);
 
             return ResponseEntity.ok(status);
         } catch (DataAccessException dae) {
@@ -301,8 +344,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<?> confirmUserEmail(
-            @PathVariable String identifier
-    ) {
+            @PathVariable String identifier) {
         try {
             // Tentar encontrar o usuário por ID ou email
             User user;
@@ -317,8 +359,7 @@ public class AdminController {
 
             if (user.isEmailConfirmed()) {
                 return ResponseEntity.ok(new MessageResponse(
-                        String.format("Email do usuário %s já está confirmado.", user.getEmail())
-                ));
+                        String.format("Email do usuário %s já está confirmado.", user.getEmail())));
             }
 
             user.setEmailConfirmed(true);
@@ -327,8 +368,7 @@ public class AdminController {
             log.info("[CONFIRM EMAIL] Email confirmed for user: {} ({})", user.getEmail(), user.getId());
 
             return ResponseEntity.ok(new MessageResponse(
-                    String.format("Email do usuário %s confirmado com sucesso.", user.getEmail())
-            ));
+                    String.format("Email do usuário %s confirmado com sucesso.", user.getEmail())));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -345,8 +385,7 @@ public class AdminController {
     @Transactional
     public ResponseEntity<?> updateUser(
             @PathVariable String identifier,
-            @RequestBody @Valid UpdateUserRequest request
-    ) {
+            @RequestBody @Valid UpdateUserRequest request) {
         try {
             // Tentar encontrar o usuário por ID ou email
             User user;
@@ -361,12 +400,12 @@ public class AdminController {
 
             // Atualizar campos se fornecidos
             boolean changed = false;
-            
+
             if (request.name() != null && !request.name().trim().isEmpty()) {
                 user.setName(request.name().trim());
                 changed = true;
             }
-            
+
             if (request.role() != null && !request.role().isBlank()) {
                 try {
                     Role newRole = Role.valueOf(request.role().toUpperCase());
@@ -377,7 +416,7 @@ public class AdminController {
                             .body(new MessageResponse("Role inválido. Use 'USER' ou 'ADMIN'."));
                 }
             }
-            
+
             // author_id pode ser atualizado (incluindo null para remover)
             if (request.authorId() != null) {
                 // Se for string vazia, trata como null (remove author_id)
@@ -385,7 +424,7 @@ public class AdminController {
                 user.setAuthorId(newAuthorId);
                 changed = true;
             }
-            
+
             // ecommerce_url pode ser atualizado (incluindo null para remover)
             if (request.ecommerceUrl() != null) {
                 // Se for string vazia, trata como null (remove ecommerce_url)
@@ -393,7 +432,7 @@ public class AdminController {
                 user.setEcommerceUrl(newEcommerceUrl);
                 changed = true;
             }
-            
+
             // Credenciais do banco do e-commerce podem ser atualizadas
             if (request.ecommerceDbUrl() != null) {
                 String newDbUrl = request.ecommerceDbUrl().trim().isEmpty() ? null : request.ecommerceDbUrl().trim();
@@ -401,31 +440,36 @@ public class AdminController {
                 changed = true;
             }
             if (request.ecommerceDbUsername() != null) {
-                String newDbUsername = request.ecommerceDbUsername().trim().isEmpty() ? null : request.ecommerceDbUsername().trim();
+                String newDbUsername = request.ecommerceDbUsername().trim().isEmpty() ? null
+                        : request.ecommerceDbUsername().trim();
                 user.setEcommerceDbUsername(newDbUsername);
                 changed = true;
             }
             // ecommerceDbPassword pode ser atualizado
             // IMPORTANTE: Se vier string vazia, remove o password
-            // Se vier null no request, NÃO altera o password atual (mantém o que está no banco)
+            // Se vier null no request, NÃO altera o password atual (mantém o que está no
+            // banco)
             // Se vier um valor não vazio, atualiza com o novo password
             if (request.ecommerceDbPassword() != null) {
-                String newDbPassword = request.ecommerceDbPassword().trim().isEmpty() ? null : request.ecommerceDbPassword().trim();
+                String newDbPassword = request.ecommerceDbPassword().trim().isEmpty() ? null
+                        : request.ecommerceDbPassword().trim();
                 // Só marca como changed se realmente mudou
                 if (!java.util.Objects.equals(user.getEcommerceDbPassword(), newDbPassword)) {
                     user.setEcommerceDbPassword(newDbPassword);
                     changed = true;
                 }
             }
-            // Se request.ecommerceDbPassword() for null, mantém o password atual do banco (não altera)
+            // Se request.ecommerceDbPassword() for null, mantém o password atual do banco
+            // (não altera)
 
             // profile_photo_url pode ser atualizado (incluindo null para remover)
             if (request.profilePhotoUrl() != null) {
-                String newPhotoUrl = request.profilePhotoUrl().trim().isEmpty() ? null : request.profilePhotoUrl().trim();
+                String newPhotoUrl = request.profilePhotoUrl().trim().isEmpty() ? null
+                        : request.profilePhotoUrl().trim();
                 user.setProfilePhotoUrl(newPhotoUrl);
                 changed = true;
             }
-            
+
             // password pode ser atualizado pelo admin (sem precisar da senha atual)
             // Admin pode mudar a senha de qualquer usuário livremente
             if (request.password() != null && !request.password().trim().isEmpty()) {
@@ -462,11 +506,12 @@ public class AdminController {
             }
 
             // Retornar usuário atualizado
-            // IMPORTANTE: Retornar o password persistido do banco para o admin poder visualizar/editar
+            // IMPORTANTE: Retornar o password persistido do banco para o admin poder
+            // visualizar/editar
             // Se o password foi alterado no request, retornar o novo valor salvo
             // Se não foi alterado, retornar o valor atual do banco
             String passwordToReturn = user.getEcommerceDbPassword();
-            
+
             var updatedUser = new UserListResponse(
                     user.getId(),
                     user.getName(),
@@ -478,9 +523,8 @@ public class AdminController {
                     user.getEcommerceUrl(),
                     user.getEcommerceDbUrl(),
                     user.getEcommerceDbUsername(),
-                    passwordToReturn,  // Retornar password persistido para admin editar
-                    user.getProfilePhotoUrl()
-            );
+                    passwordToReturn, // Retornar password persistido para admin editar
+                    user.getProfilePhotoUrl());
 
             return ResponseEntity.ok(updatedUser);
 
@@ -499,7 +543,7 @@ public class AdminController {
     public ResponseEntity<?> getUsersByAuthorId(@PathVariable String authorId) {
         try {
             var users = userRepositoryPort.findAllByAuthorId(authorId);
-            
+
             List<UserListResponse> userList = users.stream()
                     .map(user -> new UserListResponse(
                             user.getId(),
@@ -512,16 +556,14 @@ public class AdminController {
                             user.getEcommerceUrl(),
                             user.getEcommerceDbUrl(),
                             user.getEcommerceDbUsername(),
-                            user.getEcommerceDbPassword(),  // Retornar password persistido para admin editar
-                            user.getProfilePhotoUrl()
-                    ))
+                            user.getEcommerceDbPassword(), // Retornar password persistido para admin editar
+                            user.getProfilePhotoUrl()))
                     .collect(Collectors.toList());
-            
+
             return ResponseEntity.ok(new UsersListResponse(
                     "Usuários encontrados para author_id: " + authorId,
                     userList.size(),
-                    userList
-            ));
+                    userList));
 
         } catch (Exception e) {
             log.error("Erro ao buscar usuários por author_id: {}", e.getMessage(), e);
@@ -560,7 +602,8 @@ public class AdminController {
 
             if (user.getEcommerceDbUrl() == null || user.getEcommerceDbUrl().trim().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new MessageResponse("Usuário não possui credenciais do banco do e-commerce configuradas"));
+                        .body(new MessageResponse(
+                                "Usuário não possui credenciais do banco do e-commerce configuradas"));
             }
 
             Long authorId;
@@ -570,14 +613,13 @@ public class AdminController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new MessageResponse("author_id inválido: " + user.getAuthorId()));
             }
-            
+
             var statsOpt = authorStatsService.getAuthorStats(
                     authorId,
                     user.getEcommerceDbUrl(),
                     user.getEcommerceDbUsername(),
-                    user.getEcommerceDbPassword()
-            );
-            
+                    user.getEcommerceDbPassword());
+
             if (statsOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new MessageResponse("Autor não encontrado ou sem dados no e-commerce"));
@@ -588,9 +630,8 @@ public class AdminController {
                     authorId,
                     user.getEcommerceDbUrl(),
                     user.getEcommerceDbUsername(),
-                    user.getEcommerceDbPassword()
-            );
-        
+                    user.getEcommerceDbPassword());
+
             var response = new AuthorStatsResponse(
                     stats.getAuthorId(),
                     stats.getAuthorName(),
@@ -602,8 +643,7 @@ public class AdminController {
                     stats.getTotalPaid(),
                     stats.getHasPaymentAccount(),
                     recentSalesOpt.map(rs -> rs.recentOrders()).orElse(0L),
-                    recentSalesOpt.map(rs -> rs.recentRevenue()).orElse(java.math.BigDecimal.ZERO)
-            );
+                    recentSalesOpt.map(rs -> rs.recentRevenue()).orElse(java.math.BigDecimal.ZERO));
 
             return ResponseEntity.ok(response);
 
@@ -617,24 +657,22 @@ public class AdminController {
         }
     }
 
-
     @DeleteMapping("/users/{identifier}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(
             @PathVariable String identifier,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             String requestId = UUID.randomUUID().toString();
             log.info("[DELETE USER REQUEST {}] Attempt to delete user: {}", requestId, identifier);
 
             // Verificar se o admin não está tentando deletar a si mesmo
             String adminEmail = userDetails.getUsername();
-            
+
             // Tentar encontrar o usuário por ID ou email
             User userToDelete;
             String userId;
-            
+
             // Tentar como ID primeiro (admin-1, user-1, etc.)
             var userById = userRepositoryPort.findById(identifier);
             if (userById.isPresent()) {
@@ -657,7 +695,7 @@ public class AdminController {
 
             // ❌ BLOQUEAR: Não permitir deletar usuários com role ADMIN
             if (userToDelete.getRole() == com.dianaglobal.paineldoauthorbackend.domain.model.Role.ADMIN) {
-                log.warn("[DELETE USER ERROR {}] Attempt to delete ADMIN user: {} ({})", 
+                log.warn("[DELETE USER ERROR {}] Attempt to delete ADMIN user: {} ({})",
                         requestId, userToDelete.getEmail(), userId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new MessageResponse("Não é possível deletar usuários administradores."));
@@ -675,30 +713,30 @@ public class AdminController {
             }
 
             // Enviar email de notificação de deleção ANTES de deletar o usuário
-            log.info("[DELETE USER {}] Attempting to send delete account email to {} (name: {})", 
+            log.info("[DELETE USER {}] Attempting to send delete account email to {} (name: {})",
                     requestId, userToDelete.getEmail(), userToDelete.getName());
             try {
                 deleteAccountEmailService.send(userToDelete.getEmail(), userToDelete.getName());
-                log.info("[DELETE USER {}] ✅ Delete account email successfully sent to {}", requestId, userToDelete.getEmail());
+                log.info("[DELETE USER {}] ✅ Delete account email successfully sent to {}", requestId,
+                        userToDelete.getEmail());
             } catch (org.springframework.mail.MailSendException e) {
-                log.error("[DELETE USER {}] ❌ MailSendException when sending delete account email to {}: {}", 
+                log.error("[DELETE USER {}] ❌ MailSendException when sending delete account email to {}: {}",
                         requestId, userToDelete.getEmail(), e.getMessage(), e);
                 // Continuar com a deleção mesmo se o email falhar
             } catch (Exception e) {
-                log.error("[DELETE USER {}] ❌ Unexpected error sending delete account email to {}: {} - {}", 
+                log.error("[DELETE USER {}] ❌ Unexpected error sending delete account email to {}: {} - {}",
                         requestId, userToDelete.getEmail(), e.getClass().getSimpleName(), e.getMessage(), e);
                 // Continuar com a deleção mesmo se o email falhar
             }
 
             // Deletar o usuário
             userRepositoryPort.deleteById(userId);
-            
-            log.info("[DELETE USER SUCCESS {}] User deleted successfully: {} ({})", 
+
+            log.info("[DELETE USER SUCCESS {}] User deleted successfully: {} ({})",
                     requestId, userToDelete.getEmail(), userId);
 
             return ResponseEntity.ok(new MessageResponse(
-                    String.format("Usuário %s deletado com sucesso.", userToDelete.getEmail())
-            ));
+                    String.format("Usuário %s deletado com sucesso.", userToDelete.getEmail())));
 
         } catch (IllegalArgumentException e) {
             log.warn("[DELETE USER ERROR] User not found: {}", identifier);
@@ -715,10 +753,11 @@ public class AdminController {
             String panel,
             String adminName,
             String adminEmail,
-            String message
-    ) {}
+            String message) {
+    }
 
-    public record MessageResponse(String message) {}
+    public record MessageResponse(String message) {
+    }
 
     public record DatabaseStatusResponse(
             String message,
@@ -726,44 +765,37 @@ public class AdminController {
             List<Map<String, Object>> tables,
             Long totalUsers,
             Long totalAdmins,
-            List<Map<String, Object>> flywayVersions
-    ) {}
-
+            List<Map<String, Object>> flywayVersions) {
+    }
 
     public record CreateUserRequest(
-            @NotBlank(message = "Nome é obrigatório")
-            String name,
-            @NotBlank(message = "Email é obrigatório")
-            @Email(message = "Email inválido")
-            @Pattern(
-                    regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-                    message = "Email deve conter um domínio válido"
-            )
-            String email,
-            @NotBlank(message = "Senha é obrigatória")
-            String password,
-            Boolean emailConfirmed,  // Admin pode criar já confirmado
-            String role,             // Admin pode definir role (USER ou ADMIN)
-            String authorId,         // ID do autor no sistema externo (opcional)
-            String ecommerceUrl,     // URL base do e-commerce do autor (opcional)
-            String ecommerceDbUrl,   // JDBC URL do banco do e-commerce (opcional)
+            @NotBlank(message = "Nome é obrigatório") String name,
+            @NotBlank(message = "Email é obrigatório") @Email(message = "Email inválido") @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Email deve conter um domínio válido") String email,
+            @NotBlank(message = "Senha é obrigatória") String password,
+            Boolean emailConfirmed, // Admin pode criar já confirmado
+            String role, // Admin pode definir role (USER ou ADMIN)
+            String authorId, // ID do autor no sistema externo (opcional)
+            String ecommerceUrl, // URL base do e-commerce do autor (opcional)
+            String ecommerceDbUrl, // JDBC URL do banco do e-commerce (opcional)
             String ecommerceDbUsername, // Username do banco do e-commerce (opcional)
-            String ecommerceDbPassword  // Password do banco do e-commerce (opcional)
-    ) {}
+            String ecommerceDbPassword // Password do banco do e-commerce (opcional)
+    ) {
+    }
 
     public record CreateUserResponse(
             String message,
-            String id,  // Format: "user-1", "user-2", etc.
+            String id, // Format: "user-1", "user-2", etc.
             String name,
             String email,
             String role,
             Boolean emailConfirmed,
-            String authorId,        // ID do autor no sistema externo (pode ser null)
-            String ecommerceUrl,    // URL base do e-commerce do autor (pode ser null)
-            String ecommerceDbUrl,  // JDBC URL do banco do e-commerce (pode ser null)
+            String authorId, // ID do autor no sistema externo (pode ser null)
+            String ecommerceUrl, // URL base do e-commerce do autor (pode ser null)
+            String ecommerceDbUrl, // JDBC URL do banco do e-commerce (pode ser null)
             String ecommerceDbUsername, // Username do banco (pode ser null)
-            String ecommerceDbPassword  // Password do banco (persistido, retornado para admin visualizar)
-    ) {}
+            String ecommerceDbPassword // Password do banco (persistido, retornado para admin visualizar)
+    ) {
+    }
 
     public record UserListResponse(
             String id,
@@ -772,31 +804,36 @@ public class AdminController {
             String role,
             Boolean emailConfirmed,
             String authProvider,
-            String authorId,        // ID do autor no sistema externo (pode ser null)
-            String ecommerceUrl,    // URL base do e-commerce do autor (pode ser null)
-            String ecommerceDbUrl,  // JDBC URL do banco (pode ser null)
+            String authorId, // ID do autor no sistema externo (pode ser null)
+            String ecommerceUrl, // URL base do e-commerce do autor (pode ser null)
+            String ecommerceDbUrl, // JDBC URL do banco (pode ser null)
             String ecommerceDbUsername, // Username do banco (pode ser null)
-            String ecommerceDbPassword,  // Password do banco (persistido, retornado para admin editar)
-            String profilePhotoUrl  // URL da foto de perfil (pode ser null)
-    ) {}
+            String ecommerceDbPassword, // Password do banco (persistido, retornado para admin editar)
+            String profilePhotoUrl // URL da foto de perfil (pode ser null)
+    ) {
+    }
 
     public record UsersListResponse(
             String message,
             Integer total,
-            List<UserListResponse> users
-    ) {}
+            List<UserListResponse> users) {
+    }
 
     public record UpdateUserRequest(
-            String name,         // Opcional: atualizar nome
-            String role,         // Opcional: atualizar role (USER ou ADMIN)
-            String password,     // Opcional: atualizar senha do usuário (admin pode mudar livremente, validação de força aplicada)
-            String authorId,     // Opcional: atualizar author_id (pode ser null ou string vazia para remover)
-            String ecommerceUrl, // Opcional: atualizar ecommerce_url (pode ser null ou string vazia para remover)
-            String ecommerceDbUrl,     // Opcional: atualizar URL do banco
+            String name, // Opcional: atualizar nome
+            String role, // Opcional: atualizar role (USER ou ADMIN)
+            String password, // Opcional: atualizar senha do usuário (admin pode mudar livremente, validação
+                             // de força aplicada)
+            String authorId, // Opcional: atualizar author_id (pode ser null ou string vazia para remover)
+            String ecommerceUrl, // Opcional: atualizar ecommerce_url (pode ser null ou string vazia para
+                                 // remover)
+            String ecommerceDbUrl, // Opcional: atualizar URL do banco
             String ecommerceDbUsername, // Opcional: atualizar username do banco
-            String ecommerceDbPassword,  // Opcional: atualizar password do banco
-            String profilePhotoUrl  // Opcional: atualizar foto de perfil (pode ser null ou string vazia para remover)
-    ) {}
+            String ecommerceDbPassword, // Opcional: atualizar password do banco
+            String profilePhotoUrl // Opcional: atualizar foto de perfil (pode ser null ou string vazia para
+                                   // remover)
+    ) {
+    }
 
     public record AuthorStatsResponse(
             Long authorId,
@@ -808,8 +845,8 @@ public class AdminController {
             Long totalPayouts,
             java.math.BigDecimal totalPaid,
             Boolean hasPaymentAccount,
-            Long recentOrders,           // Últimos 30 dias
-            java.math.BigDecimal recentRevenue  // Últimos 30 dias
-    ) {}
+            Long recentOrders, // Últimos 30 dias
+            java.math.BigDecimal recentRevenue // Últimos 30 dias
+    ) {
+    }
 }
-

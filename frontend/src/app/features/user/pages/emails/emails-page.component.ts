@@ -272,5 +272,22 @@ export class EmailsPageComponent implements OnInit, OnDestroy {
       }
     });
   }
+  getTipoLabel(tipo: string): string {
+    if (tipo === 'REPASSE_CARD') return 'Email de Cartão enviado';
+    if (tipo === 'REPASSE_PIX') return 'Repasse PIX';
+    return tipo;
+  }
+
+  getStatusLabel(status: string): string {
+    if (status === 'SENT') return 'ENVIADO';
+    if (status === 'CONFIRMED') return 'PAGO';
+    if (status === 'FAILED') return 'FALHA';
+    return status;
+  }
+
+  hasComprovante(email: ResumoEmailRepasse): boolean {
+     // Se foi enviado (SENT) ou confirmado (CONFIRMED) e tem data de envio, consideramos que tem comprovante
+     return (email.status === 'SENT' || email.status === 'CONFIRMED') && !!email.enviadoEm;
+  }
 }
 

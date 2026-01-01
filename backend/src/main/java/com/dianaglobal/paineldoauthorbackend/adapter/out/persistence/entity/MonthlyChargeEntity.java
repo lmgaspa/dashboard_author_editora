@@ -12,11 +12,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "monthly_charges", indexes = {
-    @Index(name = "idx_charge_author_status", columnList = "author_id, status"),
-    @Index(name = "idx_charge_due_date", columnList = "due_date"),
-    @Index(name = "idx_charge_status", columnList = "status"),
-    @Index(name = "idx_charge_created_by", columnList = "created_by_user_id"),
-    @Index(name = "idx_charge_month_year", columnList = "charge_month, charge_year")
+        @Index(name = "idx_charge_author_status", columnList = "author_id, status"),
+        @Index(name = "idx_charge_due_date", columnList = "due_date"),
+        @Index(name = "idx_charge_status", columnList = "status"),
+        @Index(name = "idx_charge_created_by", columnList = "created_by_user_id"),
+        @Index(name = "idx_charge_month_year", columnList = "charge_month, charge_year")
 })
 @Data
 @Builder
@@ -77,57 +77,62 @@ public class MonthlyChargeEntity {
     @Builder.Default
     private Instant updatedAt = Instant.now();
 
-    @Column(name = "notes", columnDefinition = "TEXT")
+    @Column(name = "notes")
     private String notes;
+
+    @Column(name = "txid")
+    private String txid;
+
+    @Column(name = "location_id")
+    private String locationId;
 
     // ---------- Mapeamentos domínio <-> entidade ----------
 
-    public static MonthlyChargeEntity fromDomain(MonthlyCharge d) {
-        if (d == null) return null;
-        return MonthlyChargeEntity.builder()
-                .id(d.getId())
-                .authorId(d.getAuthorId())
-                .createdByUserId(d.getCreatedByUserId())
-                .chargeMonth(d.getChargeMonth())
-                .chargeYear(d.getChargeYear())
-                .amount(d.getAmount())
-                .dueDate(d.getDueDate())
-                .chargeDate(d.getChargeDate())
-                .status(d.getStatus() != null ? d.getStatus() : ChargeStatus.PENDING)
-                .paidAt(d.getPaidAt())
-                .confirmedByUserId(d.getConfirmedByUserId())
-                .confirmedAt(d.getConfirmedAt())
-                .pixCode(d.getPixCode())
-                .pixExpiresAt(d.getPixExpiresAt())
-                .createdAt(d.getCreatedAt() != null ? d.getCreatedAt() : Instant.now())
-                .updatedAt(d.getUpdatedAt() != null ? d.getUpdatedAt() : Instant.now())
-                .notes(d.getNotes())
+    public MonthlyCharge toDomain() {
+        return MonthlyCharge.builder()
+                .id(this.id)
+                .authorId(this.authorId)
+                .createdByUserId(this.createdByUserId)
+                .chargeMonth(this.chargeMonth)
+                .chargeYear(this.chargeYear)
+                .amount(this.amount)
+                .dueDate(this.dueDate)
+                .chargeDate(this.chargeDate)
+                .status(this.status)
+                .paidAt(this.paidAt)
+                .confirmedByUserId(this.confirmedByUserId)
+                .confirmedAt(this.confirmedAt)
+                .pixCode(this.pixCode)
+                .pixExpiresAt(this.pixExpiresAt)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .notes(this.notes)
+                .txid(this.txid)
+                .locationId(this.locationId)
                 .build();
     }
 
-    public static MonthlyCharge toDomain(MonthlyChargeEntity e) {
-        if (e == null) return null;
-        return MonthlyCharge.builder()
-                .id(e.getId())
-                .authorId(e.getAuthorId())
-                .createdByUserId(e.getCreatedByUserId())
-                .chargeMonth(e.getChargeMonth())
-                .chargeYear(e.getChargeYear())
-                .amount(e.getAmount())
-                .dueDate(e.getDueDate())
-                .chargeDate(e.getChargeDate())
-                .status(e.getStatus())
-                .paidAt(e.getPaidAt())
-                .confirmedByUserId(e.getConfirmedByUserId())
-                .confirmedAt(e.getConfirmedAt())
-                .pixCode(e.getPixCode())
-                .pixExpiresAt(e.getPixExpiresAt())
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .notes(e.getNotes())
+    public static MonthlyChargeEntity fromDomain(MonthlyCharge domain) {
+        return MonthlyChargeEntity.builder()
+                .id(domain.getId())
+                .authorId(domain.getAuthorId())
+                .createdByUserId(domain.getCreatedByUserId())
+                .chargeMonth(domain.getChargeMonth())
+                .chargeYear(domain.getChargeYear())
+                .amount(domain.getAmount())
+                .dueDate(domain.getDueDate())
+                .chargeDate(domain.getChargeDate())
+                .status(domain.getStatus())
+                .paidAt(domain.getPaidAt())
+                .confirmedByUserId(domain.getConfirmedByUserId())
+                .confirmedAt(domain.getConfirmedAt())
+                .pixCode(domain.getPixCode())
+                .pixExpiresAt(domain.getPixExpiresAt())
+                .createdAt(domain.getCreatedAt())
+                .updatedAt(domain.getUpdatedAt())
+                .notes(domain.getNotes())
+                .txid(domain.getTxid())
+                .locationId(domain.getLocationId())
                 .build();
     }
 }
-
-
-

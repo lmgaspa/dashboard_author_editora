@@ -34,7 +34,7 @@ export class CreateChargeModalComponent implements OnInit {
     authorId: ['', [Validators.required]],
     chargeMonth: [new Date().getMonth() + 1, [Validators.required, Validators.min(1), Validators.max(12)]],
     chargeYear: [new Date().getFullYear(), [Validators.required, Validators.min(2020), Validators.max(2100)]],
-    amount: ['', [Validators.required, Validators.min(0.01)]],
+    amount: ['', [Validators.required, Validators.pattern(/^\d{1,4},\d{2}$/)]],
     dueDate: ['', [Validators.required]]
   });
 
@@ -104,11 +104,15 @@ export class CreateChargeModalComponent implements OnInit {
     this.error.set(null);
 
     const formValue = this.form.value;
+    
+    // Converter valor "100,00" para 100.00
+    const amountVal = parseFloat(formValue.amount.replace(',', '.'));
+
     const request: CreateChargeRequest = {
       authorId: formValue.authorId,
       chargeMonth: parseInt(formValue.chargeMonth),
       chargeYear: parseInt(formValue.chargeYear),
-      amount: parseFloat(formValue.amount),
+      amount: amountVal,
       dueDate: formValue.dueDate
     };
 
@@ -136,6 +140,9 @@ export class CreateChargeModalComponent implements OnInit {
     }
     if (field?.hasError('max') && field.touched) {
       return `Valor máximo: ${field.errors?.['max'].max}`;
+    }
+    if (field?.hasError('pattern') && field.touched) {
+      return 'Formato inválido. Use xx,xx (máx 4 dígitos inteiros)';
     }
     return '';
   }
