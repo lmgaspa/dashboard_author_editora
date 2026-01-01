@@ -143,6 +143,12 @@ export class MenuService {
       roles: ['ADMIN']
     },
     {
+      label: 'Tickets',
+      icon: 'support_agent',
+      route: '/admin/tickets',
+      roles: ['ADMIN']
+    },
+    {
       label: 'Cobranças',
       icon: 'receipt_long',
       route: '/admin/charges',

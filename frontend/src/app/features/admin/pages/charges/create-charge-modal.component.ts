@@ -35,7 +35,7 @@ export class CreateChargeModalComponent implements OnInit {
     chargeMonth: [new Date().getMonth() + 1, [Validators.required, Validators.min(1), Validators.max(12)]],
     chargeYear: [new Date().getFullYear(), [Validators.required, Validators.min(2020), Validators.max(2100)]],
     amount: ['', [Validators.required, Validators.pattern(/^\d{1,4},\d{2}$/)]],
-    dueDate: ['', [Validators.required]]
+    dueDate: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{2}-\d{2}$/)]]
   });
 
   readonly users = signal<User[]>([]);
@@ -108,6 +108,17 @@ export class CreateChargeModalComponent implements OnInit {
     // Converter valor "100,00" para 100.00
     const amountVal = parseFloat(formValue.amount.replace(',', '.'));
 
+    // Validar data de vencimento (limite razoável)
+    const dueDate = new Date(formValue.dueDate);
+    const minDate = new Date('2020-01-01');
+    const maxDate = new Date('2100-12-31');
+    
+    if (dueDate < minDate || dueDate > maxDate) {
+      this.error.set('Data de vencimento inválida (deve ser entre 2020 e 2100)');
+      this.loading.set(false);
+      return;
+    }
+
     const request: CreateChargeRequest = {
       authorId: formValue.authorId,
       chargeMonth: parseInt(formValue.chargeMonth),
@@ -130,6 +141,38 @@ export class CreateChargeModalComponent implements OnInit {
     });
   }
 
+  onAmountInput(event: any): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, '');
+    
+    // Remove zeros à esquerda excessivos
+    value = Number(value).toString();
+
+    // Limita a 6 dígitos (4 inteiros + 2 decimais) para 9999,99
+    if (value.length > 6) {
+      value = value.substring(0, 6);
+    }
+
+    if (value === '' || value === '0') {
+      this.form.patchValue({ amount: '' });
+      return;
+    }
+
+    // Preenche com zeros à esquerda se necessário para garantir divisao correta
+    while (value.length < 3) {
+      value = '0' + value;
+    }
+
+    const numericValue = parseInt(value, 10) / 100;
+    
+    // Garante que é string com vírgula fixada em 2 casas
+    const formatted = numericValue.toFixed(2).replace('.', ',');
+    
+    input.value = formatted;
+    this.form.patchValue({ amount: formatted }, { emitEvent: false });
+    this.form.get('amount')?.updateValueAndValidity({ emitEvent: false });
+  }
+
   getFieldError(fieldName: string): string {
     const field = this.form.get(fieldName);
     if (field?.hasError('required') && field.touched) {
@@ -142,7 +185,12 @@ export class CreateChargeModalComponent implements OnInit {
       return `Valor máximo: ${field.errors?.['max'].max}`;
     }
     if (field?.hasError('pattern') && field.touched) {
-      return 'Formato inválido. Use xx,xx (máx 4 dígitos inteiros)';
+      if (fieldName === 'amount') {
+        return 'Formato inválido. Use xx,xx (máx 4 dígitos inteiros)';
+      }
+      if (fieldName === 'dueDate') {
+        return 'Data inválida';
+      }
     }
     return '';
   }
