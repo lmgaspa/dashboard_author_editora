@@ -4,20 +4,22 @@ import { firstValueFrom } from 'rxjs';
 import { ExportService, ExportFormat } from '@/app/core/services/export.service';
 import { AuthService } from '@/app/core/services/auth.service';
 
-export type ExportModule = 'entregas' | 'cobrancas' | 'metricas' | 'tickets';
+export type ExportModule = 'entregas' | 'cobrancas' | 'metricas' | 'tickets' | 'tickets-admin';
 
 const MODULE_LABELS: Record<ExportModule, string> = {
   entregas: 'Entregas',
   cobrancas: 'Cobranças',
   metricas: 'Métricas',
-  tickets: 'Tickets'
+  tickets: 'Tickets',
+  'tickets-admin': 'Todos os Tickets'
 };
 
 const MODULE_LABELS_ARQUIVADOS: Record<ExportModule, string> = {
   entregas: 'Pedidos Arquivados',
   cobrancas: 'Cobranças',
   metricas: 'Métricas',
-  tickets: 'Tickets'
+  tickets: 'Tickets',
+  'tickets-admin': 'Todos os Tickets'
 };
 
 @Component({
@@ -123,6 +125,10 @@ export class ExportButtonsComponent implements OnInit, OnDestroy {
         case 'tickets':
           blob = await firstValueFrom(this.exportService.exportTickets(options));
           filename = this.exportService.generateFilename('tickets', format, this.currentAuthorId);
+          break;
+        case 'tickets-admin':
+          blob = await firstValueFrom(this.exportService.exportAdminTickets(options));
+          filename = this.exportService.generateFilename('all-tickets', format, this.currentAuthorId);
           break;
         default:
           throw new Error(`Módulo de exportação desconhecido: ${this.module}`);

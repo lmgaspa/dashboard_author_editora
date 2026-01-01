@@ -144,6 +144,17 @@ export class ExportService {
   }
 
   /**
+   * Exporta todos os tickets (admin)
+   */
+  exportAdminTickets(options: ExportOptions): Observable<Blob> {
+    const params = this.buildParams(options);
+    return this.http.get(`${this.API_URL}/api/v1/tickets/admin/export`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  /**
    * Gera nome de arquivo com timestamp
    */
   generateFilename(prefix: string, format: ExportFormat, authorId?: string, suffix?: string): string {
