@@ -44,8 +44,7 @@ public class CobrancasExportController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> exportarCobrancas(
             @RequestParam(required = false, defaultValue = "json") String format,
-            @RequestParam(required = false) String author_id
-    ) {
+            @RequestParam(required = false) String author_id) {
         try {
             // Determinar author_id
             String authorId;
@@ -68,50 +67,56 @@ public class CobrancasExportController {
             }
 
             // Listar cobranças
-            List<com.dianaglobal.paineldoauthorbackend.domain.model.MonthlyCharge> charges = 
-                chargeService.findAllByAuthorId(authorId);
-            
+            List<com.dianaglobal.paineldoauthorbackend.domain.model.MonthlyCharge> charges = chargeService
+                    .findAllByAuthorId(authorId);
+
             // Converter para DTO (simplificado - em produção, usar um mapper)
             List<MonthlyChargeDTO> dtos = charges.stream()
                     .map(charge -> {
                         // Buscar nome do autor
                         Optional<User> userOpt = currentAuthorService.getCurrentUser();
                         String authorName = userOpt.map(User::getName).orElse("Autor");
-                        
+
                         // Calcular dias de atraso
                         long daysOverdue = 0;
-                        if (charge.getStatus() == com.dianaglobal.paineldoauthorbackend.domain.model.ChargeStatus.OVERDUE 
-                            && charge.getDueDate() != null) {
+                        if (charge
+                                .getStatus() == com.dianaglobal.paineldoauthorbackend.domain.model.ChargeStatus.OVERDUE
+                                && charge.getDueDate() != null) {
                             daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(
-                                charge.getDueDate(), 
-                                java.time.LocalDate.now()
-                            );
+                                    charge.getDueDate(),
+                                    java.time.LocalDate.now());
                         }
-                        
+
                         // Verificar se tem ticket aberto
                         boolean hasOpenTicket = false; // TODO: implementar verificação de ticket
-                        
+
                         return new MonthlyChargeDTO(
-                            charge.getId(),
-                            charge.getAuthorId(),
-                            authorName,
-                            charge.getChargeMonth(),
-                            charge.getChargeYear(),
-                            charge.getAmount(),
-                            charge.getDueDate(),
-                            charge.getChargeDate(),
-                            charge.getStatus().name(),
-                            charge.getPaidAt() != null ? 
-                                java.time.OffsetDateTime.ofInstant(charge.getPaidAt(), java.time.ZoneOffset.UTC) : null,
-                            null, // confirmedByAdminName - precisa buscar
-                            charge.getConfirmedAt() != null ? 
-                                java.time.OffsetDateTime.ofInstant(charge.getConfirmedAt(), java.time.ZoneOffset.UTC) : null,
-                            charge.getPixCode(),
-                            charge.getPixExpiresAt() != null ? 
-                                java.time.OffsetDateTime.ofInstant(charge.getPixExpiresAt(), java.time.ZoneOffset.UTC) : null,
-                            daysOverdue,
-                            hasOpenTicket
-                        );
+                                charge.getId(),
+                                charge.getAuthorId(),
+                                authorName,
+                                charge.getChargeMonth(),
+                                charge.getChargeYear(),
+                                charge.getAmount(),
+                                charge.getDueDate(),
+                                charge.getChargeDate(),
+                                charge.getStatus().name(),
+                                charge.getPaidAt() != null
+                                        ? java.time.OffsetDateTime.ofInstant(charge.getPaidAt(),
+                                                java.time.ZoneOffset.UTC)
+                                        : null,
+                                null, // confirmedByAdminName - precisa buscar
+                                charge.getConfirmedAt() != null
+                                        ? java.time.OffsetDateTime.ofInstant(charge.getConfirmedAt(),
+                                                java.time.ZoneOffset.UTC)
+                                        : null,
+                                charge.getPixCode(),
+                                charge.getPixImageUrl(),
+                                charge.getPixExpiresAt() != null
+                                        ? java.time.OffsetDateTime.ofInstant(charge.getPixExpiresAt(),
+                                                java.time.ZoneOffset.UTC)
+                                        : null,
+                                daysOverdue,
+                                hasOpenTicket);
                     })
                     .collect(Collectors.toList());
 
@@ -143,6 +148,6 @@ public class CobrancasExportController {
         }
     }
 
-    public record MessageResponse(String message) {}
+    public record MessageResponse(String message) {
+    }
 }
-

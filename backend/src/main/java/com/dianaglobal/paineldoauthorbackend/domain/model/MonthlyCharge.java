@@ -36,4 +36,5 @@ public class MonthlyCharge {
     private String notes; // Notas do admin
     private String txid; // ID da transação PIX (EFI)
     private String locationId; // Location ID do QR Code (EFI)
+    private String pixImageUrl; // URL da imagem do QR Code (EFI)
 }

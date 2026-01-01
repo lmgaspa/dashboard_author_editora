@@ -51,31 +51,63 @@ public class BillingEmailService {
     }
 
     private String buildEmailBody(User user, MonthlyCharge charge) {
-        String paymentLink = "https://painel.andeseditora.com.br/user/charges"; // Adjust domain as needed
+        String paymentLink = "https://painel.andeseditora.com.br/user/charges";
+        String pixCode = charge.getPixCode() != null ? charge.getPixCode() : "Código PIX indisponível no momento.";
+        String qrCodeImg = charge.getPixImageUrl() != null ? charge.getPixImageUrl() : "";
+        String dueDate = charge.getDueDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String amount = String.format("%.2f", charge.getAmount());
 
         return String.format(
                 """
                         <html>
-                        <body style="font-family: Arial, sans-serif; color: #333;">
-                            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-                                <h2 style="color: #2563eb;">Cobrança Mensal</h2>
-                                <p>Olá, <strong>%s</strong>,</p>
-                                <p>Sua cobrança referente aos serviços de nuvem do mês de <strong>%s de %d</strong> já está disponível.</p>
+                        <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background-color: #f4f4f4; margin: 0; padding: 40px 0;">
+                            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
 
-                                <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0;">
-                                    <p style="margin: 5px 0;"><strong>Valor:</strong> R$ %.2f</p>
-                                    <p style="margin: 5px 0;"><strong>Vencimento:</strong> %s</p>
+                                <div style="text-align: center; margin-bottom: 30px;">
+                                    <h2 style="color: #1e293b; margin: 0; font-size: 24px;">Cobrança Mensal</h2>
+                                    <p style="color: #64748b; margin-top: 5px;">Painel do Autor</p>
                                 </div>
 
-                                <p>Para realizar o pagamento via PIX, clique no botão abaixo para acessar o painel:</p>
+                                <p style="font-size: 16px; line-height: 1.5;">Olá, <strong>%s</strong>,</p>
+                                <p style="font-size: 16px; line-height: 1.5;">Sua fatura referente a <strong>%s de %d</strong> já está fechada e disponível para pagamento.</p>
 
-                                <div style="text-align: center; margin: 30px 0;">
-                                    <a href="%s" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                                        Para pagar clique aqui
+                                <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e2e8f0;">
+                                    <table style="width: 100%%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding-bottom: 8px; color: #64748b;">Valor a pagar:</td>
+                                            <td style="padding-bottom: 8px; text-align: right; font-weight: bold; font-size: 18px; color: #0f172a;">R$ %s</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color: #64748b;">Vencimento:</td>
+                                            <td style="text-align: right; font-weight: bold; color: #0f172a;">%s</td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <div style="text-align: center; margin-top: 30px; border-top: 1px dashed #cbd5e1; padding-top: 30px;">
+                                    <p style="font-weight: bold; margin-bottom: 20px; color: #334155; font-size: 18px;">Escaneie o QR Code com seu app do banco:</p>
+
+                                    <!-- QR Code Image -->
+                                    <div style="margin-bottom: 25px;">
+                                        <img src="%s" alt="QR Code PIX" style="width: 200px; height: 200px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px;" />
+                                    </div>
+
+                                    <p style="margin-bottom: 10px; color: #334155; font-weight: 500;">Ou copie e cole no seu app:</p>
+
+                                    <!-- Copy Paste Box -->
+                                    <div style="background-color: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; word-break: break-all; font-family: monospace; color: #475569; font-size: 13px; text-align: left; margin-bottom: 10px;">
+                                        %s
+                                    </div>
+                                    <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;">Este código é válido até o vencimento.</p>
+                                </div>
+
+                                <div style="text-align: center; margin-top: 40px;">
+                                    <a href="%s" style="background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+                                        Acessar Painel
                                     </a>
                                 </div>
 
-                                <p style="font-size: 12px; color: #666;">
+                                <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 40px;">
                                     Caso já tenha efetuado o pagamento, por favor desconsidere este e-mail.
                                 </p>
                             </div>
@@ -85,8 +117,10 @@ public class BillingEmailService {
                 user.getName(),
                 getMonthName(charge.getChargeMonth()),
                 charge.getChargeYear(),
-                charge.getAmount(),
-                charge.getDueDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                amount,
+                dueDate,
+                qrCodeImg,
+                pixCode,
                 paymentLink);
     }
 

@@ -180,7 +180,9 @@ public class EfiPayService {
             if (qrResponse.statusCode() == 200) {
                 JsonNode qrJson = objectMapper.readTree(qrResponse.body());
                 charge.setPixCode(qrJson.get("qrcode").asText());
-                // image is also available as "imagemQrcode"
+                if (qrJson.has("imagemQrcode")) {
+                    charge.setPixImageUrl(qrJson.get("imagemQrcode").asText());
+                }
             } else {
                 throw new RuntimeException("Failed to get QR Code: " + qrResponse.body());
             }
