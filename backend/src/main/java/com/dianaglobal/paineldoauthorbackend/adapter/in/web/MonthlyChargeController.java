@@ -3,6 +3,7 @@ package com.dianaglobal.paineldoauthorbackend.adapter.in.web;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.cobrancas.ConfirmPaymentRequest;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.cobrancas.CreateChargeRequest;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.cobrancas.MonthlyChargeDTO;
+import com.dianaglobal.paineldoauthorbackend.adapter.out.mail.BillingEmailService;
 import com.dianaglobal.paineldoauthorbackend.application.port.out.UserRepositoryPort;
 import com.dianaglobal.paineldoauthorbackend.application.service.CurrentAuthorService;
 import com.dianaglobal.paineldoauthorbackend.application.service.MonthlyChargeService;
@@ -42,6 +43,7 @@ public class MonthlyChargeController {
     private final CurrentAuthorService currentAuthorService;
     private final UserRepositoryPort userRepository;
     private final TicketService ticketService;
+    private final BillingEmailService billingEmailService;
 
     /**
      * GET /api/v1/cobrancas (Autor)
@@ -173,7 +175,9 @@ public class MonthlyChargeController {
 
             MonthlyCharge charge = chargeService.confirmPayment(chargeId, admin.getId(), request.notes());
 
-            // TODO: Enviar e-mail "Pagamento confirmado - Mês X/Ano"
+            userRepository.findAllByAuthorId(charge.getAuthorId()).stream()
+                    .findFirst()
+                    .ifPresent(author -> billingEmailService.sendPaymentConfirmedEmail(author, charge));
 
             MonthlyChargeDTO dto = toDTO(charge, charge.getAuthorId());
             return ResponseEntity.ok(dto);

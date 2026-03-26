@@ -1,8 +1,12 @@
 package com.dianaglobal.paineldoauthorbackend.application.service;
 
+import com.dianaglobal.paineldoauthorbackend.adapter.out.mail.BillingEmailService;
+import com.dianaglobal.paineldoauthorbackend.application.port.out.UserRepositoryPort;
 import com.dianaglobal.paineldoauthorbackend.domain.model.MonthlyCharge;
+import com.dianaglobal.paineldoauthorbackend.domain.model.Role;
 import com.dianaglobal.paineldoauthorbackend.domain.model.Ticket;
 import com.dianaglobal.paineldoauthorbackend.domain.model.TicketCategory;
+import com.dianaglobal.paineldoauthorbackend.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +28,8 @@ public class OverdueChargeDetectionJob {
 
     private final MonthlyChargeService chargeService;
     private final TicketService ticketService;
+    private final UserRepositoryPort userRepository;
+    private final BillingEmailService billingEmailService;
 
     @Scheduled(cron = "0 0 6 * * *") // Diariamente às 6h
     public void detectOverdueCharges() {
@@ -62,10 +68,17 @@ public class OverdueChargeDetectionJob {
                         
                         ticket = ticketService.createTicket(ticket);
                         
-                        log.info("[OVERDUE JOB] Ticket criado automaticamente: {} para cobrança {}", 
+                        log.info("[OVERDUE JOB] Ticket criado automaticamente: {} para cobrança {}",
                                 ticket.getTicketNumber(), charge.getId());
-                        
-                        // TODO: Enviar e-mail para autor e admin
+
+                        userRepository.findAllByAuthorId(charge.getAuthorId()).stream()
+                                .findFirst()
+                                .ifPresent(author -> billingEmailService.sendOverdueChargeEmail(author, charge));
+
+                        List<User> admins = userRepository.findAllByRole(Role.ADMIN);
+                        for (User admin : admins) {
+                            billingEmailService.sendOverdueChargeEmail(admin, charge);
+                        }
                     } else {
                         log.debug("[OVERDUE JOB] Já existe ticket aberto para cobrança {}", charge.getId());
                     }

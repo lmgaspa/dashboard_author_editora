@@ -4,7 +4,6 @@ import com.dianaglobal.paineldoauthorbackend.adapter.out.mail.BillingEmailServic
 import com.dianaglobal.paineldoauthorbackend.application.port.out.UserRepositoryPort;
 import com.dianaglobal.paineldoauthorbackend.domain.model.ChargeStatus;
 import com.dianaglobal.paineldoauthorbackend.domain.model.MonthlyCharge;
-import com.dianaglobal.paineldoauthorbackend.domain.model.Role;
 import com.dianaglobal.paineldoauthorbackend.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

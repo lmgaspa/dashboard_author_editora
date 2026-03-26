@@ -124,6 +124,175 @@ public class BillingEmailService {
                 paymentLink);
     }
 
+    @Async
+    public void sendPaymentConfirmedEmail(User user, MonthlyCharge charge) {
+        try {
+            log.info("[BILLING EMAIL] Sending payment confirmed email to {}", user.getEmail());
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(user.getEmail());
+
+            String subject = String.format("Pagamento confirmado - %s/%d - Painel do Autor",
+                    getMonthName(charge.getChargeMonth()), charge.getChargeYear());
+            helper.setSubject(subject);
+
+            String body = buildPaymentConfirmedEmailBody(user, charge);
+            helper.setText(body, true);
+
+            mailSender.send(message);
+            log.info("[BILLING EMAIL] Payment confirmed email sent to {}", user.getEmail());
+
+        } catch (MessagingException e) {
+            log.error("[BILLING EMAIL] Failed to send payment confirmed email to {}: {}", user.getEmail(), e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendOverdueChargeEmail(User user, MonthlyCharge charge) {
+        try {
+            log.info("[BILLING EMAIL] Sending overdue charge email to {}", user.getEmail());
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(user.getEmail());
+
+            String subject = String.format("Cobrança em atraso - %s/%d - Painel do Autor",
+                    getMonthName(charge.getChargeMonth()), charge.getChargeYear());
+            helper.setSubject(subject);
+
+            String body = buildOverdueChargeEmailBody(user, charge);
+            helper.setText(body, true);
+
+            mailSender.send(message);
+            log.info("[BILLING EMAIL] Overdue charge email sent to {}", user.getEmail());
+
+        } catch (MessagingException e) {
+            log.error("[BILLING EMAIL] Failed to send overdue charge email to {}: {}", user.getEmail(), e.getMessage());
+        }
+    }
+
+    private String buildPaymentConfirmedEmailBody(User user, MonthlyCharge charge) {
+        String dashboardLink = "https://painel.andeseditora.com.br/user/charges";
+        String amount = String.format("%.2f", charge.getAmount());
+        String confirmedAt = charge.getConfirmedAt() != null
+                ? java.time.OffsetDateTime.ofInstant(charge.getConfirmedAt(), java.time.ZoneOffset.UTC)
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                : "";
+
+        return String.format(
+                """
+                        <html>
+                        <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background-color: #f4f4f4; margin: 0; padding: 40px 0;">
+                            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+
+                                <div style="text-align: center; margin-bottom: 30px;">
+                                    <h2 style="color: #16a34a; margin: 0; font-size: 24px;">Pagamento Confirmado</h2>
+                                    <p style="color: #64748b; margin-top: 5px;">Painel do Autor</p>
+                                </div>
+
+                                <p style="font-size: 16px; line-height: 1.5;">Olá, <strong>%s</strong>,</p>
+                                <p style="font-size: 16px; line-height: 1.5;">Confirmamos o recebimento do seu pagamento referente a <strong>%s de %d</strong>.</p>
+
+                                <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bbf7d0;">
+                                    <table style="width: 100%%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding-bottom: 8px; color: #64748b;">Valor pago:</td>
+                                            <td style="padding-bottom: 8px; text-align: right; font-weight: bold; font-size: 18px; color: #16a34a;">R$ %s</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color: #64748b;">Data de confirmação:</td>
+                                            <td style="text-align: right; font-weight: bold; color: #0f172a;">%s</td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <div style="text-align: center; margin-top: 40px;">
+                                    <a href="%s" style="background-color: #16a34a; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+                                        Acessar Painel
+                                    </a>
+                                </div>
+
+                                <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 40px;">
+                                    Obrigado por manter seus pagamentos em dia!
+                                </p>
+                            </div>
+                        </body>
+                        </html>
+                        """,
+                user.getName(),
+                getMonthName(charge.getChargeMonth()),
+                charge.getChargeYear(),
+                amount,
+                confirmedAt,
+                dashboardLink);
+    }
+
+    private String buildOverdueChargeEmailBody(User user, MonthlyCharge charge) {
+        String dashboardLink = "https://painel.andeseditora.com.br/user/charges";
+        String amount = String.format("%.2f", charge.getAmount());
+        String dueDate = charge.getDueDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(charge.getDueDate(), java.time.LocalDate.now());
+
+        return String.format(
+                """
+                        <html>
+                        <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background-color: #f4f4f4; margin: 0; padding: 40px 0;">
+                            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+
+                                <div style="text-align: center; margin-bottom: 30px;">
+                                    <h2 style="color: #dc2626; margin: 0; font-size: 24px;">Cobrança em Atraso</h2>
+                                    <p style="color: #64748b; margin-top: 5px;">Painel do Autor</p>
+                                </div>
+
+                                <p style="font-size: 16px; line-height: 1.5;">Olá, <strong>%s</strong>,</p>
+                                <p style="font-size: 16px; line-height: 1.5;">Identificamos que o pagamento referente a <strong>%s de %d</strong> encontra-se em atraso.</p>
+
+                                <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #fecaca;">
+                                    <table style="width: 100%%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding-bottom: 8px; color: #64748b;">Valor em aberto:</td>
+                                            <td style="padding-bottom: 8px; text-align: right; font-weight: bold; font-size: 18px; color: #dc2626;">R$ %s</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-bottom: 8px; color: #64748b;">Vencimento:</td>
+                                            <td style="padding-bottom: 8px; text-align: right; font-weight: bold; color: #0f172a;">%s</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color: #64748b;">Dias em atraso:</td>
+                                            <td style="text-align: right; font-weight: bold; color: #dc2626;">%d dias</td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <p style="font-size: 14px; line-height: 1.5; color: #64748b;">Um ticket de suporte foi aberto automaticamente. Entre em contato caso haja alguma dúvida.</p>
+
+                                <div style="text-align: center; margin-top: 40px;">
+                                    <a href="%s" style="background-color: #dc2626; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+                                        Regularizar Pagamento
+                                    </a>
+                                </div>
+
+                                <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 40px;">
+                                    Caso já tenha efetuado o pagamento, por favor desconsidere este e-mail.
+                                </p>
+                            </div>
+                        </body>
+                        </html>
+                        """,
+                user.getName(),
+                getMonthName(charge.getChargeMonth()),
+                charge.getChargeYear(),
+                amount,
+                dueDate,
+                daysOverdue,
+                dashboardLink);
+    }
+
     private String getMonthName(int month) {
         String[] months = {
                 "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",

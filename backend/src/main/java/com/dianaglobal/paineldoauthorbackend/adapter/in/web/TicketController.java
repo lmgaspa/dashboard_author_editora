@@ -3,7 +3,6 @@ package com.dianaglobal.paineldoauthorbackend.adapter.in.web;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.CreateMessageRequest;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.CreateTicketRequest;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.MessageDTO;
-import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.TicketAdminDTO;
 import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.tickets.TicketDTO;
 import com.dianaglobal.paineldoauthorbackend.application.port.out.UserRepositoryPort;
 import com.dianaglobal.paineldoauthorbackend.application.service.CurrentAuthorService;
@@ -200,7 +199,6 @@ public class TicketController {
             // Atualizar status do ticket
             Optional<Ticket> ticketOpt = ticketService.findById(ticketId);
             if (ticketOpt.isPresent()) {
-                Ticket ticket = ticketOpt.get();
                 if (isAdmin) {
                     ticketService.updateStatus(ticketId, TicketStatus.WAITING_AUTHOR, user.getId());
                 } else {

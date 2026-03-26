@@ -4,6 +4,7 @@ import com.dianaglobal.paineldoauthorbackend.adapter.in.dto.cobrancas.MonthlyCha
 import com.dianaglobal.paineldoauthorbackend.application.service.CurrentAuthorService;
 import com.dianaglobal.paineldoauthorbackend.application.service.ExportService;
 import com.dianaglobal.paineldoauthorbackend.application.service.MonthlyChargeService;
+import com.dianaglobal.paineldoauthorbackend.application.service.TicketService;
 import com.dianaglobal.paineldoauthorbackend.config.ApiPaths;
 import com.dianaglobal.paineldoauthorbackend.domain.model.User;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class CobrancasExportController {
     private final MonthlyChargeService chargeService;
     private final CurrentAuthorService currentAuthorService;
     private final ExportService exportService;
+    private final TicketService ticketService;
 
     /**
      * Endpoint para exportar cobranças do autor.
@@ -88,7 +90,7 @@ public class CobrancasExportController {
                         }
 
                         // Verificar se tem ticket aberto
-                        boolean hasOpenTicket = false; // TODO: implementar verificação de ticket
+                        boolean hasOpenTicket = ticketService.existsTicketForCharge(charge.getAuthorId(), charge.getId());
 
                         return new MonthlyChargeDTO(
                                 charge.getId(),

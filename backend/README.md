@@ -73,6 +73,8 @@ A plataforma suporta múltiplos métodos de autenticação, controle de acesso b
 - ✅ **Payment Status** - Track pending, paid, and overdue charges
 - ✅ **Due Date Tracking** - Monitor payment deadlines
 - ✅ **Overdue Calculation** - Automatic overdue days calculation
+- ✅ **Open Ticket Check** - Export and listing indicate if a charge has an open support ticket
+- ✅ **Payment Confirmed Email** - Author receives email notification when admin confirms payment
 - ✅ **Export PDF/CSV** - Export charges data in multiple formats
 
 ### 🎫 Ticket System
@@ -81,6 +83,7 @@ A plataforma suporta múltiplos métodos de autenticação, controle de acesso b
 - ✅ **Message Threading** - Conversation threads within tickets
 - ✅ **Internal Notes** - Private notes for admin use
 - ✅ **Status Tracking** - OPEN, IN_PROGRESS, RESOLVED, CLOSED
+- ✅ **Auto Ticket Creation** - Overdue charges automatically generate support tickets
 - ✅ **Export PDF/CSV** - Export tickets data in multiple formats
 
 ### 📄 Export System
@@ -209,6 +212,10 @@ A plataforma suporta múltiplos métodos de autenticação, controle de acesso b
 - **V14** - Create order_shipping table
 - **V15** - Update shipping status (ENVIO_CONFIRMADO → ENTREGUE)
 
+### Scheduled Jobs
+- **BillingJob** (`0 0 8 * * *`) - Generates monthly charges on billing day and sends billing emails
+- **OverdueChargeDetectionJob** (`0 0 6 * * *`) - Detects overdue charges, creates support tickets automatically, and emails author + all admins
+
 ## 🌐 API Endpoints
 
 ### Public Endpoints
@@ -259,7 +266,8 @@ A plataforma suporta múltiplos métodos de autenticação, controle de acesso b
 
 ### Charges Endpoints (Cobranças)
 - `GET /api/v1/cobrancas` - List monthly charges for current author
-- `GET /api/v1/cobrancas/export?format=pdf|csv|json` - Export charges
+- `PUT /api/v1/admin/cobrancas/{chargeId}/confirmar` - Admin confirms payment (triggers email to author)
+- `GET /api/v1/cobrancas/export?format=pdf|csv|json` - Export charges (includes open ticket status)
 
 ### Ticket Endpoints
 - `GET /api/v1/tickets` - List tickets for current author
@@ -305,6 +313,8 @@ All emails are sent in **Portuguese** with:
 - 🔔 Security alerts
 - 📨 Welcome messages
 - 💰 Payout notification emails
+- ✅ Payment confirmed emails (sent to author when admin confirms payment)
+- ⚠️ Overdue charge emails (sent to author and all admins when a charge becomes overdue)
 
 Features:
 - **Rate Limiting** - Prevents email spam
