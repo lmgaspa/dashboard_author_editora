@@ -1,0 +1,49 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    project: painel-autor
+    environment: production
+
+# ── Remote write to Grafana Cloud ─────────────────────────────────────────────
+remote_write:
+  - url: https://prometheus-prod-40-prod-sa-east-1.grafana.net/api/prom/push
+    basic_auth:
+      username: "1967050"
+      password_file: /etc/prometheus/grafana_token  # echo YOUR_TOKEN > /etc/prometheus/grafana_token
+
+# ── Scrape configs ─────────────────────────────────────────────────────────────
+scrape_configs:
+
+  # Java Spring Backend — /actuator/prometheus
+  - job_name: painel-autor-java
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["localhost:8080"]
+        labels:
+          service: java-spring
+          component: api
+
+  # Go Email Worker
+  - job_name: painel-autor-email-worker
+    static_configs:
+      - targets: ["localhost:2112"]
+        labels:
+          service: email-worker
+          component: worker
+
+  # Go Billing Worker
+  - job_name: painel-autor-billing-worker
+    static_configs:
+      - targets: ["localhost:2112"]
+        labels:
+          service: billing-worker
+          component: worker
+
+  # Go Export Service
+  - job_name: painel-autor-export-service
+    static_configs:
+      - targets: ["localhost:2113"]
+        labels:
+          service: export-service
+          component: grpc

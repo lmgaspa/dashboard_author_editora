@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package export;
+
+option go_package = "github.com/dianaglobal/painel-autor-go/proto/export;exportpb";
+
+service ExportService {
+  rpc ExportCharges(ExportRequest) returns (ExportResponse);
+  rpc ExportTickets(ExportRequest) returns (ExportResponse);
+  rpc ExportDeliveries(ExportRequest) returns (ExportResponse);
+}
+
+message ExportRequest {
+  string format    = 1; // "pdf" | "csv"
+  string author_id = 2;
+  repeated Record records = 3;
+}
+
+message Record {
+  map<string, string> fields = 1;
+}
+
+message ExportResponse {
+  bytes  data         = 1;
+  string filename     = 2;
+  string content_type = 3;
+}
